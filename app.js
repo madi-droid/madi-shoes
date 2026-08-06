@@ -278,44 +278,14 @@ function setupEventListeners() {
   // Резервное копирование и восстановление базы данных
   const btnExport = document.getElementById("btn-export-backup");
   if (btnExport) {
-    btnExport.addEventListener("click", () => {
-      if (!requireAdminAccess()) return;
-      window.db.exportDatabase();
-      showToast("Резервная копия скачана (JSON)", "success");
-    });
+    btnExport.addEventListener("click", exportDatabaseToFile);
   }
 
   const btnImport = document.getElementById("btn-import-backup");
-  const fileImportInput = document.getElementById("import-file-input");
-  if (btnImport && fileImportInput) {
+  if (btnImport) {
     btnImport.addEventListener("click", () => {
       if (!requireAdminAccess()) return;
-      fileImportInput.click();
-    });
-
-    fileImportInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const success = window.db.importDatabase(event.target.result);
-        if (success) {
-          products = window.db.loadProducts();
-          orders = window.db.loadOrders();
-          sales = window.db.loadSales();
-          if (typeof renderAdminProductsTable === "function") renderAdminProductsTable();
-          if (typeof renderAdminOrdersTable === "function") renderAdminOrdersTable();
-          if (typeof renderSalesTable === "function") renderSalesTable();
-          if (typeof renderAdminDashboard === "function") renderAdminDashboard();
-          if (typeof renderCatalog === "function") renderCatalog();
-          showToast("База данных успешно восстановлена!", "success");
-        } else {
-          showToast("Ошибка при импорте: некорректный формат файла JSON", "error");
-        }
-        fileImportInput.value = "";
-      };
-      reader.readAsText(file);
+      document.getElementById("import-file-input").click();
     });
   }
 
@@ -997,57 +967,72 @@ function handleBookingFlow(actionType) {
 
 // Физическое создание бронирования
 function executeBooking() {
-  if (!currentSelectedProduct || !currentSelectedSize || !currentSelectedLocation || !currentUser) {
-    showToast("Данные о товаре повреждены. Пожалуйста, повторите попытку.", "error");
-    return;
+  if (isOrderProcessing) return;
+  isOrderProcessing = true;
+
+  try {
+    if (!currentSelectedProduct || !currentSelectedSize || !currentSelectedLocation || !currentUser) {
+      showToast("Данные о товаре повреждены. Пожалуйста, повторите попытку.", "error");
+      return;
+    }
+
+    // Каноническая проверка товара и цены в базе (защита от подмены пользователем)
+    const canonicalProduct = products.find(p => p.id === currentSelectedProduct.id);
+    if (!canonicalProduct) {
+      showToast("Товар не найден в базе данных.", "error");
+      return;
+    }
+
+    const realPrice = Math.max(0, parseInt(canonicalProduct.price) || 0);
+    const locKey = currentSelectedLocation === "mall" ? "mall" : "bazaar";
+    const availableStock = canonicalProduct.stock?.[locKey]?.[currentSelectedSize] || 0;
+
+    if (availableStock <= 0) {
+      showToast("К сожалению, этот размер только что забрали.", "error");
+      return;
+    }
+
+    // 1. Создаем объект заказа
+    const orderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
+    const newOrder = {
+      id: orderId,
+      userPhone: currentUser.phone,
+      userName: safeText(currentUser.name, 100),
+      productId: canonicalProduct.id,
+      productName: safeText(canonicalProduct.name, 120),
+      productArticle: safeText(canonicalProduct.article, 60),
+      size: safeText(currentSelectedSize, 5),
+      location: locKey,
+      price: realPrice,
+      type: "Бронь",
+      status: "Новый",
+      date: new Date().toLocaleString()
+    };
+
+    // 2. Списываем размер со склада в канонической базе
+    canonicalProduct.stock[locKey][currentSelectedSize]--;
+    window.db.saveProducts(products);
+
+    // 3. Сохраняем заказ в базу данных
+    orders.unshift(newOrder);
+    window.db.saveOrders(orders);
+
+    // 4. Показываем успех и закрываем модалки
+    closeAllModals();
+    showToast(`Заказ ${orderId} успешно создан! Ждем вас на примерку.`, "success");
+
+    // Обновляем состояние
+    currentSelectedProduct = null;
+    currentSelectedSize = null;
+    currentSelectedLocation = null;
+    pendingAction = null;
+
+    // Обновляем каталог
+    renderCatalog();
+  } finally {
+    isOrderProcessing = false;
   }
-
-  // Каноническая проверка товара и цены в базе (защита от подмены пользователем)
-  const canonicalProduct = products.find(p => p.id === currentSelectedProduct.id);
-  if (!canonicalProduct) {
-    showToast("Товар не найден в базе данных.", "error");
-    return;
-  }
-
-  const realPrice = Math.max(0, parseInt(canonicalProduct.price) || 0);
-  const locKey = currentSelectedLocation === "mall" ? "mall" : "bazaar";
-  const availableStock = canonicalProduct.stock?.[locKey]?.[currentSelectedSize] || 0;
-
-  if (availableStock <= 0) {
-    showToast("К сожалению, этот размер только что забрали.", "error");
-    return;
-  }
-
-  // 1. Создаем объект заказа
-  const orderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
-  const newOrder = {
-    id: orderId,
-    userPhone: currentUser.phone,
-    userName: safeText(currentUser.name, 100),
-    productId: canonicalProduct.id,
-    productName: safeText(canonicalProduct.name, 120),
-    productArticle: safeText(canonicalProduct.article, 60),
-    size: safeText(currentSelectedSize, 5),
-    location: locKey,
-    price: realPrice,
-    type: "Бронь",
-    status: "Новый",
-    date: new Date().toLocaleString()
-  };
-
-  // 2. Списываем размер со склада в канонической базе
-  canonicalProduct.stock[locKey][currentSelectedSize]--;
-  window.db.saveProducts(products);
-
-  // 3. Сохраняем заказ в базу данных
-  orders.unshift(newOrder);
-  window.db.saveOrders(orders);
-
-  // 4. Показываем успех и закрываем модалки
-  closeAllModals();
-  showToast(`Заказ ${orderId} успешно создан! Ждем вас на примерку.`, "success");
-
-  // Обновляем состояние
+}
   currentSelectedProduct = null;
   currentSelectedSize = null;
   currentSelectedLocation = null;
@@ -1074,76 +1059,88 @@ function openKaspiPaymentSim() {
 }
 
 function processKaspiPaymentConfirm() {
-  if (!currentSelectedProduct || !currentSelectedSize || !currentSelectedLocation || !currentUser) {
-    showToast("Данные о товаре повреждены. Пожалуйста, повторите попытку.", "error");
-    return;
+  if (isOrderProcessing) return;
+  isOrderProcessing = true;
+
+  try {
+    if (!currentSelectedProduct || !currentSelectedSize || !currentSelectedLocation || !currentUser) {
+      showToast("Данные о товаре повреждены. Пожалуйста, повторите попытку.", "error");
+      return;
+    }
+
+    // Каноническая проверка товара, цены и остатка в базе (защита от консольной подмены)
+    const canonicalProduct = products.find(p => p.id === currentSelectedProduct.id);
+    if (!canonicalProduct) {
+      showToast("Товар не найден в базе данных.", "error");
+      return;
+    }
+
+    const realPrice = Math.max(0, parseInt(canonicalProduct.price) || 0);
+    const locKey = currentSelectedLocation === "mall" ? "mall" : "bazaar";
+    const availableStock = canonicalProduct.stock?.[locKey]?.[currentSelectedSize] || 0;
+
+    if (availableStock <= 0) {
+      showToast("К сожалению, этот размер закончился.", "error");
+      return;
+    }
+
+    // Проверяем введенный номер Kaspi
+    const kaspiPhoneInput = document.getElementById("kaspi-phone-input");
+    const kaspiPhoneRaw = kaspiPhoneInput ? kaspiPhoneInput.value.trim() : "";
+    const kaspiDigits = kaspiPhoneRaw.replace(/\D/g, "");
+
+    // Валидация: от 10 до 11 цифр (с 8 или 7 в начале)
+    let kaspiPhone = "";
+    if (kaspiDigits.length === 11 && kaspiDigits.startsWith("8")) {
+      kaspiPhone = "7" + kaspiDigits.substring(1);
+    } else if (kaspiDigits.length === 11 && kaspiDigits.startsWith("7")) {
+      kaspiPhone = kaspiDigits;
+    } else if (kaspiDigits.length === 10) {
+      kaspiPhone = "7" + kaspiDigits;
+    } else {
+      showToast("Введите корректный номер Kaspi (например: 8 700 000 00 00)", "error");
+      kaspiPhoneInput && kaspiPhoneInput.focus();
+      return;
+    }
+
+    // 1. Создаем заказ с проверенной ценой из базы
+    const orderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
+    const newOrder = {
+      id: orderId,
+      userPhone: currentUser.phone,
+      userName: safeText(currentUser.name, 100),
+      productId: canonicalProduct.id,
+      productName: safeText(canonicalProduct.name, 120),
+      productArticle: safeText(canonicalProduct.article, 60),
+      size: safeText(currentSelectedSize, 5),
+      location: locKey,
+      price: realPrice,
+      type: "Kaspi",
+      kaspiPhone: kaspiPhone,
+      status: "Новый",
+      date: new Date().toLocaleString()
+    };
+
+    // 2. Списываем остатки в канонической базе
+    canonicalProduct.stock[locKey][currentSelectedSize]--;
+    window.db.saveProducts(products);
+
+    // 3. Сохраняем
+    orders.unshift(newOrder);
+    window.db.saveOrders(orders);
+
+    closeAllModals();
+    showToast("✅ Номер отправлен! Продавец свяжется с вами и отправит запрос на оплату (Kaspi).", "success");
+
+    // Сброс состояния
+    currentSelectedProduct = null;
+    currentSelectedSize = null;
+    currentSelectedLocation = null;
+    pendingAction = null;
+  } finally {
+    isOrderProcessing = false;
   }
-
-  // Каноническая проверка товара, цены и остатка в базе (защита от консольной подмены)
-  const canonicalProduct = products.find(p => p.id === currentSelectedProduct.id);
-  if (!canonicalProduct) {
-    showToast("Товар не найден в базе данных.", "error");
-    return;
-  }
-
-  const realPrice = Math.max(0, parseInt(canonicalProduct.price) || 0);
-  const locKey = currentSelectedLocation === "mall" ? "mall" : "bazaar";
-  const availableStock = canonicalProduct.stock?.[locKey]?.[currentSelectedSize] || 0;
-
-  if (availableStock <= 0) {
-    showToast("К сожалению, этот размер закончился.", "error");
-    return;
-  }
-
-  // Проверяем введенный номер Kaspi
-  const kaspiPhoneInput = document.getElementById("kaspi-phone-input");
-  const kaspiPhoneRaw = kaspiPhoneInput ? kaspiPhoneInput.value.trim() : "";
-  const kaspiDigits = kaspiPhoneRaw.replace(/\D/g, "");
-
-  // Валидация: от 10 до 11 цифр (с 8 или 7 в начале)
-  let kaspiPhone = "";
-  if (kaspiDigits.length === 11 && kaspiDigits.startsWith("8")) {
-    kaspiPhone = "7" + kaspiDigits.substring(1);
-  } else if (kaspiDigits.length === 11 && kaspiDigits.startsWith("7")) {
-    kaspiPhone = kaspiDigits;
-  } else if (kaspiDigits.length === 10) {
-    kaspiPhone = "7" + kaspiDigits;
-  } else {
-    showToast("Введите корректный номер Kaspi (например: 8 700 000 00 00)", "error");
-    kaspiPhoneInput && kaspiPhoneInput.focus();
-    return;
-  }
-
-  // 1. Создаем заказ с проверенной ценой из базы
-  const orderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
-  const newOrder = {
-    id: orderId,
-    userPhone: currentUser.phone,
-    userName: safeText(currentUser.name, 100),
-    productId: canonicalProduct.id,
-    productName: safeText(canonicalProduct.name, 120),
-    productArticle: safeText(canonicalProduct.article, 60),
-    size: safeText(currentSelectedSize, 5),
-    location: locKey,
-    price: realPrice,
-    type: "Kaspi",
-    kaspiPhone: kaspiPhone,
-    status: "Новый",
-    date: new Date().toLocaleString()
-  };
-
-  // 2. Списываем остатки в канонической базе
-  canonicalProduct.stock[locKey][currentSelectedSize]--;
-  window.db.saveProducts(products);
-
-  // 3. Сохраняем
-  orders.unshift(newOrder);
-  window.db.saveOrders(orders);
-
-  closeAllModals();
-  showToast("✅ Номер отправлен! Продавец свяжется с вами и отправит запрос на оплату (Kaspi).", "success");
-
-  // Сброс состояния
+}
   currentSelectedProduct = null;
   currentSelectedSize = null;
   currentSelectedLocation = null;
@@ -1409,8 +1406,8 @@ async function handleAdminLoginSubmit(e) {
   const matchedAdmin = ADMIN_ACCOUNTS.find(acc => normalizePhone(acc.phone) === phoneNorm);
   const pinHash = await sha256Async(pin);
 
-  // Валидация ПИН-кода по разрешенным криптографическим хэшам или стандартным кодам
-  const isValidPin = ALLOWED_PIN_HASHES.includes(pinHash) || pin === "7777" || pin === "1234";
+  // Валидация ПИН-кода по разрешенным криптографическим хэшам
+  const isValidPin = ALLOWED_PIN_HASHES.includes(pinHash);
 
   if (matchedAdmin && isValidPin) {
     setAdminLockoutInfo(0, 0);
@@ -2063,6 +2060,7 @@ function importDatabaseFromFile(e) {
       // Обновляем локальное состояние
       products = window.db.loadProducts();
       orders = window.db.loadOrders();
+      sales = window.db.loadSales();
       currentUser = window.db.getCurrentUser();
 
       showToast("База данных успешно импортирована!", "success");
