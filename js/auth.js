@@ -125,8 +125,17 @@ function openProfileModal() {
   } else {
     document.getElementById("auth-form-container").classList.remove("d-none");
     document.getElementById("profile-container").classList.add("d-none");
-    document.getElementById("sms-code-group").classList.add("d-none");
-    document.getElementById("btn-auth-submit").textContent = "Продолжить";
+
+    const titleEl = document.getElementById("auth-modal-title");
+    const descEl = document.getElementById("auth-modal-desc");
+    const nameGroup = document.getElementById("name-group");
+    const submitBtn = document.getElementById("btn-auth-submit");
+
+    if (titleEl) titleEl.textContent = "Вход или Регистрация";
+    if (descEl) descEl.textContent = "Укажите ваш номер телефона, имя и пароль для создания аккаунта или входа.";
+    if (nameGroup) nameGroup.classList.remove("d-none");
+    if (submitBtn) submitBtn.textContent = "Продолжить";
+
     document.getElementById("auth-form").reset();
   }
   openModal("modal-auth-profile");
@@ -135,18 +144,35 @@ function openProfileModal() {
 function initClientAuthListeners() {
   const authPhoneEl = document.getElementById("auth-phone");
   const authNameEl = document.getElementById("auth-name");
-  if (!authPhoneEl || !authNameEl) return;
+  const titleEl = document.getElementById("auth-modal-title");
+  const descEl = document.getElementById("auth-modal-desc");
+  const nameGroup = document.getElementById("name-group");
+  const submitBtn = document.getElementById("btn-auth-submit");
+
+  if (!authPhoneEl) return;
 
   authPhoneEl.addEventListener("input", () => {
     const norm = normalizePhone(authPhoneEl.value);
     if (norm.length === 11) {
       const users = window.db.loadUsers();
       const found = users.find(u => u.phone === norm);
-      if (found && found.name) {
-        const formattedName = formatFullName(found.name);
-        authNameEl.value = formattedName;
-        showToast(`Профиль найден: ${formattedName}`, "info");
+      if (found) {
+        if (titleEl) titleEl.textContent = "Вход в аккаунт";
+        if (descEl) descEl.textContent = "С возвращением! Введите пароль для входа в профиль.";
+        if (found.name && authNameEl) authNameEl.value = formatFullName(found.name);
+        if (nameGroup) nameGroup.classList.add("d-none");
+        if (submitBtn) submitBtn.textContent = "Войти";
+        showToast(`Аккаунт найден: ${formatFullName(found.name)}`, "info");
+      } else {
+        if (titleEl) titleEl.textContent = "Регистрация аккаунта";
+        if (descEl) descEl.textContent = "Введите ваши Имя, Фамилию и придумайте пароль.";
+        if (nameGroup) nameGroup.classList.remove("d-none");
+        if (submitBtn) submitBtn.textContent = "Зарегистрироваться";
       }
+    } else {
+      if (titleEl) titleEl.textContent = "Вход или Регистрация";
+      if (nameGroup) nameGroup.classList.remove("d-none");
+      if (submitBtn) submitBtn.textContent = "Продолжить";
     }
   });
 }
@@ -156,8 +182,7 @@ function handleClientAuthSubmit(e) {
 
   const nameInput = document.getElementById("auth-name").value.trim();
   const phoneInput = document.getElementById("auth-phone").value.trim();
-  const smsGroup = document.getElementById("sms-code-group");
-  const smsInput = document.getElementById("auth-sms").value.trim();
+  const passwordInput = document.getElementById("auth-password").value.trim();
 
   const normPhone = normalizePhone(phoneInput);
 
@@ -166,49 +191,51 @@ function handleClientAuthSubmit(e) {
     return;
   }
 
+  if (!isValidPassword(passwordInput)) {
+    showToast("Пароль должен быть от 6 символов и содержать хотя бы одну букву и одну цифру", "error");
+    return;
+  }
+
   let users = window.db.loadUsers();
   let existingUser = users.find(u => u.phone === normPhone);
 
-  if (smsGroup.classList.contains("d-none")) {
-    if (!existingUser && !isValidFullName(nameInput)) {
-      showToast("Введите ваши имя и фамилию через пробел (например: Арман Сериков)", "error");
+  const pwdHash = secureHashSync(passwordInput);
+
+  if (existingUser) {
+    if (existingUser.passwordHash && existingUser.passwordHash !== pwdHash && existingUser.password !== passwordInput) {
+      showToast("Неверный пароль! Попробуйте еще раз.", "error");
       return;
     }
-    smsGroup.classList.remove("d-none");
-    document.getElementById("btn-auth-submit").textContent = "Войти и продолжить";
-    showToast("Симуляция СМС: код отправлен на ваш номер", "info");
-    return;
-  }
 
-  if (smsInput !== "1234") {
-    showToast("Неверный код СМС! Введите 1234", "error");
-    return;
-  }
-
-  let finalName = "";
-  if (existingUser) {
-    if (isValidFullName(nameInput)) {
-      finalName = formatFullName(safeText(nameInput, 100));
-      existingUser.name = finalName;
+    if (!existingUser.passwordHash) {
+      existingUser.passwordHash = pwdHash;
       window.db.saveUsers(users);
-    } else {
-      finalName = formatFullName(existingUser.name);
     }
+
+    const finalName = formatFullName(existingUser.name);
+    currentUser = { name: finalName, phone: normPhone };
+    window.db.setCurrentUser(currentUser);
+    showToast(`Вы успешно вошли! С возвращением, ${finalName}`, "success");
   } else {
     if (!isValidFullName(nameInput)) {
       showToast("Введите ваши имя и фамилию через пробел (например: Арман Сериков)", "error");
       return;
     }
-    finalName = formatFullName(safeText(nameInput, 100));
-    const newUser = { name: finalName, phone: normPhone };
+    const finalName = formatFullName(safeText(nameInput, 100));
+    const newUser = {
+      name: finalName,
+      phone: normPhone,
+      passwordHash: pwdHash,
+      createdAt: new Date().toISOString()
+    };
     users.push(newUser);
     window.db.saveUsers(users);
+
+    currentUser = { name: finalName, phone: normPhone };
+    window.db.setCurrentUser(currentUser);
+    showToast(`Регистрация завершена! Добро пожаловать, ${finalName}`, "success");
   }
 
-  currentUser = { name: finalName, phone: normPhone };
-  window.db.setCurrentUser(currentUser);
-
-  showToast(`С возвращением, ${finalName}!`, "success");
   openProfileModal();
 
   if (pendingAction) {

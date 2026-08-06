@@ -20,7 +20,7 @@ function renderCategoryTabs() {
   if (!tabsContainer) return;
 
   const categoriesSet = new Set();
-  const defaultCats = ["кроссовки", "туфли", "кроксы", "мокасины", "сапоги"];
+  const defaultCats = ["кроссовки", "туфли", "кеды", "лоферы", "ботинки", "кроксы", "мокасины", "сапоги", "босоножки"];
   defaultCats.forEach(c => categoriesSet.add(c));
 
   products.forEach(p => {
@@ -55,8 +55,10 @@ function renderCategoryTabs() {
 
   tabsContainer.querySelectorAll(".nav-tab-btn").forEach(btn => {
     btn.addEventListener("click", (e) => {
+      const targetBtn = e.target.closest(".nav-tab-btn");
+      if (!targetBtn) return;
       tabsContainer.querySelectorAll(".nav-tab-btn").forEach(b => b.classList.remove("active"));
-      e.target.classList.add("active");
+      targetBtn.classList.add("active");
       renderCatalog(true);
     });
   });
@@ -134,7 +136,10 @@ function renderCatalog(resetPage = false) {
       const categoryVal = categoryTab.getAttribute("data-category");
       if (categoryVal !== "all") {
         const itemCategories = (item.category || "").split(",").map(c => c.trim().toLowerCase());
-        if (!itemCategories.includes(categoryVal)) {
+        const catMatch = itemCategories.some(c => c.includes(categoryVal) || categoryVal.includes(c));
+        const nameMatch = (item.name || "").toLowerCase().includes(categoryVal);
+        const descMatch = (item.description || "").toLowerCase().includes(categoryVal);
+        if (!catMatch && !nameMatch && !descMatch) {
           return false;
         }
       }

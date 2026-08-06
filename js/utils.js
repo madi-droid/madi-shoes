@@ -162,6 +162,14 @@ function isValidFullName(nameStr) {
   return parts.every(part => nameRegex.test(part));
 }
 
+// Валидация пароля (минимум 6 символов, хотя бы одна буква и цифра)
+function isValidPassword(pwd) {
+  if (!pwd || pwd.length < 6) return false;
+  const hasLetter = /[a-zA-Zа-яА-ЯёЁәғқңөұүһӘҒҚҢӨҰҮҺ]/u.test(pwd);
+  const hasDigit = /[0-9]/.test(pwd);
+  return hasLetter && hasDigit;
+}
+
 // Сжатие и масштабирование загружаемых изображений через HTML5 Canvas
 function compressAndPreviewImage(file, callback) {
   if (!file) return;
