@@ -123,6 +123,57 @@ function requireAdminAccess() {
   return true;
 }
 
+// Вспомогательная функция задержки вызова (Debounce) для оптимизации поиска
+function debounce(fn, delay = 150) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  };
+}
+
+// Хэш-индексация продуктов по ID для мгновенного доступа O(1)
+let productMap = new Map();
+
+function updateProductMap() {
+  productMap = new Map((products || []).map(p => [p.id, p]));
+}
+
+// Сжатие и масштабирование загружаемых изображений через HTML5 Canvas (30-50 КБ вместо 1.4 МБ)
+function compressAndPreviewImage(file, callback) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const maxDim = 600;
+      let width = img.width;
+      let height = img.height;
+
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.75);
+      callback(compressedDataUrl);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function clearElement(el) {
   if (el) el.replaceChildren();
 }
@@ -159,6 +210,7 @@ const AVAILABLE_SIZES = ["35", "36", "37", "38", "39", "40", "41", "42", "43", "
 document.addEventListener("DOMContentLoaded", () => {
   // Загружаем данные из db.js
   products = window.db.loadProducts();
+  updateProductMap();
   orders = window.db.loadOrders();
   sales = window.db.loadSales();
   currentUser = window.db.getCurrentUser();
@@ -197,17 +249,20 @@ function updateThemeIcon(theme) {
 }
 
 function setupEventListeners() {
-  // Поиск и фильтры
-  document.getElementById("search-input").addEventListener("input", () => renderCatalog(true));
+  // Поиск и фильтры с оптимизацией debouncing (150 мс)
+  const debouncedRenderCatalog = debounce(() => renderCatalog(true), 150);
+  const debouncedRenderAdminProducts = debounce(() => renderAdminProductsTable(), 150);
+
+  document.getElementById("search-input").addEventListener("input", debouncedRenderCatalog);
   document.getElementById("filter-location").addEventListener("change", () => renderCatalog(true));
   document.getElementById("filter-size").addEventListener("change", () => renderCatalog(true));
   document.getElementById("filter-sort").addEventListener("change", () => renderCatalog(true));
   document.getElementById("filter-status").addEventListener("change", () => renderCatalog(true));
 
-  // Поиск товаров в админке
+  // Поиск товаров в админке с задержкой ввода
   const adminSearch = document.getElementById("admin-product-search");
   if (adminSearch) {
-    adminSearch.addEventListener("input", renderAdminProductsTable);
+    adminSearch.addEventListener("input", debouncedRenderAdminProducts);
   }
 
   // Переключение темы
@@ -399,23 +454,21 @@ function setupEventListeners() {
   document.getElementById("btn-cancel-edit").addEventListener("click", () => closeModal("modal-admin-product-edit"));
   document.getElementById("product-edit-form").addEventListener("submit", handleProductSaveSubmit);
 
-  // Загрузка фото товара с устройства
+  // Загрузка фото товара с устройства (авто-сжатие через Canvas до ~30-50 КБ)
   document.getElementById("edit-product-file").addEventListener("change", (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (!file.type.startsWith("image/") || file.size > MAX_IMAGE_FILE_SIZE) {
+      if (!file.type.startsWith("image/")) {
         e.target.value = "";
-        showToast("Загрузите изображение до 1 МБ", "error");
+        showToast("Выберите графический файл формата изображения", "error");
         return;
       }
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        document.getElementById("edit-product-image").value = evt.target.result;
-        document.getElementById("preview-img-tag").src = evt.target.result;
+      compressAndPreviewImage(file, (compressedDataUrl) => {
+        document.getElementById("edit-product-image").value = compressedDataUrl;
+        document.getElementById("preview-img-tag").src = compressedDataUrl;
         document.getElementById("product-image-preview").style.display = "flex";
-        showToast("Фото успешно загружено с устройства", "info");
-      };
-      reader.readAsDataURL(file);
+        showToast("Фото сжато и загружено", "info");
+      });
     }
   });
 
