@@ -131,6 +131,24 @@ function openProfileModal() {
   openModal("modal-auth-profile");
 }
 
+function initClientAuthListeners() {
+  const authPhoneEl = document.getElementById("auth-phone");
+  const authNameEl = document.getElementById("auth-name");
+  if (!authPhoneEl || !authNameEl) return;
+
+  authPhoneEl.addEventListener("input", () => {
+    const norm = normalizePhone(authPhoneEl.value);
+    if (norm.length === 11) {
+      const users = window.db.loadUsers();
+      const found = users.find(u => u.phone === norm);
+      if (found && found.name) {
+        authNameEl.value = found.name;
+        showToast(`Профиль найден: ${found.name}`, "info");
+      }
+    }
+  });
+}
+
 function handleClientAuthSubmit(e) {
   e.preventDefault();
 
@@ -139,13 +157,19 @@ function handleClientAuthSubmit(e) {
   const smsGroup = document.getElementById("sms-code-group");
   const smsInput = document.getElementById("auth-sms").value.trim();
 
+  const normPhone = normalizePhone(phoneInput);
+
+  if (!isValidKazakhstanPhone(phoneInput)) {
+    showToast("Введите корректный номер телефона РК (например: +7 777 123 45 67)", "error");
+    return;
+  }
+
+  let users = window.db.loadUsers();
+  let existingUser = users.find(u => u.phone === normPhone);
+
   if (smsGroup.classList.contains("d-none")) {
-    if (!nameInput || !phoneInput) {
-      showToast("Заполните все поля", "error");
-      return;
-    }
-    if (normalizePhone(phoneInput).length !== 11) {
-      showToast("Введите корректный номер телефона в формате +7 (7XX) XXX-XX-XX", "error");
+    if (!existingUser && !isValidName(nameInput)) {
+      showToast("Введите ваше настоящее имя (минимум 2 буквы, без цифр)", "error");
       return;
     }
     smsGroup.classList.remove("d-none");
@@ -159,18 +183,30 @@ function handleClientAuthSubmit(e) {
     return;
   }
 
-  const newUser = { name: safeText(nameInput, 100), phone: normalizePhone(phoneInput) };
-
-  let users = window.db.loadUsers();
-  if (!users.some(u => u.phone === newUser.phone)) {
+  let finalName = "";
+  if (existingUser) {
+    if (isValidName(nameInput)) {
+      finalName = safeText(nameInput, 100);
+      existingUser.name = finalName;
+      window.db.saveUsers(users);
+    } else {
+      finalName = existingUser.name;
+    }
+  } else {
+    if (!isValidName(nameInput)) {
+      showToast("Введите ваше настоящее имя (минимум 2 буквы, без цифр)", "error");
+      return;
+    }
+    finalName = safeText(nameInput, 100);
+    const newUser = { name: finalName, phone: normPhone };
     users.push(newUser);
     window.db.saveUsers(users);
   }
 
-  currentUser = newUser;
-  window.db.setCurrentUser(newUser);
+  currentUser = { name: finalName, phone: normPhone };
+  window.db.setCurrentUser(currentUser);
 
-  showToast("Вы успешно вошли в профиль!", "success");
+  showToast(`С возвращением, ${finalName}!`, "success");
   openProfileModal();
 
   if (pendingAction) {

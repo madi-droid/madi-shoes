@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initFilters();
   initFormBtnGroups();
   initCategoryAutocomplete();
+  initClientAuthListeners();
 
   showClientPage("page-catalog");
   setupEventListeners();

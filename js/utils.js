@@ -135,6 +135,20 @@ function normalizePhone(phoneStr) {
   return digits;
 }
 
+// Валидация мобильных номеров РК (+7 7XX XXX XX XX)
+function isValidKazakhstanPhone(phoneStr) {
+  const norm = normalizePhone(phoneStr);
+  return /^7(7[0-8]|74|70|77)\d{8}$/.test(norm);
+}
+
+// Валидация имени пользователя (только буквы, минимум 2 символа, без цифр)
+function isValidName(nameStr) {
+  if (!nameStr) return false;
+  const clean = nameStr.trim();
+  if (clean.length < 2 || clean.length > 50) return false;
+  return /^[a-zA-Zа-яА-ЯёЁәғқңөұүһӘҒҚҢӨҰҮҺ\s'-]+$/u.test(clean);
+}
+
 // Сжатие и масштабирование загружаемых изображений через HTML5 Canvas
 function compressAndPreviewImage(file, callback) {
   if (!file) return;
