@@ -43,13 +43,21 @@ function showClientPage(pageId) {
     link.classList.remove("active");
   });
 
+  document.querySelectorAll(".bottom-nav-item").forEach(item => {
+    item.classList.remove("active");
+  });
+
   if (pageId === "page-catalog") {
     const el = document.getElementById("nav-catalog");
     if (el) el.classList.add("active");
+    const bnav = document.getElementById("bnav-catalog");
+    if (bnav) bnav.classList.add("active");
     renderCatalog();
   } else if (pageId === "page-about") {
     const el = document.getElementById("nav-about");
     if (el) el.classList.add("active");
+    const bnav = document.getElementById("bnav-about");
+    if (bnav) bnav.classList.add("active");
   }
 }
 

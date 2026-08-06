@@ -117,17 +117,64 @@ function setupEventListeners() {
   const navProfile = document.getElementById("nav-profile");
   if (navProfile) navProfile.addEventListener("click", openProfileModal);
 
+  const btnThemeToggle = () => {
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    const newTheme = currentTheme === "light" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("shoe_store_theme", newTheme);
+    updateThemeIcon(newTheme);
+    showToast("Тема успешно изменена", "info");
+  };
+
   const btnTheme = document.getElementById("btn-theme-toggle");
-  if (btnTheme) {
-    btnTheme.addEventListener("click", () => {
-      const currentTheme = document.documentElement.getAttribute("data-theme");
-      const newTheme = currentTheme === "light" ? "dark" : "light";
-      document.documentElement.setAttribute("data-theme", newTheme);
-      localStorage.setItem("shoe_store_theme", newTheme);
-      updateThemeIcon(newTheme);
-      showToast("Тема успешно изменена", "info");
+  if (btnTheme) btnTheme.addEventListener("click", btnThemeToggle);
+
+  // Мобильная нижняя навигация (Bottom Nav)
+  const bnavCatalog = document.getElementById("bnav-catalog");
+  if (bnavCatalog) {
+    bnavCatalog.addEventListener("click", () => {
+      showClientPage("page-catalog");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     });
   }
+
+  const bnavAbout = document.getElementById("bnav-about");
+  if (bnavAbout) {
+    bnavAbout.addEventListener("click", () => {
+      showClientPage("page-about");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+
+  const bnavProfile = document.getElementById("bnav-profile");
+  if (bnavProfile) {
+    bnavProfile.addEventListener("click", openProfileModal);
+  }
+
+  const bnavTheme = document.getElementById("bnav-theme");
+  if (bnavTheme) {
+    bnavTheme.addEventListener("click", btnThemeToggle);
+  }
+
+  // Кнопка сворачивания фильтров на мобильных
+  const btnToggleFilters = document.getElementById("btn-toggle-filters");
+  const filtersGridContainer = document.getElementById("filters-grid-container");
+  if (btnToggleFilters && filtersGridContainer) {
+    btnToggleFilters.addEventListener("click", () => {
+      const isOpen = filtersGridContainer.classList.toggle("is-open");
+      btnToggleFilters.classList.toggle("is-active", isOpen);
+      btnToggleFilters.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    });
+  }
+
+  // Обновление бейджа фильтров при изменении селекторов
+  const filterInputs = ["filter-location", "filter-size", "filter-sort", "filter-status"];
+  filterInputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("change", updateActiveFiltersBadge);
+    }
+  });
 
   const btnExport = document.getElementById("btn-export-backup");
   if (btnExport) btnExport.addEventListener("click", exportDatabaseToFile);
@@ -416,4 +463,27 @@ function closeAllModals() {
     modal.classList.remove("open");
   });
   document.body.style.overflow = "";
+}
+
+function updateActiveFiltersBadge() {
+  const badge = document.getElementById("filters-active-badge");
+  if (!badge) return;
+
+  const loc = document.getElementById("filter-location")?.value || "all";
+  const size = document.getElementById("filter-size")?.value || "all";
+  const sort = document.getElementById("filter-sort")?.value || "default";
+  const status = document.getElementById("filter-status")?.value || "all";
+
+  let count = 0;
+  if (loc !== "all") count++;
+  if (size !== "all") count++;
+  if (sort !== "default") count++;
+  if (status !== "all") count++;
+
+  if (count > 0) {
+    badge.textContent = count;
+    badge.classList.remove("d-none");
+  } else {
+    badge.classList.add("d-none");
+  }
 }
