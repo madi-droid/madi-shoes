@@ -117,7 +117,8 @@ function openProfileModal() {
     document.getElementById("auth-form-container").classList.add("d-none");
     document.getElementById("profile-container").classList.remove("d-none");
 
-    document.getElementById("profile-user-name").textContent = `Здравствуйте, ${safeText(currentUser.name, 100)}!`;
+    const formatted = formatFullName(safeText(currentUser.name, 100));
+    document.getElementById("profile-user-name").textContent = `Здравствуйте, ${formatted}!`;
     document.getElementById("profile-user-phone").textContent = currentUser.phone;
 
     renderClientOrders();
@@ -142,8 +143,9 @@ function initClientAuthListeners() {
       const users = window.db.loadUsers();
       const found = users.find(u => u.phone === norm);
       if (found && found.name) {
-        authNameEl.value = found.name;
-        showToast(`Профиль найден: ${found.name}`, "info");
+        const formattedName = formatFullName(found.name);
+        authNameEl.value = formattedName;
+        showToast(`Профиль найден: ${formattedName}`, "info");
       }
     }
   });
@@ -168,8 +170,8 @@ function handleClientAuthSubmit(e) {
   let existingUser = users.find(u => u.phone === normPhone);
 
   if (smsGroup.classList.contains("d-none")) {
-    if (!existingUser && !isValidName(nameInput)) {
-      showToast("Введите ваше настоящее имя (минимум 2 буквы, без цифр)", "error");
+    if (!existingUser && !isValidFullName(nameInput)) {
+      showToast("Введите ваши имя и фамилию через пробел (например: Арман Сериков)", "error");
       return;
     }
     smsGroup.classList.remove("d-none");
@@ -185,19 +187,19 @@ function handleClientAuthSubmit(e) {
 
   let finalName = "";
   if (existingUser) {
-    if (isValidName(nameInput)) {
-      finalName = safeText(nameInput, 100);
+    if (isValidFullName(nameInput)) {
+      finalName = formatFullName(safeText(nameInput, 100));
       existingUser.name = finalName;
       window.db.saveUsers(users);
     } else {
-      finalName = existingUser.name;
+      finalName = formatFullName(existingUser.name);
     }
   } else {
-    if (!isValidName(nameInput)) {
-      showToast("Введите ваше настоящее имя (минимум 2 буквы, без цифр)", "error");
+    if (!isValidFullName(nameInput)) {
+      showToast("Введите ваши имя и фамилию через пробел (например: Арман Сериков)", "error");
       return;
     }
-    finalName = safeText(nameInput, 100);
+    finalName = formatFullName(safeText(nameInput, 100));
     const newUser = { name: finalName, phone: normPhone };
     users.push(newUser);
     window.db.saveUsers(users);

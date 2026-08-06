@@ -141,12 +141,25 @@ function isValidKazakhstanPhone(phoneStr) {
   return /^7(7[0-8]|74|70|77)\d{8}$/.test(norm);
 }
 
-// Валидация имени пользователя (только буквы, минимум 2 символа, без цифр)
-function isValidName(nameStr) {
+// Форматирование ФИО (Каждое слово с заглавной буквы)
+function formatFullName(str) {
+  if (!str) return "";
+  const parts = str.trim().split(/\s+/);
+  return parts.map(part => {
+    if (!part) return "";
+    return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+  }).join(" ");
+}
+
+// Валидация Имени и Фамилии (Минимум 2 слова: Имя и Фамилия, только буквы)
+function isValidFullName(nameStr) {
   if (!nameStr) return false;
   const clean = nameStr.trim();
-  if (clean.length < 2 || clean.length > 50) return false;
-  return /^[a-zA-Zа-яА-ЯёЁәғқңөұүһӘҒҚҢӨҰҮҺ\s'-]+$/u.test(clean);
+  const parts = clean.split(/\s+/);
+  if (parts.length < 2) return false;
+
+  const nameRegex = /^[a-zA-Zа-яА-ЯёЁәғқңөұүһӘҒҚҢӨҰҮҺ'-]{2,30}$/u;
+  return parts.every(part => nameRegex.test(part));
 }
 
 // Сжатие и масштабирование загружаемых изображений через HTML5 Canvas
