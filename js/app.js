@@ -94,6 +94,23 @@ function setupEventListeners() {
   const navAbout = document.getElementById("nav-about");
   if (navAbout) navAbout.addEventListener("click", () => showClientPage("page-about"));
 
+  const btnMobileMenu = document.getElementById("btn-mobile-menu");
+  const navMenu = document.getElementById("nav-menu");
+  if (btnMobileMenu && navMenu) {
+    btnMobileMenu.addEventListener("click", (e) => {
+      e.stopPropagation();
+      navMenu.classList.toggle("active");
+      btnMobileMenu.classList.toggle("active");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!navMenu.contains(e.target) && !btnMobileMenu.contains(e.target)) {
+        navMenu.classList.remove("active");
+        btnMobileMenu.classList.remove("active");
+      }
+    });
+  }
+
   const btnProfile = document.getElementById("btn-profile");
   if (btnProfile) btnProfile.addEventListener("click", openProfileModal);
 

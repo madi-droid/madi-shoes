@@ -26,6 +26,11 @@ function switchToClientView() {
 }
 
 function showClientPage(pageId) {
+  const navMenu = document.getElementById("nav-menu");
+  const btnMobileMenu = document.getElementById("btn-mobile-menu");
+  if (navMenu) navMenu.classList.remove("active");
+  if (btnMobileMenu) btnMobileMenu.classList.remove("active");
+
   document.querySelectorAll(".client-page").forEach(page => {
     page.classList.add("d-none");
   });
