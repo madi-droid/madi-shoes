@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MADIYAR SHOES — Премиум каталог и Учет остатков</title>
+  <link rel="stylesheet" href="style.css?v=22">
+</head>
+
+<body>
+
+  <!-- Шапка сайта -->
+  <header>
+    <div class="container header-wrapper">
+      <div class="logo" id="btn-logo">
+        <div class="logo-icon-container" style="display: flex; align-items: center; justify-content: center;">
+          <img src="logo.png?v=1" alt="Madiyar Shoes Logo"
+            style="width: 58px; height: 58px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--border-color); background: #ffffff;">
+        </div>
+        <span
+          style="font-family: var(--font-title); font-weight: 800; letter-spacing: 0.05em; margin-left: 12px; font-size: 18px;">MADIYAR</span>
+      </div>
+
+      <nav class="nav-menu">
+        <span class="nav-link active" id="nav-catalog">Каталог</span>
+        <span class="nav-link" id="nav-about">О нас</span>
+      </nav>
+
+      <div class="header-actions">
+        <!-- Кнопка смены темы -->
+        <button class="btn-icon" id="btn-theme-toggle" title="Сменить тему">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+          </svg>
+        </button>
+
+        <!-- Профиль клиента -->
+        <button class="btn-icon" id="btn-profile" title="Личный кабинет">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== КЛИЕНТСКИЙ РАЗДЕЛ ==================== -->
+  <main id="client-section">
+
+    <!-- 2. СТРАНИЦА КАТАЛОГА С ФИЛЬТРАМИ -->
+    <div id="page-catalog" class="client-page">
+      <!-- Поиск и слоган -->
+      <section class="hero-section" style="padding: 40px 0 20px;">
+        <div class="container">
+          <h1 class="hero-title">Каталог обуви MADIYAR</h1>
+          <div class="search-bar-container">
+            <svg class="search-icon-inside" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input type="text" class="search-input" id="search-input"
+              placeholder="Поиск по артикулу или названию обуви...">
+          </div>
+        </div>
+      </section>
+
+      <!-- Фильтры -->
+      <section class="container">
+        <div class="filters-section">
+          <div class="filters-grid">
+            <!-- Точка продаж -->
+            <div class="filter-group">
+              <label class="filter-label">Точка продаж</label>
+              <select class="filter-select" id="filter-location">
+                <option value="all">Все точки</option>
+                <option value="bazaar">Базар «Кулпаршын» (25 бутик)</option>
+                <option value="mall">Гранд Парк (1 блок, 10 бутик)</option>
+              </select>
+            </div>
+            <!-- Размер -->
+            <div class="filter-group">
+              <label class="filter-label">Размер</label>
+              <select class="filter-select" id="filter-size">
+                <option value="all">Все размеры</option>
+                <!-- Размеры добавятся динамически из JS -->
+              </select>
+            </div>
+            <!-- Сортировка -->
+            <div class="filter-group">
+              <label class="filter-label">Сортировка</label>
+              <select class="filter-select" id="filter-sort">
+                <option value="default">По умолчанию</option>
+                <option value="price-asc">Сначала дешевые</option>
+                <option value="price-desc">Сначала дорогие</option>
+              </select>
+            </div>
+            <!-- Наличие -->
+            <div class="filter-group">
+              <label class="filter-label">Наличие</label>
+              <select class="filter-select" id="filter-status">
+                <option value="all">Любой статус</option>
+                <option value="in-stock">В наличии</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Категории навигации (Пол, Сезон, Тип) -->
+      <section class="container" style="margin-bottom: 30px;">
+        <div class="filters-section" style="display:flex; flex-direction:column; gap:16px; padding: 20px;">
+          <!-- Селектор пола -->
+          <div class="nav-filter-group">
+            <span class="nav-filter-label">Пол:</span>
+            <div class="nav-tabs" id="tabs-gender">
+              <button class="nav-tab-btn active" data-gender="all">Все</button>
+              <button class="nav-tab-btn" data-gender="мужской">Мужская</button>
+              <button class="nav-tab-btn" data-gender="женский">Женская</button>
+            </div>
+          </div>
+
+          <!-- Селектор сезона -->
+          <div class="nav-filter-group">
+            <span class="nav-filter-label">Сезон:</span>
+            <div class="nav-tabs" id="tabs-season">
+              <button class="nav-tab-btn active" data-season="all">Все сезоны</button>
+              <button class="nav-tab-btn" data-season="зима">Зима</button>
+              <button class="nav-tab-btn" data-season="весна">Весна</button>
+              <button class="nav-tab-btn" data-season="лето">Лето</button>
+              <button class="nav-tab-btn" data-season="осень">Осень</button>
+            </div>
+          </div>
+
+          <!-- Селектор категории -->
+          <div class="nav-filter-group">
+            <span class="nav-filter-label">Категория:</span>
+            <div class="nav-tabs" id="tabs-category">
+              <button class="nav-tab-btn active" data-category="all">Все</button>
+              <button class="nav-tab-btn" data-category="кроссовки">Кроссовки</button>
+              <button class="nav-tab-btn" data-category="туфли">Туфли</button>
+              <button class="nav-tab-btn" data-category="кроксы">Кроксы</button>
+              <button class="nav-tab-btn" data-category="мокасины">Мокасины</button>
+              <button class="nav-tab-btn" data-category="сапоги">Сапоги</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Сетка товаров каталога -->
+      <section class="container">
+        <div class="catalog-title-bar">
+          <h2 class="catalog-title">Модели в ассортименте</h2>
+          <div class="catalog-count" id="catalog-count">Найдено: 0 моделей</div>
+        </div>
+        <div class="products-grid" id="products-grid">
+          <!-- Карточки товаров заполняются динамически через JS -->
+        </div>
+        
+        <div class="pagination-container" id="catalog-pagination" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 32px; margin-bottom: 20px;">
+          <!-- Заполняется динамически -->
+        </div>
+      </section>
+    </div>
+
+
+    <!-- 3. СТРАНИЦА "О НАС" С ИСТОРИЕЙ И КАРТАМИ -->
+    <div id="page-about" class="client-page d-none">
+      <!-- Наша история -->
+      <section class="container" style="margin-top: 40px; margin-bottom: 50px;">
+        <div class="filters-section" style="padding: 40px; border-radius: var(--radius-lg);">
+          <h2
+            style="font-family: var(--font-title); font-size: 32px; text-align: center; margin-bottom: 20px; color: var(--text-primary);">
+            Наша история</h2>
+          <p
+            style="font-size: 16px; line-height: 1.8; color: var(--text-secondary); margin-bottom: 15px; text-align: justify;">
+            Все началось в далеком 2008 году как скромное семейное дело. Мы с родителями всегда считали, что
+            качественная обувь — это залог уверенных шагов в будущее, отсюда и родилось наше название —
+            <strong>MADIYAR</strong>.
+            Первый наш бутик открылся на базаре «Кулпаршын». В те годы мы лично отбирали каждую модель, проверяя
+            прочность швов, мягкость кожи и удобство колодки. Наши клиенты ценили эту заботу, и слухи о качественном
+            бутике быстро расходились по городу.
+          </p>
+          <p style="font-size: 16px; line-height: 1.8; color: var(--text-secondary); text-align: justify;">
+            Со временем наше дело росло, и к нам присоединилось новое поколение семьи. Чтобы быть ближе к покупателям,
+            которые ценят современный комфорт, мы открыли вторую точку продаж в одном из знаковых торгово-выставочных
+            комплексов Жетысая — Гранд Парке. Сегодня MADIYAR — это проверенный временем бренд с 4 заботливыми
+            администраторами (нашей семьей!), собственными точками и тысячами постоянных клиентов, шагающих по жизни с
+            комфортом.
+          </p>
+        </div>
+      </section>
+
+      <!-- Интерактивная карта и бутики -->
+      <section class="container" style="margin-bottom: 60px;">
+        <div class="filters-section" style="padding: 30px;">
+          <h2
+            style="font-family: var(--font-title); font-size: 28px; text-align: center; margin-bottom: 25px; color: var(--text-primary);">
+            Наши торговые точки</h2>
+
+          <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;">
+            <button class="nav-tab-btn active" id="btn-map-bazaar" style="padding: 10px 24px; cursor: pointer;">Базар
+              «Кулпаршын» (25 бутик)</button>
+            <button class="nav-tab-btn" id="btn-map-mall" style="padding: 10px 24px; cursor: pointer;">Гранд Парк (1
+              блок, 10 бутик)</button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+            <!-- Информация и Фото бутика -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              <!-- Контент для Кулпаршын -->
+              <div id="info-map-bazaar" class="map-info-block">
+                <div
+                  style="border-radius: var(--radius-md); overflow: hidden; height: 220px; margin-bottom: 15px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.05); display: flex; justify-content: center; align-items: center;">
+                  <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80"
+                    style="width: 100%; height: 100%; object-fit: cover;" alt="Бутик Кулпаршын">
+                </div>
+                <h3 style="margin-bottom: 10px; color: var(--text-primary);">Базар «Кулпаршын»</h3>
+                <p style="font-size: 14px; margin-bottom: 6px; color: var(--text-secondary);"><strong>Адрес:</strong>
+                  Базар «Кулпаршын», бутик 25</p>
+                <p style="font-size: 14px; margin-bottom: 6px; color: var(--text-secondary);"><strong>Режим
+                    работы:</strong> Вторник — Воскресенье, 09:00 - 18:00</p>
+                <p style="font-size: 14px; margin-bottom: 15px; color: var(--text-secondary);"><strong>Телефон:</strong>
+                  +7 (777) 123-45-67</p>
+              </div>
+
+              <!-- Контент для Гранд Парк -->
+              <div id="info-map-mall" class="map-info-block d-none">
+                <div
+                  style="border-radius: var(--radius-md); overflow: hidden; height: 220px; margin-bottom: 15px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.05); display: flex; justify-content: center; align-items: center;">
+                  <img src="https://images.unsplash.com/photo-1528698827591-e19ccd7bc23d?w=800&q=80"
+                    style="width: 100%; height: 100%; object-fit: cover;" alt="Бутик Гранд Парк">
+                </div>
+                <h3 style="margin-bottom: 10px; color: var(--text-primary);">Гранд Парк</h3>
+                <p style="font-size: 14px; margin-bottom: 6px; color: var(--text-secondary);"><strong>Адрес:</strong>
+                  Гранд Парк, 1 блок, бутик 10</p>
+                <p style="font-size: 14px; margin-bottom: 6px; color: var(--text-secondary);"><strong>Режим
+                    работы:</strong> Ежедневно, 10:00 - 22:00</p>
+                <p style="font-size: 14px; margin-bottom: 15px; color: var(--text-secondary);"><strong>Телефон:</strong>
+                  +7 (778) 987-65-43</p>
+              </div>
+
+              <button class="btn-primary" id="btn-show-map-action" style="width: 100%; cursor: pointer;">Показать
+                интерактивную карту</button>
+            </div>
+
+            <!-- Контейнер для Карты -->
+            <div id="map-iframe-container"
+              style="border-radius: var(--radius-md); overflow: hidden; height: 350px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: center; position: relative;">
+              <div id="map-placeholder-text" style="padding: 20px; text-align: center; color: var(--text-secondary);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                  style="margin-bottom: 10px; color: var(--primary);">
+                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                <p>Нажмите на кнопку слева, чтобы запустить интерактивную карту</p>
+              </div>
+
+
+              <iframe id="map-iframe" src="" style="width:100%; height:100%; border:none; display:none;" sandbox="allow-scripts" allowfullscreen="true"></iframe>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Футер с секретной кнопкой админа -->
+    <footer
+      style="text-align: center; padding: 40px 0; color: var(--text-secondary); font-size: 14px; border-top: 1px dashed var(--border-color); margin-top: 60px;">
+      <div class="container">
+        <p>© 2026 MADIYAR. Все права защищены. <span id="secret-admin-key"
+            style="cursor: pointer; opacity: 0.4; margin-left: 8px;" title="Панель учета">🔑</span></p>
+      </div>
+    </footer>
+  </main>
+
+
+  <!-- ==================== АДМИНИСТРАТИВНЫЙ РАЗДЕЛ ==================== -->
+  <main class="container d-none" id="admin-section">
+    <div class="admin-layout">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>Панель учета товаров и броней</h2>
+        <button class="btn-secondary" id="btn-exit-admin">Выйти из админки</button>
+      </div>
+
+      <!-- Дашборд со статистикой -->
+      <div class="admin-dashboard-grid">
+        <div class="dash-card">
+          <div class="dash-value" id="dash-total-models">0</div>
+          <div class="dash-label">Всего моделей</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-value" id="dash-bazaar-stock">0</div>
+          <div class="dash-label">Пар на Базаре «Кулпаршын»</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-value" id="dash-mall-stock">0</div>
+          <div class="dash-label">Пар в Гранд Парке</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-value" id="dash-pending-orders">0</div>
+          <div class="dash-label">Новых броней</div>
+        </div>
+      </div>
+
+      <!-- Вкладки управления -->
+      <div class="admin-tabs">
+        <button class="admin-tab active" id="tab-products">Товары</button>
+        <button class="admin-tab" id="tab-orders">Заказы и бронирование</button>
+        <button class="admin-tab" id="tab-sales">Оффлайн-продажи</button>
+        <button class="admin-tab" id="tab-backup">Резервная копия</button>
+      </div>
+
+      <!-- Вкладка 1: Список товаров -->
+      <div class="admin-panel-content active" id="panel-products">
+        <div class="admin-actions-row">
+          <h3>Каталог товаров</h3>
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <input type="text" id="admin-product-search" class="form-input"
+              placeholder="Поиск по артикулу или названию..."
+              style="width: 280px; margin: 0; padding: 10px 14px; font-size: 14px;">
+            <button class="btn-primary" id="btn-add-product-modal">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14" />
+                <path d="M12 5v14" />
+              </svg>
+              Добавить модель
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Фото</th>
+                <th>Артикул</th>
+                <th>Бренд / Название</th>
+                <th>Базар (Размеры : Кол-во)</th>
+                <th>ТЦ (Размеры : Кол-во)</th>
+                <th>Цена</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody id="admin-products-list">
+              <!-- Заполняется динамически -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Вкладка 2: Список заказов/бронирований -->
+      <div class="admin-panel-content" id="panel-orders">
+        <h3>Заявки от клиентов</h3>
+        <br>
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Клиент</th>
+                <th>Модель и Размер</th>
+                <th>Точка / Доставка</th>
+                <th>Тип покупки</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody id="admin-orders-list">
+              <!-- Заполняется динамически -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Вкладка 3: Резервное копирование -->
+      <div class="admin-panel-content" id="panel-backup">
+        <h3>Резервное копирование базы данных</h3>
+        <p style="color:var(--text-secondary); margin-bottom: 24px;">Вы можете экспортировать текущую базу товаров,
+          остатков и броней в текстовый файл, чтобы восстановить её в будущем или перенести на другое устройство.</p>
+
+        <div class="backup-section">
+          <div class="backup-info">
+            <h4>Экспорт данных</h4>
+            <p>Скачать текущее состояние товаров, остатков и заказов в виде JSON файла.</p>
+          </div>
+          <button class="btn-primary" id="btn-export-db">Скачать файл базы</button>
+        </div>
+
+        <div class="backup-section">
+          <div class="backup-info">
+            <h4>Импорт данных</h4>
+            <p>Загрузить данные из ранее сохраненного JSON файла. Текущие данные будут перезаписаны!</p>
+            <input type="file" id="import-file-input" accept=".json" style="display:none;">
+          </div>
+          <button class="btn-secondary" id="btn-trigger-import">Выбрать файл и импортировать</button>
+        </div>
+
+        <div class="backup-section">
+          <div class="backup-info">
+            <h4>Сброс базы данных</h4>
+            <p style="color: var(--accent-red)">Внимание! Все измененные остатки, добавленные товары и бронирования
+              будут стерты. Приложение вернется к исходному демо-ассортименту.</p>
+          </div>
+          <button class="btn-secondary" style="border-color: var(--accent-red); color: var(--accent-red)"
+            id="btn-reset-db">Сбросить базу данных</button>
+        </div>
+      </div>
+
+      <!-- Вкладка 4: История оффлайн-продаж -->
+      <div class="admin-panel-content" id="panel-sales">
+        <h3>Оффлайн продажи и Учет остатков</h3>
+        <p style="color:var(--text-secondary); margin-bottom: 24px;">Запись оффлайн продаж, сделанных непосредственно со
+          складов на Базаре или в ТЦ. При сохранении остаток выбранного размера автоматически уменьшится на 1.</p>
+
+        <div class="sales-layout" style="display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px;">
+          <!-- Форма записи продажи -->
+          <div class="sales-form-card"
+            style="flex: 1.5; min-width: 320px; background: var(--bg-card); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <h4
+              style="margin-top: 0; margin-bottom: 16px; font-family: var(--font-title); font-size: 18px; color: var(--text-primary);">
+              Записать продажу обуви</h4>
+
+            <form id="offline-sale-form" onsubmit="event.preventDefault(); handleOfflineSaleSubmit();">
+              <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 14px; position: relative;">
+                  <label class="form-label">Поиск модели по артикулу</label>
+                  <input type="text" id="sale-product-search" class="form-input"
+                    placeholder="Введите артикул (например: 14090)..." style="width: 100%;" autocomplete="off" required>
+                  <input type="hidden" id="sale-product-id" value="">
+                  <div id="sale-product-autocomplete-dropdown" class="autocomplete-dropdown d-none"></div>
+                </div>
+
+                <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 14px;">
+                  <label class="form-label">Точка продажи</label>
+                  <div class="form-btn-group" id="sale-point-group" style="margin-top: 4px;">
+                    <button type="button" class="form-group-btn active" data-value="bazaar">Базар</button>
+                    <button type="button" class="form-group-btn" data-value="mall">ТЦ</button>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 14px;">
+                  <label class="form-label">Доступный размер</label>
+                  <select id="sale-size-select" class="form-input" style="width: 100%;" required>
+                    <!-- Заполняется динамически -->
+                  </select>
+                </div>
+
+                <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 14px;">
+                  <label class="form-label">Способ оплаты</label>
+                  <div class="form-btn-group" id="sale-payment-group" style="margin-top: 4px;">
+                    <button type="button" class="form-group-btn active" data-value="kaspi">Каспи</button>
+                    <button type="button" class="form-group-btn" data-value="red">Каспи Ред</button>
+                    <button type="button" class="form-group-btn" data-value="cash">Нал</button>
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" class="btn-primary"
+                style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
+                Сохранить продажу и списать со склада
+              </button>
+            </form>
+          </div>
+
+          <!-- Касса / Статистика оффлайн -->
+          <div class="sales-stats-card"
+            style="flex: 1; min-width: 280px; background: var(--bg-card); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <h4
+                style="margin-top: 0; margin-bottom: 16px; font-family: var(--font-title); font-size: 18px; color: var(--text-primary);">
+                Касса за сегодня</h4>
+              <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+                <div
+                  style="background: rgba(0,0,0,0.02); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); text-align: center;">
+                  <div
+                    style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">
+                    Всего за сегодня</div>
+                  <div id="sales-count-total" style="font-size: 24px; font-weight: 800; color: var(--text-primary);">0
+                    шт</div>
+                </div>
+                <div
+                  style="background: rgba(0,0,0,0.02); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); text-align: center;">
+                  <div
+                    style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">
+                    Выручка за сегодня</div>
+                  <div id="sales-sum-total" style="font-size: 24px; font-weight: 800; color: var(--accent-green);">0 ₸
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="border-top: 1px solid var(--border-color); padding-top: 16px;">
+              <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
+                <span style="color: var(--text-secondary);">Каспи QR:</span>
+                <strong id="sales-sum-kaspi" style="color: var(--text-primary);">0 ₸</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
+                <span style="color: var(--text-secondary);">Каспи Ред:</span>
+                <strong id="sales-sum-red" style="color: var(--text-primary);">0 ₸</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 14px;">
+                <span style="color: var(--text-secondary);">Наличные:</span>
+                <strong id="sales-sum-cash" style="color: var(--text-primary);">0 ₸</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Таблица истории продаж -->
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-top: 32px; margin-bottom: 14px;">
+          <h4 style="font-family: var(--font-title); font-size: 20px; color: var(--text-primary); margin: 0;">История
+            операций</h4>
+
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 13px; color: var(--text-secondary);">Период с:</span>
+              <input type="date" id="history-date-start" class="form-input"
+                style="padding: 6px 10px; margin: 0; width: 140px; font-size: 13px;">
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 13px; color: var(--text-secondary);">по:</span>
+              <input type="date" id="history-date-end" class="form-input"
+                style="padding: 6px 10px; margin: 0; width: 140px; font-size: 13px;">
+            </div>
+            <button type="button" class="btn-secondary" id="btn-clear-history-dates"
+              style="padding: 6px 10px; font-size: 12px; margin: 0;">Сбросить даты</button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Дата и время</th>
+                <th>Артикул / Модель</th>
+                <th>Точка</th>
+                <th>Размер</th>
+                <th>Способ оплаты</th>
+                <th>Сумма</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody id="offline-sales-list">
+              <!-- Заполняется динамически -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    </div>
+  </main>
+
+
+  <!-- ==================== МОДАЛЬНЫЕ ОКНА ==================== -->
+
+  <!-- 1. Модальное окно деталей товара (Client View) -->
+  <div class="modal-overlay" id="modal-product-details">
+    <div class="modal-container">
+      <button class="modal-close"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg></button>
+      <div class="product-details">
+        <div class="details-image-box">
+          <img class="details-image" id="details-image" src="" alt="Обувь">
+        </div>
+        <div class="details-info">
+          <div class="details-brand" id="details-brand"></div>
+          <h2 class="details-name" id="details-name"></h2>
+          <div class="details-article" id="details-article"></div>
+          <p class="details-description" id="details-description"></p>
+          <div class="details-price" id="details-price"></div>
+
+          <!-- Выбор размера по точкам -->
+          <div class="size-picker-section">
+            <div class="size-section-title">Выберите нужный размер на точке:</div>
+
+            <div class="sizes-grid-wrapper">
+              <!-- Точка 1: Базар -->
+              <div class="point-sizes-block">
+                <div class="point-title">
+                  <span>Базар «Кулпаршын» (25 бутик)</span>
+                  <span class="status" id="bazaar-point-status"></span>
+                </div>
+                <div class="sizes-flex-list" id="bazaar-sizes-list">
+                  <!-- Размеры -->
+                </div>
+              </div>
+
+              <!-- Точка 2: Гранд Парк -->
+              <div class="point-sizes-block">
+                <div class="point-title">
+                  <span>Гранд Парк (1 блок, 10 бутик)</span>
+                  <span class="status" id="mall-point-status"></span>
+                </div>
+                <div class="sizes-flex-list" id="mall-sizes-list">
+                  <!-- Размеры -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Действия с обувью -->
+          <div class="details-actions-block">
+            <button class="btn-booking" id="btn-book-action" disabled>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              Забронировать
+            </button>
+            <button class="btn-buy-now" id="btn-buy-action" disabled>
+              <span>Купить с Kaspi</span>
+            </button>
+          </div>
+          <span style="font-size: 11px; color: var(--text-muted); margin-top: 10px; text-align: center;">При
+            бронировании вы сможете примерить обувь на выбранной точке. При удаленной оплате Kaspi мы свяжемся для
+            доставки.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Модальное окно авторизации/профиля (Client Auth) -->
+  <div class="modal-overlay" id="modal-auth-profile">
+    <div class="modal-container" style="max-width: 500px;">
+      <button class="modal-close"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg></button>
+
+      <!-- Форма входа/регистрации (показывается гостю) -->
+      <div class="auth-box" id="auth-form-container">
+        <h2 class="auth-title">Вход или Регистрация</h2>
+        <p class="auth-desc">Для бронирования или покупки обуви введите имя и номер телефона, чтобы мы могли связаться с
+          вами.</p>
+
+        <form id="auth-form" onsubmit="event.preventDefault();">
+          <div class="form-group">
+            <label class="form-label">Ваше имя</label>
+            <input type="text" class="form-input" id="auth-name" placeholder="Например, Арман" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Номер телефона</label>
+            <input type="tel" class="form-input" id="auth-phone" placeholder="+7 (777) 123-45-67" required>
+          </div>
+
+          <!-- Поле для кода из СМС (динамически активируется при первом клике) -->
+          <div class="form-group d-none" id="sms-code-group">
+            <label class="form-label">Код подтверждения из СМС (Симуляция)</label>
+            <input type="text" class="form-input" id="auth-sms" placeholder="Введите код 1234">
+            <span style="font-size: 12px; color: var(--accent-cyan); display:block; margin-top:6px;">Мы отправили
+              виртуальный код 1234 для теста</span>
+          </div>
+
+          <button type="submit" class="btn-submit" id="btn-auth-submit">Продолжить</button>
+        </form>
+      </div>
+
+      <!-- Панель профиля клиента (показывается авторизованному) -->
+      <div class="profile-box d-none" id="profile-container">
+        <div class="profile-header">
+          <div>
+            <h2 id="profile-user-name">Здравствуйте!</h2>
+            <p style="color:var(--text-secondary); font-size:14px;" id="profile-user-phone"></p>
+          </div>
+          <button class="btn-secondary" style="padding: 8px 16px; font-size: 13px;" id="btn-logout">Выйти</button>
+        </div>
+
+        <h3 class="profile-orders-title">Ваши заказы и бронирования</h3>
+        <div class="orders-list" id="profile-orders-list">
+          <!-- Заказы выводятся из JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Модальное окно входа в Админ-панель (Admin Pin Code) -->
+  <div class="modal-overlay" id="modal-admin-auth">
+    <div class="modal-container" style="max-width: 400px;">
+      <button class="modal-close"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg></button>
+      <div class="auth-box">
+        <h2 class="auth-title">Вход в Панель Учета</h2>
+        <p class="auth-desc">Доступ только для владельцев и продавцов магазина.</p>
+
+        <form id="admin-login-form" onsubmit="event.preventDefault();">
+          <div class="form-group">
+            <label class="form-label">Номер телефона администратора</label>
+            <input type="tel" class="form-input" id="admin-phone-input" placeholder="+7 (701) 999-88-77" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Введите ПИН-код</label>
+            <input type="password" class="form-input" id="admin-pin-input" placeholder="Введите пин-код" required>
+          </div>
+          <button type="submit" class="btn-submit">Войти</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Модальное окно симуляции оплаты Kaspi (QR / Red / Credit) -->
+  <div class="modal-overlay" id="modal-kaspi-sim">
+    <div class="modal-container kaspi-modal-container">
+      <button class="modal-close"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg></button>
+      <div class="kaspi-header">
+        <div class="kaspi-logo-sim">kaspi<span>.kz</span></div>
+        <div style="font-size:13px; color:#495057; font-weight: 600;">Удаленная оплата заказа</div>
+      </div>
+      <div class="kaspi-body">
+        <div style="font-size:14px; color:var(--text-secondary); margin-bottom:8px;" id="kaspi-product-label">Кроссовки
+          Etor (Размер 42)</div>
+        <div class="kaspi-amount" id="kaspi-amount-label">28 000 ₸</div>
+
+        <!-- Оплата: клиент указывает номер Kaspi, продавец отправляет удалённый запрос вручную -->
+
+        <div style="margin: 18px 0 6px; text-align:left;">
+          <label class="form-label" style="font-size:13px; display:block; margin-bottom:6px;">Введите номер Kaspi, с которого будете оплачивать:</label>
+          <input type="tel" class="form-input" id="kaspi-phone-input" placeholder="8 700 000 00 00"
+            style="width:100%; padding:12px 14px; font-size:15px; text-align:center; letter-spacing:0.5px;"
+            autocomplete="off" inputmode="tel">
+          <p class="kaspi-footer-note" id="kaspi-instruction-text">После отправки номера продавец отправит вам удаленный запрос на оплату.</p>
+        </div>
+
+        <button class="btn-submit" style="background: var(--kaspi-red); width:100%; margin-top:10px;" id="btn-kaspi-confirm">Отправить номер и подтвердить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Модальное окно добавления/редактирования товара (Admin Panel) -->
+  <div class="modal-overlay" id="modal-admin-product-edit">
+    <div class="modal-container" style="max-width: 650px;">
+      <button class="modal-close"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg></button>
+      <div style="padding:24px; border-bottom:1px solid var(--border-color)">
+        <h2 id="product-modal-title">Добавление нового товара</h2>
+      </div>
+
+      <form id="product-edit-form" onsubmit="event.preventDefault();">
+        <input type="hidden" id="edit-product-id">
+        <div class="edit-form-grid">
+
+          <div class="form-group">
+            <label class="form-label">Артикул товара</label>
+            <input type="text" class="form-input" id="edit-product-article" placeholder="Например: ET-204-W" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Бренд</label>
+            <input type="text" class="form-input" id="edit-product-brand" placeholder="Например: Etor" required>
+          </div>
+
+          <div class="form-group form-full-width">
+            <label class="form-label">Название товара</label>
+            <input type="text" class="form-input" id="edit-product-name" placeholder="Например: Белые кожаные кроссовки"
+              required>
+          </div>
+
+          <div class="form-group form-full-width">
+            <label class="form-label">Описание товара</label>
+            <textarea class="form-input" id="edit-product-desc" rows="3"
+              placeholder="Введите подробное описание обуви..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Цена (₸)</label>
+            <input type="number" class="form-input" id="edit-product-price" placeholder="28000" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Фото товара (загрузить из галереи)</label>
+            <input type="file" class="form-input" id="edit-product-file" accept="image/*" style="padding: 8px 12px;">
+            <input type="hidden" id="edit-product-image">
+            <div id="product-image-preview"
+              style="margin-top: 10px; display: none; width: 60px; height: 60px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); overflow: hidden; align-items: center; justify-content: center; background: #1e293b;">
+              <img id="preview-img-tag" src="" alt="Превью"
+                style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Пол</label>
+            <div class="form-btn-group" id="edit-product-gender-group">
+              <button type="button" class="form-group-btn" data-value="мужской">Мужской</button>
+              <button type="button" class="form-group-btn" data-value="женский">Женский</button>
+              <button type="button" class="form-group-btn" data-value="унисекс">Унисекс</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Сезон</label>
+            <div class="form-btn-group" id="edit-product-season-group">
+              <button type="button" class="form-group-btn" data-value="зима">Зима</button>
+              <button type="button" class="form-group-btn" data-value="весна">Весна</button>
+              <button type="button" class="form-group-btn" data-value="лето">Лето</button>
+              <button type="button" class="form-group-btn" data-value="осень">Осень</button>
+            </div>
+          </div>
+
+          <div class="form-group" style="position: relative;">
+            <label class="form-label">Категория</label>
+            <input type="text" id="edit-product-category" class="form-input"
+              placeholder="Нажмите для выбора или введите..." autocomplete="off" required>
+            <div id="category-autocomplete-dropdown" class="autocomplete-dropdown d-none"></div>
+          </div>
+
+          <!-- Редактор остатков по размерам -->
+          <div class="form-full-width">
+            <h4 style="margin-bottom:12px;">Остатки размеров по торговым точкам</h4>
+            <div class="admin-stock-editor">
+              <!-- Точка 1: Базар -->
+              <div class="admin-stock-point">
+                <strong style="font-size:14px;">Базар «Кулпаршын» (25 бутик)</strong>
+                <div class="admin-sizes-inputs" id="admin-sizes-bazaar">
+                  <!-- Размеры инпуты (39-45) -->
+                </div>
+              </div>
+              <!-- Точка 2: Гранд Парк -->
+              <div class="admin-stock-point">
+                <strong style="font-size:14px;">Гранд Парк (1 блок, 10 бутик)</strong>
+                <div class="admin-sizes-inputs" id="admin-sizes-mall">
+                  <!-- Размеры инпуты (39-45) -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="padding:20px 24px; background: rgba(0,0,0,0.05); display:flex; justify-content:flex-end; gap:12px; border-top: 1px solid var(--border-color);">
+          <button type="button" class="btn-secondary" id="btn-cancel-edit">Отмена</button>
+          <button type="submit" class="btn-primary" id="btn-save-product">Сохранить товар</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Контейнер для уведомлений (Toasts) -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Подключение скриптов -->
+  <script src="db.js?v=22"></script>
+  <script src="app.js?v=22"></script>
+</body>
+
+</html>
