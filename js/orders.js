@@ -202,7 +202,9 @@ function renderClientOrders() {
   const myOrders = orders.filter(o => o.userPhone === currentUser.phone);
 
   if (myOrders.length === 0) {
-    container.innerHTML = `<p style="color:var(--text-secondary); text-align:center; padding: 20px;">У вас пока нет активных заказов.</p>`;
+    const emptyP = createEl("p", "", "У вас пока нет активных заказов.");
+    emptyP.style.cssText = "color:var(--text-secondary); text-align:center; padding: 20px;";
+    container.appendChild(emptyP);
     return;
   }
 

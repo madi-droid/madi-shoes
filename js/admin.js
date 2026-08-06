@@ -400,11 +400,12 @@ function renderAdminOrdersTable() {
   tbody.innerHTML = "";
 
   if (orders.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="8" style="text-align:center; padding: 30px; color:var(--text-secondary);">Список заказов пуст</td>
-      </tr>
-    `;
+    const emptyTr = document.createElement("tr");
+    const emptyTd = createEl("td", "", "Список заказов пуст");
+    emptyTd.colSpan = 8;
+    emptyTd.style.cssText = "text-align:center; padding: 30px; color:var(--text-secondary);";
+    emptyTr.appendChild(emptyTd);
+    tbody.appendChild(emptyTr);
     return;
   }
 
