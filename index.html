@@ -284,9 +284,14 @@
   <!-- ==================== АДМИНИСТРАТИВНЫЙ РАЗДЕЛ ==================== -->
   <main class="container d-none" id="admin-section">
     <div class="admin-layout">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
         <h2>Панель учета товаров и броней</h2>
-        <button class="btn-secondary" id="btn-exit-admin">Выйти из админки</button>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="btn-secondary" id="btn-export-backup" style="font-size:13px; padding:8px 12px;">💾 Экспорт БД</button>
+          <button class="btn-secondary" id="btn-import-backup" style="font-size:13px; padding:8px 12px;">📂 Импорт БД</button>
+          <input type="file" id="import-file-input" accept=".json" style="display:none;">
+          <button class="btn-secondary" id="btn-exit-admin" style="font-size:13px; padding:8px 12px;">Выйти</button>
+        </div>
       </div>
 
       <!-- Дашборд со статистикой -->

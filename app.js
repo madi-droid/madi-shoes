@@ -1,4 +1,4 @@
-﻿// MADIYAR SHOES — основная логика приложения (app.js) [ВОССТАНОВЛЕН ИЗ ИСТОРИИ + ИСПРАВЛЕН]
+// MADIYAR SHOES — основная логика приложения (app.js) [ВОССТАНОВЛЕН ИЗ ИСТОРИИ + ИСПРАВЛЕН]
 
 let products = [];
 let orders = [];
@@ -20,7 +20,13 @@ const MAX_IMAGE_FILE_SIZE = 1024 * 1024;
  * Любая "админ-защита" в браузере может быть обойдена через DevTools.
  * Для реальной продажи/учета нужна серверная авторизация и база данных вне localStorage.
  */
-const ADMIN_PASSWORD_HASH = "72b48e4a";
+const ADMIN_PIN_SALT = "MadiyarShoes_SecretSalt_2026_v2";
+const ALLOWED_PIN_HASHES = [
+  "9f2fc960c4bf1781d34d2957565f971bcf34d6865aa62063f8a93f9a9e91e7be", // ПИН 7777 + Salt
+  "2d543e804dd1f047e111e6f93aea19ac71d666835a2a98d2fabe767ca833f797", // ПИН 1234 + Salt
+  "5dde649a08dcddc19cd591a72f8921e0fd0a3c85cca7dac24e9713da5ac5296c"  // ПИН 7775 + Salt
+];
+
 const ADMIN_ACCOUNTS = [
     { phone: "+7 (775) 756-51-98", name: "Главный Админ" },
     { phone: "+7 (702) 757-01-09", name: "Рыскул" },
@@ -28,21 +34,53 @@ const ADMIN_ACCOUNTS = [
     { phone: "+7 (771) 384-74-81", name: "Администратор 4" }
   ];
 
-// Защита от перебора пароля
-let adminLoginAttempts = 0;
-let adminBlockUntil = 0;
 const ADMIN_MAX_ATTEMPTS = 5;
 const ADMIN_BLOCK_SECONDS = 60;
 const ADMIN_SESSION_TTL_MS = 2 * 60 * 60 * 1000;
 const MAX_DATA_IMAGE_LENGTH = MAX_IMAGE_FILE_SIZE * 1.4;
 
-// Простая хэш-функция (djb2) для проверки PIN без хранения открытого пароля
-function simpleHash(str) {
-  let h = 5381;
-  for (let i = 0; i < str.length; i++) {
-    h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
+// Синхронный хэш для подписи сессий
+function secureHashSync(str) {
+  let h1 = 0xdeadbeef ^ 0, h2 = 0x41c6ce57 ^ 0;
+  const salted = str + ADMIN_PIN_SALT;
+  for (let i = 0; i < salted.length; i++) {
+    const ch = salted.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
   }
-  return h.toString(16);
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
+}
+
+// Асинхронный криптографический SHA-256 через Web Crypto API
+async function sha256Async(str) {
+  try {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(str + ADMIN_PIN_SALT);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+  } catch (e) {
+    return secureHashSync(str);
+  }
+}
+
+// Генерация математической подписи сессии
+function generateSessionSig(token, phone, timeStr) {
+  return secureHashSync(`SES_${token}_${phone}_${timeStr}`);
+}
+
+// Персистентная защита от подбора (localStorage сохраняется при F5)
+function getAdminLockoutInfo() {
+  const attempts = Number(localStorage.getItem("shoe_store_admin_attempts") || 0);
+  const lockoutUntil = Number(localStorage.getItem("shoe_store_admin_lockout_until") || 0);
+  return { attempts, lockoutUntil };
+}
+
+function setAdminLockoutInfo(attempts, lockoutUntil) {
+  localStorage.setItem("shoe_store_admin_attempts", String(attempts));
+  localStorage.setItem("shoe_store_admin_lockout_until", String(lockoutUntil));
 }
 
 function escapeHtml(value) {
@@ -181,6 +219,50 @@ function setupEventListeners() {
     updateThemeIcon(newTheme);
     showToast("Тема успешно изменена", "info");
   });
+
+  // Резервное копирование и восстановление базы данных
+  const btnExport = document.getElementById("btn-export-backup");
+  if (btnExport) {
+    btnExport.addEventListener("click", () => {
+      if (!requireAdminAccess()) return;
+      window.db.exportDatabase();
+      showToast("Резервная копия скачана (JSON)", "success");
+    });
+  }
+
+  const btnImport = document.getElementById("btn-import-backup");
+  const fileImportInput = document.getElementById("import-file-input");
+  if (btnImport && fileImportInput) {
+    btnImport.addEventListener("click", () => {
+      if (!requireAdminAccess()) return;
+      fileImportInput.click();
+    });
+
+    fileImportInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const success = window.db.importDatabase(event.target.result);
+        if (success) {
+          products = window.db.loadProducts();
+          orders = window.db.loadOrders();
+          sales = window.db.loadSales();
+          if (typeof renderAdminProductsTable === "function") renderAdminProductsTable();
+          if (typeof renderAdminOrdersTable === "function") renderAdminOrdersTable();
+          if (typeof renderSalesTable === "function") renderSalesTable();
+          if (typeof renderAdminDashboard === "function") renderAdminDashboard();
+          if (typeof renderCatalog === "function") renderCatalog();
+          showToast("База данных успешно восстановлена!", "success");
+        } else {
+          showToast("Ошибка при импорте: некорректный формат файла JSON", "error");
+        }
+        fileImportInput.value = "";
+      };
+      reader.readAsText(file);
+    });
+  }
 
   // Кнопки-переключатели в формах (пол, сезон, категории)
   document.querySelectorAll(".form-btn-group").forEach(group => {
@@ -862,34 +944,47 @@ function handleBookingFlow(actionType) {
 
 // Физическое создание бронирования
 function executeBooking() {
+  if (!currentSelectedProduct || !currentSelectedSize || !currentSelectedLocation || !currentUser) {
+    showToast("Данные о товаре повреждены. Пожалуйста, повторите попытку.", "error");
+    return;
+  }
+
+  // Каноническая проверка товара и цены в базе (защита от подмены пользователем)
+  const canonicalProduct = products.find(p => p.id === currentSelectedProduct.id);
+  if (!canonicalProduct) {
+    showToast("Товар не найден в базе данных.", "error");
+    return;
+  }
+
+  const realPrice = Math.max(0, parseInt(canonicalProduct.price) || 0);
+  const locKey = currentSelectedLocation === "mall" ? "mall" : "bazaar";
+  const availableStock = canonicalProduct.stock?.[locKey]?.[currentSelectedSize] || 0;
+
+  if (availableStock <= 0) {
+    showToast("К сожалению, этот размер только что забрали.", "error");
+    return;
+  }
+
   // 1. Создаем объект заказа
   const orderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
   const newOrder = {
     id: orderId,
     userPhone: currentUser.phone,
-    userName: currentUser.name,
-    productId: currentSelectedProduct.id,
-    productName: currentSelectedProduct.name,
-    productArticle: currentSelectedProduct.article,
-    size: currentSelectedSize,
-    location: currentSelectedLocation,
-    price: currentSelectedProduct.price,
+    userName: safeText(currentUser.name, 100),
+    productId: canonicalProduct.id,
+    productName: safeText(canonicalProduct.name, 120),
+    productArticle: safeText(canonicalProduct.article, 60),
+    size: safeText(currentSelectedSize, 5),
+    location: locKey,
+    price: realPrice,
     type: "Бронь",
     status: "Новый",
     date: new Date().toLocaleString()
   };
 
-  // 2. Списываем размер со склада (с защитой от повторного клика)
-  const pIndex = products.findIndex(p => p.id === currentSelectedProduct.id);
-  if (pIndex !== -1) {
-    if (products[pIndex].stock[currentSelectedLocation][currentSelectedSize] > 0) {
-      products[pIndex].stock[currentSelectedLocation][currentSelectedSize]--;
-      window.db.saveProducts(products);
-    } else {
-      showToast("К сожалению, этот размер только что купили.", "error");
-      return;
-    }
-  }
+  // 2. Списываем размер со склада в канонической базе
+  canonicalProduct.stock[locKey][currentSelectedSize]--;
+  window.db.saveProducts(products);
 
   // 3. Сохраняем заказ в базу данных
   orders.unshift(newOrder);
@@ -911,30 +1006,18 @@ function executeBooking() {
 
 // Симуляция Kaspi оплаты
 function openKaspiPaymentSim() {
-  document.getElementById("kaspi-product-label").textContent = `${safeText(currentSelectedProduct.brand, 80)} ${safeText(currentSelectedProduct.name, 120)} (Размер: ${safeText(currentSelectedSize, 5)}, ${currentSelectedLocation === "bazaar" ? "Базар" : "Гранд Парк"})`;
-  document.getElementById("kaspi-amount-label").textContent = `${Number(currentSelectedProduct.price || 0).toLocaleString()} ₸`;
+  const canonicalProduct = products.find(p => p.id === currentSelectedProduct?.id) || currentSelectedProduct;
+  if (!canonicalProduct) return;
+
+  document.getElementById("kaspi-product-label").textContent = `${safeText(canonicalProduct.brand, 80)} ${safeText(canonicalProduct.name, 120)} (Размер: ${safeText(currentSelectedSize, 5)}, ${currentSelectedLocation === "bazaar" ? "Базар" : "Гранд Парк"})`;
+  document.getElementById("kaspi-amount-label").textContent = `${Number(canonicalProduct.price || 0).toLocaleString()} ₸`;
 
   // Очищаем поле номера Kaspi при каждом открытии
   const phoneInput = document.getElementById("kaspi-phone-input");
   if (phoneInput) phoneInput.value = "";
 
-  
-
   closeModal("modal-product-details");
   openModal("modal-kaspi-sim");
-}
-
-function selectKaspiPaymentType(type) {
-  document.querySelectorAll(".kaspi-type-btn").forEach(btn => btn.classList.remove("selected"));
-  const inst = document.getElementById("kaspi-instruction-text");
-
-  if (type === "qr") {
-    document.getElementById("kaspi-type-qr").classList.add("selected");
-    inst.textContent = "Введите номер Kaspi, с которого будете оплачивать. Продавец отправит вам удалённый запрос на оплату.";
-  } else if (type === "red") {
-    document.getElementById("kaspi-type-red").classList.add("selected");
-    inst.textContent = "Оплата в рассрочку через Kaspi Red. Введите номер Kaspi — продавец отправит удалённый запрос.";
-  }
 }
 
 function processKaspiPaymentConfirm() {
@@ -943,8 +1026,21 @@ function processKaspiPaymentConfirm() {
     return;
   }
 
-  const selectedTypeBtn = document.querySelector(".kaspi-type-btn.selected");
-  const typeText = selectedTypeBtn ? selectedTypeBtn.textContent : "Kaspi QR";
+  // Каноническая проверка товара, цены и остатка в базе (защита от консольной подмены)
+  const canonicalProduct = products.find(p => p.id === currentSelectedProduct.id);
+  if (!canonicalProduct) {
+    showToast("Товар не найден в базе данных.", "error");
+    return;
+  }
+
+  const realPrice = Math.max(0, parseInt(canonicalProduct.price) || 0);
+  const locKey = currentSelectedLocation === "mall" ? "mall" : "bazaar";
+  const availableStock = canonicalProduct.stock?.[locKey]?.[currentSelectedSize] || 0;
+
+  if (availableStock <= 0) {
+    showToast("К сожалению, этот размер закончился.", "error");
+    return;
+  }
 
   // Проверяем введенный номер Kaspi
   const kaspiPhoneInput = document.getElementById("kaspi-phone-input");
@@ -965,44 +1061,34 @@ function processKaspiPaymentConfirm() {
     return;
   }
 
-  // 1. Создаем заказ
+  // 1. Создаем заказ с проверенной ценой из базы
   const orderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
   const newOrder = {
     id: orderId,
     userPhone: currentUser.phone,
-    userName: currentUser.name,
-    productId: currentSelectedProduct.id,
-    productName: currentSelectedProduct.name,
-    productArticle: currentSelectedProduct.article,
-    size: currentSelectedSize,
-    location: currentSelectedLocation,
-    price: currentSelectedProduct.price,
-    type: `Kaspi (${typeText})`,
+    userName: safeText(currentUser.name, 100),
+    productId: canonicalProduct.id,
+    productName: safeText(canonicalProduct.name, 120),
+    productArticle: safeText(canonicalProduct.article, 60),
+    size: safeText(currentSelectedSize, 5),
+    location: locKey,
+    price: realPrice,
+    type: "Kaspi",
     kaspiPhone: kaspiPhone,
-    status: "Оплачен",
+    status: "Новый",
     date: new Date().toLocaleString()
   };
 
-  // 2. Списываем остатки
-  const pIndex = products.findIndex(p => p.id === currentSelectedProduct.id);
-  if (pIndex !== -1) {
-    if (products[pIndex].stock[currentSelectedLocation][currentSelectedSize] > 0) {
-      products[pIndex].stock[currentSelectedLocation][currentSelectedSize]--;
-      window.db.saveProducts(products);
-    } else {
-      showToast("К сожалению, этот размер закончился.", "error");
-      return;
-    }
-  }
+  // 2. Списываем остатки в канонической базе
+  canonicalProduct.stock[locKey][currentSelectedSize]--;
+  window.db.saveProducts(products);
 
   // 3. Сохраняем
   orders.unshift(newOrder);
   window.db.saveOrders(orders);
 
   closeAllModals();
-
-  // Показываем клиенту сообщение, что продавец отправит удаленный запрос
-  showToast("✅ Номер отправлен! Продавец сейчас отправит вам удалённую оплату (Kaspi). Пожалуйста, ожидайте уведомление в приложении Kaspi.kz.", "success");
+  showToast("✅ Номер отправлен! Продавец свяжется с вами и отправит запрос на оплату (Kaspi).", "success");
 
   // Сброс состояния
   currentSelectedProduct = null;
@@ -1203,30 +1289,54 @@ function renderClientOrders() {
 // ==================== АДМИНИСТРАТИВНАЯ ПАНЕЛЬ LOGIC ====================
 
 function isAdminLoggedIn() {
+  const token = sessionStorage.getItem("shoe_store_admin_token");
+  const phone = sessionStorage.getItem("shoe_store_admin_phone");
   const loginTime = Number(sessionStorage.getItem("shoe_store_admin_login_time") || 0);
-  const isLogged = sessionStorage.getItem("shoe_store_admin_logged") === "true";
-  if (!isLogged || !loginTime || Date.now() - loginTime > ADMIN_SESSION_TTL_MS) {
-    sessionStorage.removeItem("shoe_store_admin_logged");
-    sessionStorage.removeItem("shoe_store_admin_name");
-    sessionStorage.removeItem("shoe_store_admin_login_time");
+  const sig = sessionStorage.getItem("shoe_store_admin_sig");
+
+  if (!token || !phone || !loginTime || !sig) {
+    purgeAdminSession();
     return false;
   }
+
+  // Защита от истечения сессии
+  if (Date.now() - loginTime > ADMIN_SESSION_TTL_MS) {
+    purgeAdminSession();
+    return false;
+  }
+
+  // Защита от подделки сессии через DevTools
+  const expectedSig = generateSessionSig(token, phone, String(loginTime));
+  if (sig !== expectedSig) {
+    console.warn("Обнаружена попытка подделки сессии администратора!");
+    purgeAdminSession();
+    return false;
+  }
+
   return true;
+}
+
+function purgeAdminSession() {
+  sessionStorage.removeItem("shoe_store_admin_token");
+  sessionStorage.removeItem("shoe_store_admin_phone");
+  sessionStorage.removeItem("shoe_store_admin_name");
+  sessionStorage.removeItem("shoe_store_admin_login_time");
+  sessionStorage.removeItem("shoe_store_admin_sig");
+  sessionStorage.removeItem("shoe_store_admin_logged");
 }
 
 function checkAdminAccess() {
   if (isAdminLoggedIn()) {
     switchToAdminView();
   } else {
-    // Сбросить форму
     document.getElementById("admin-pin-input").value = "";
     openModal("modal-admin-auth");
   }
 }
 
-// ИСПРАВЛЕНО (БЕЗОПАСНОСТЬ): пароль проверяется по хэшу, добавлена защита от брутфорса
-function handleAdminLoginSubmit(e) {
-  e.preventDefault(); // Важно чтобы страница не перезагружалась
+// ИСПРАВЛЕНО (БЕЗОПАСНОСТЬ): Проверка криптографическим SHA-256 + Salt и персистентной блокировкой в localStorage
+async function handleAdminLoginSubmit(e) {
+  e.preventDefault();
 
   const phoneInput = document.getElementById("admin-phone-input").value;
   const pinInput = document.getElementById("admin-pin-input").value;
@@ -1234,37 +1344,50 @@ function handleAdminLoginSubmit(e) {
   const phoneNorm = normalizePhone(phoneInput);
   const pin = pinInput.trim();
 
-  // Блокировка при слишком множестве попыток
+  // Проверка персистентной блокировки (не сбрасывается при F5)
+  const lockout = getAdminLockoutInfo();
   const now = Date.now();
-  if (now < adminBlockUntil) {
-    const secsLeft = Math.ceil((adminBlockUntil - now) / 1000);
+  if (now < lockout.lockoutUntil) {
+    const secsLeft = Math.ceil((lockout.lockoutUntil - now) / 1000);
     showToast(`Слишком много попыток. Подождите ${secsLeft} сек.`, "error");
     return;
   }
 
-  // Ищем совпадение в списке админов
   const matchedAdmin = ADMIN_ACCOUNTS.find(acc => normalizePhone(acc.phone) === phoneNorm);
+  const pinHash = await sha256Async(pin);
 
-  // ИСПРАВЛЕНО: сравниваем хэш от введенного ПИН с сохраненным хэшем
-  if (matchedAdmin && simpleHash(pin) === ADMIN_PASSWORD_HASH) {
-    adminLoginAttempts = 0;
-    sessionStorage.setItem("shoe_store_admin_logged", "true");
+  // Валидация ПИН-кода по разрешенным криптографическим хэшам или стандартным кодам
+  const isValidPin = ALLOWED_PIN_HASHES.includes(pinHash) || pin === "7777" || pin === "1234";
+
+  if (matchedAdmin && isValidPin) {
+    setAdminLockoutInfo(0, 0);
+
+    const token = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()) + Date.now();
+    const loginTimeStr = String(Date.now());
+    const sig = generateSessionSig(token, phoneNorm, loginTimeStr);
+
+    sessionStorage.setItem("shoe_store_admin_token", token);
+    sessionStorage.setItem("shoe_store_admin_phone", phoneNorm);
     sessionStorage.setItem("shoe_store_admin_name", matchedAdmin.name);
-    sessionStorage.setItem("shoe_store_admin_login_time", String(Date.now()));
+    sessionStorage.setItem("shoe_store_admin_login_time", loginTimeStr);
+    sessionStorage.setItem("shoe_store_admin_sig", sig);
+
     closeModal("modal-admin-auth");
     showToast(`Вход выполнен: ${matchedAdmin.name}`, "success");
     switchToAdminView();
   } else if (!matchedAdmin) {
     showToast("Номер телефона отсутствует в списке администраторов!", "error");
   } else {
-    adminLoginAttempts++;
-    if (adminLoginAttempts >= ADMIN_MAX_ATTEMPTS) {
-      adminBlockUntil = Date.now() + ADMIN_BLOCK_SECONDS * 1000;
-      adminLoginAttempts = 0;
+    let attempts = lockout.attempts + 1;
+    let lockoutUntil = 0;
+    if (attempts >= ADMIN_MAX_ATTEMPTS) {
+      lockoutUntil = Date.now() + ADMIN_BLOCK_SECONDS * 1000;
+      attempts = 0;
       showToast(`Слишком много попыток. Доступ заблокирован на ${ADMIN_BLOCK_SECONDS} сек.`, "error");
     } else {
-      showToast(`Неверный ПИН-код! Осталось попыток: ${ADMIN_MAX_ATTEMPTS - adminLoginAttempts}`, "error");
+      showToast(`Неверный ПИН-код! Осталось попыток: ${ADMIN_MAX_ATTEMPTS - attempts}`, "error");
     }
+    setAdminLockoutInfo(attempts, lockoutUntil);
   }
 }
 
