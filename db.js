@@ -432,8 +432,31 @@ function loadProducts() {
   }
   let updated = false;
 
-  // 1. Обновляем отсутствующие свойства у существующих товаров в localStorage
+  // 1. Нормализация и очистка свойств всех товаров из localStorage
   loaded = loaded.map(p => {
+    if (!p || typeof p !== "object") return null;
+
+    p.id = cleanString(p.id, 50);
+    p.brand = cleanString(p.brand, 80);
+    p.name = cleanString(p.name, 120);
+    p.article = cleanString(p.article, 60);
+    p.category = cleanString(p.category, 60);
+    p.price = Math.max(0, parseInt(p.price) || 0);
+
+    // Гарантируем структуру складов
+    if (!p.stock || typeof p.stock !== "object") {
+      p.stock = { bazaar: {}, mall: {} };
+      updated = true;
+    }
+    if (!p.stock.bazaar || typeof p.stock.bazaar !== "object") {
+      p.stock.bazaar = {};
+      updated = true;
+    }
+    if (!p.stock.mall || typeof p.stock.mall !== "object") {
+      p.stock.mall = {};
+      updated = true;
+    }
+
     const def = DEFAULT_PRODUCTS.find(d => d.id === p.id);
     if (def) {
       if (!p.gender || !p.season || !p.category) {
@@ -444,7 +467,7 @@ function loadProducts() {
       }
     }
     return p;
-  });
+  }).filter(Boolean);
 
   // 2. Добавляем новые товары (например, кроксы, зимние сапоги), если их вообще не было
   DEFAULT_PRODUCTS.forEach(defProd => {
@@ -564,17 +587,17 @@ function exportDatabase() {
   return JSON.stringify(dbData, null, 2);
 }
 
+// Санитизация строк
+function cleanString(val, maxLen = 500) {
+  if (typeof val !== "string") return "";
+  return val.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, maxLen);
+}
+
 // Импорт базы из JSON строки
 function importDatabase(jsonString) {
   try {
     const dbData = JSON.parse(jsonString);
     if (!dbData || typeof dbData !== "object") return false;
-
-    // Санитизация строк
-    const cleanString = (val, maxLen = 500) => {
-      if (typeof val !== "string") return "";
-      return val.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, maxLen);
-    };
 
     // Валидация и очистка товаров
     if (dbData.products !== undefined) {

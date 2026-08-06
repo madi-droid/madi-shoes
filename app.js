@@ -139,6 +139,13 @@ function updateProductMap() {
   productMap = new Map((products || []).map(p => [p.id, p]));
 }
 
+function getProductById(id) {
+  if (productMap.size === 0 && products.length > 0) {
+    updateProductMap();
+  }
+  return productMap.get(id) || products.find(p => p.id === id);
+}
+
 // Сжатие и масштабирование загружаемых изображений через HTML5 Canvas (30-50 КБ вместо 1.4 МБ)
 function compressAndPreviewImage(file, callback) {
   if (!file) return;
@@ -379,9 +386,7 @@ function setupEventListeners() {
 
   // Кнопка выхода из админки, секретный ключ в футере и отслеживание хэша URL
   document.getElementById("btn-exit-admin").addEventListener("click", () => {
-    sessionStorage.removeItem("shoe_store_admin_logged");
-    sessionStorage.removeItem("shoe_store_admin_name");
-    sessionStorage.removeItem("shoe_store_admin_login_time");
+    purgeAdminSession();
     switchToClientView();
     showClientPage("page-catalog");
   });
@@ -853,7 +858,7 @@ function renderCatalog(resetPage = false) {
 // ==================== ДЕТАЛЬНАЯ КАРТОЧКА ТОВАРА (КЛИЕНТ) ====================
 
 function openProductDetailsModal(productId) {
-  const item = products.find(p => p.id === productId);
+  const item = getProductById(productId);
   if (!item) return;
 
   currentSelectedProduct = item;
@@ -977,7 +982,7 @@ function executeBooking() {
     }
 
     // Каноническая проверка товара и цены в базе (защита от подмены пользователем)
-    const canonicalProduct = products.find(p => p.id === currentSelectedProduct.id);
+    const canonicalProduct = getProductById(currentSelectedProduct.id);
     if (!canonicalProduct) {
       showToast("Товар не найден в базе данных.", "error");
       return;
@@ -993,7 +998,7 @@ function executeBooking() {
     }
 
     // 1. Создаем объект заказа
-    const orderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
+    const orderId = "ORD-" + Date.now().toString(36).toUpperCase() + "-" + Math.floor(100 + Math.random() * 900);
     const newOrder = {
       id: orderId,
       userPhone: currentUser.phone,
@@ -1006,7 +1011,7 @@ function executeBooking() {
       price: realPrice,
       type: "Бронь",
       status: "Новый",
-      date: new Date().toLocaleString()
+      date: new Date().toISOString()
     };
 
     // 2. Списываем размер со склада в канонической базе
@@ -1069,7 +1074,7 @@ function processKaspiPaymentConfirm() {
     }
 
     // Каноническая проверка товара, цены и остатка в базе (защита от консольной подмены)
-    const canonicalProduct = products.find(p => p.id === currentSelectedProduct.id);
+    const canonicalProduct = getProductById(currentSelectedProduct.id);
     if (!canonicalProduct) {
       showToast("Товар не найден в базе данных.", "error");
       return;
@@ -1104,7 +1109,7 @@ function processKaspiPaymentConfirm() {
     }
 
     // 1. Создаем заказ с проверенной ценой из базы
-    const orderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
+    const orderId = "ORD-" + Date.now().toString(36).toUpperCase() + "-" + Math.floor(100 + Math.random() * 900);
     const newOrder = {
       id: orderId,
       userPhone: currentUser.phone,
@@ -1118,7 +1123,7 @@ function processKaspiPaymentConfirm() {
       type: "Kaspi",
       kaspiPhone: kaspiPhone,
       status: "Новый",
-      date: new Date().toLocaleString()
+      date: new Date().toISOString()
     };
 
     // 2. Списываем остатки в канонической базе
@@ -1252,6 +1257,7 @@ function renderClientOrders() {
   const container = document.getElementById("profile-orders-list");
   container.innerHTML = "";
 
+  orders = window.db.loadOrders();
   const myOrders = orders.filter(o => o.userPhone === currentUser.phone);
 
   if (myOrders.length === 0) {
