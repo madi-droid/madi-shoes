@@ -84,11 +84,17 @@ function setupEventListeners() {
   const adminSearch = document.getElementById("admin-product-search");
   if (adminSearch) adminSearch.addEventListener("input", debouncedRenderAdminProducts);
 
+  const btnLogo = document.getElementById("btn-logo");
+  if (btnLogo) btnLogo.addEventListener("click", () => showClientPage("page-catalog"));
+
   const navCatalog = document.getElementById("nav-catalog");
   if (navCatalog) navCatalog.addEventListener("click", () => showClientPage("page-catalog"));
 
   const navAbout = document.getElementById("nav-about");
   if (navAbout) navAbout.addEventListener("click", () => showClientPage("page-about"));
+
+  const btnProfile = document.getElementById("btn-profile");
+  if (btnProfile) btnProfile.addEventListener("click", openProfileModal);
 
   const navProfile = document.getElementById("nav-profile");
   if (navProfile) navProfile.addEventListener("click", openProfileModal);
@@ -117,23 +123,64 @@ function setupEventListeners() {
     });
   }
 
+  // Интерактивная карта и переключение точек на странице «О нас»
   const mapIframe = document.getElementById("map-iframe");
-  const tabBazaarMap = document.getElementById("tab-bazaar-map");
-  const tabMallMap = document.getElementById("tab-mall-map");
+  const mapPlaceholder = document.getElementById("map-placeholder-text");
+  const btnMapBazaar = document.getElementById("btn-map-bazaar");
+  const btnMapMall = document.getElementById("btn-map-mall");
+  const infoMapBazaar = document.getElementById("info-map-bazaar");
+  const infoMapMall = document.getElementById("info-map-mall");
+  const btnShowMap = document.getElementById("btn-show-map-action");
 
-  if (tabBazaarMap && mapIframe) {
-    tabBazaarMap.addEventListener("click", () => {
-      tabBazaarMap.classList.add("active");
-      if (tabMallMap) tabMallMap.classList.remove("active");
-      mapIframe.src = "map.html?lat=40.774518&lon=68.322906&title=" + encodeURIComponent("Базар Кулпаршин (25 бутик)");
+  let currentMapPoint = "bazaar";
+
+  function getMapUrl(point) {
+    if (point === "mall") {
+      return "map.html?lat=40.766395&lon=68.312624&title=" + encodeURIComponent("Гранд Парк (1 блок, 10 бутик)");
+    }
+    return "map.html?lat=40.774518&lon=68.322906&title=" + encodeURIComponent("Базар Кулпаршын (25 бутик)");
+  }
+
+  function displayMap() {
+    if (mapIframe) {
+      mapIframe.src = getMapUrl(currentMapPoint);
+      mapIframe.style.display = "block";
+    }
+    if (mapPlaceholder) {
+      mapPlaceholder.style.display = "none";
+    }
+  }
+
+  if (btnMapBazaar) {
+    btnMapBazaar.addEventListener("click", () => {
+      btnMapBazaar.classList.add("active");
+      if (btnMapMall) btnMapMall.classList.remove("active");
+      if (infoMapBazaar) infoMapBazaar.classList.remove("d-none");
+      if (infoMapMall) infoMapMall.classList.add("d-none");
+
+      currentMapPoint = "bazaar";
+      if (mapIframe && mapIframe.style.display === "block") {
+        mapIframe.src = getMapUrl("bazaar");
+      }
     });
   }
-  if (tabMallMap && mapIframe) {
-    tabMallMap.addEventListener("click", () => {
-      tabMallMap.classList.add("active");
-      if (tabBazaarMap) tabBazaarMap.classList.remove("active");
-      mapIframe.src = "map.html?lat=40.766395&lon=68.312624&title=" + encodeURIComponent("Гранд Парк (1 блок, 10 бутик)");
+
+  if (btnMapMall) {
+    btnMapMall.addEventListener("click", () => {
+      btnMapMall.classList.add("active");
+      if (btnMapBazaar) btnMapBazaar.classList.remove("active");
+      if (infoMapMall) infoMapMall.classList.remove("d-none");
+      if (infoMapBazaar) infoMapBazaar.classList.add("d-none");
+
+      currentMapPoint = "mall";
+      if (mapIframe && mapIframe.style.display === "block") {
+        mapIframe.src = getMapUrl("mall");
+      }
     });
+  }
+
+  if (btnShowMap) {
+    btnShowMap.addEventListener("click", displayMap);
   }
 
   const btnExitAdmin = document.getElementById("btn-exit-admin");
