@@ -5087,6 +5087,24 @@ html .modal-content.is-swiping {
 }
 
 @media (max-width: 768px) {
+  /* Статичный фон и отдельный слой шапки исключают вспышку возле логотипа на Android. */
+  body {
+    background-image: none !important;
+    background-color: var(--bg-main) !important;
+  }
+
+  header {
+    background: var(--bg-card) !important;
+    transform: translateZ(0);
+    contain: paint;
+  }
+
+  #modal-product-details {
+    transform: translateZ(0);
+    will-change: opacity;
+    contain: paint;
+  }
+
   html body .modal-overlay,
   html body #modal-admin-product-edit.modal-overlay,
   html body #modal-admin-staff-edit.modal-overlay {
