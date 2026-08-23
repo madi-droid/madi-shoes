@@ -103,7 +103,7 @@ function openProfileModal() {
 
     const formatted = formatFullName(safeText(currentUser.name, 100));
     document.getElementById("profile-user-name").textContent = `Здравствуйте, ${formatted}!`;
-    document.getElementById("profile-user-phone").textContent = currentUser.phone;
+    document.getElementById("profile-user-phone").textContent = formatPhoneDisplay(currentUser.phone);
 
     renderClientOrders();
   } else {
@@ -116,8 +116,8 @@ function openProfileModal() {
     const submitBtn = document.getElementById("btn-auth-submit");
     const authNameEl = document.getElementById("auth-name");
 
-    if (titleEl) titleEl.textContent = "Данные для бронирования";
-    if (descEl) descEl.textContent = "Введите имя и телефон. Они сохраняются только на этом устройстве.";
+    if (titleEl) titleEl.textContent = "Вход в профиль";
+    if (descEl) descEl.textContent = "Сохраняйте бронирования и заявки Kaspi в одном месте.";
     if (nameGroup) nameGroup.classList.remove("d-none");
     if (authNameEl) authNameEl.required = true;
     if (submitBtn) submitBtn.textContent = "Продолжить";
@@ -143,21 +143,22 @@ function initClientAuthListeners() {
       const users = window.db.loadUsers();
       const found = users.find(u => u.phone === norm);
       if (found) {
-        if (titleEl) titleEl.textContent = "Ваши данные";
-        if (descEl) descEl.textContent = "Данные найдены на этом устройстве. Проверьте их перед продолжением.";
+        if (titleEl) titleEl.textContent = "Профиль найден";
+        if (descEl) descEl.textContent = "Проверьте имя и нажмите «Войти».";
         if (found.name && authNameEl) authNameEl.value = formatFullName(found.name);
         if (nameGroup) nameGroup.classList.remove("d-none");
         if (authNameEl) authNameEl.required = true;
-        if (submitBtn) submitBtn.textContent = "Продолжить";
+        if (submitBtn) submitBtn.textContent = "Войти";
       } else {
-        if (titleEl) titleEl.textContent = "Данные для бронирования";
-        if (descEl) descEl.textContent = "Введите имя и фамилию для связи по заявке.";
+        if (titleEl) titleEl.textContent = "Создание профиля";
+        if (descEl) descEl.textContent = "Укажите имя и фамилию, чтобы продавец мог связаться с вами.";
         if (nameGroup) nameGroup.classList.remove("d-none");
         if (authNameEl) authNameEl.required = true;
         if (submitBtn) submitBtn.textContent = "Зарегистрироваться";
       }
     } else {
-      if (titleEl) titleEl.textContent = "Данные для бронирования";
+      if (titleEl) titleEl.textContent = "Вход в профиль";
+      if (descEl) descEl.textContent = "Введите номер телефона, который использовали для заявки.";
       if (nameGroup) nameGroup.classList.remove("d-none");
       if (authNameEl) authNameEl.required = true;
       if (submitBtn) submitBtn.textContent = "Продолжить";

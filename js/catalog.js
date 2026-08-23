@@ -333,7 +333,6 @@ function renderCatalog(resetPage = false) {
           : "border-line bg-bg-deep/45 text-cream/70 hover:text-gold-bright"
       }`;
       favBtn.querySelector("svg").setAttribute("fill", added ? "currentColor" : "none");
-      showToast(added ? "Товар добавлен в Избранное" : "Товар удален из Избранного", "info");
     });
     imageWrap.appendChild(favBtn);
 

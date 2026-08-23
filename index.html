@@ -7,7 +7,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://*.supabase.co; img-src 'self' data: https://images.unsplash.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' https://cdn.jsdelivr.net; frame-src 'self'; base-uri 'self'; form-action 'self'">
 
   <title>MADIYAR SHOES — Премиум каталог и Учет остатков</title>
-  <link rel="stylesheet" href="css/style.css?v=1018">
+  <link rel="stylesheet" href="css/style.css?v=1019">
 </head>
 
 <body>
@@ -251,105 +251,85 @@
     </div>
 
 
-    <!-- 3. СТРАНИЦА "О НАС" С ИСТОРИЕЙ И КАРТАМИ -->
+    <!-- 3. СТРАНИЦА "О НАС" -->
     <div id="page-about" class="client-page d-none">
-      <!-- Наша история -->
-      <section class="container" style="margin-top: 40px; margin-bottom: 50px;">
-        <div class="filters-section" style="padding: 40px; border-radius: var(--radius-lg);">
-          <h2
-            style="font-family: var(--font-title); font-size: 32px; text-align: center; margin-bottom: 20px; color: var(--text-primary);">
-            Наша история</h2>
-          <p
-            style="font-size: 16px; line-height: 1.8; color: var(--text-secondary); margin-bottom: 15px; text-align: justify;">
-            Все началось в далеком 2008 году как скромное семейное дело. Мы с родителями всегда считали, что
-            качественная обувь — это залог уверенных шагов в будущее, отсюда и родилось наше название —
-            <strong>MADIYAR</strong>.
-            Первый наш бутик открылся на базаре «Кулпаршын». В те годы мы лично отбирали каждую модель, проверяя
-            прочность швов, мягкость кожи и удобство колодки. Наши клиенты ценили эту заботу, и слухи о качественном
-            бутике быстро расходились по городу.
-          </p>
-          <p style="font-size: 16px; line-height: 1.8; color: var(--text-secondary); text-align: justify;">
-            Со временем наше дело росло, и к нам присоединилось новое поколение семьи. Чтобы быть ближе к покупателям,
-            которые ценят современный комфорт, мы открыли вторую точку продаж в одном из знаковых торгово-выставочных
-            комплексов Жетысая — Гранд Парке. Сегодня MADIYAR — это проверенный временем бренд с 4 заботливыми
-            администраторами (нашей семьей!), собственными точками и тысячами постоянных клиентов, шагающих по жизни с
-            комфортом.
-          </p>
-        </div>
-      </section>
-
-      <!-- Интерактивная карта и бутики -->
-      <section class="container" style="margin-bottom: 60px;">
-        <div class="filters-section" style="padding: 30px;">
-          <h2
-            style="font-family: var(--font-title); font-size: 28px; text-align: center; margin-bottom: 25px; color: var(--text-primary);">
-            Наши торговые точки</h2>
-
-          <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;">
-            <button class="nav-tab-btn active" id="btn-map-bazaar" style="padding: 10px 24px; cursor: pointer;">Базар
-              «Кулпаршын» (25 бутик)</button>
-            <button class="nav-tab-btn" id="btn-map-mall" style="padding: 10px 24px; cursor: pointer;">Гранд Парк (1
-              блок, 10 бутик)</button>
-          </div>
-
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
-            <!-- Информация и Фото бутика -->
-            <div style="display: flex; flex-direction: column; gap: 20px;">
-              <!-- Контент для Кулпаршын -->
-              <div id="info-map-bazaar" class="map-info-block">
-                <div
-                  style="border-radius: var(--radius-md); overflow: hidden; height: 220px; margin-bottom: 15px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.05); display: flex; justify-content: center; align-items: center;">
-                  <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80"
-                    style="width: 100%; height: 100%; object-fit: cover;" alt="Бутик Кулпаршын">
-                </div>
-                <h3 style="margin-bottom: 10px; color: var(--text-primary);">Базар «Кулпаршын»</h3>
-                <p style="font-size: 14px; margin-bottom: 6px; color: var(--text-secondary);"><strong>Адрес:</strong>
-                  Базар «Кулпаршын», бутик 25</p>
-                <p style="font-size: 14px; margin-bottom: 6px; color: var(--text-secondary);"><strong>Режим
-                    работы:</strong> Вторник — Воскресенье, 09:00 - 18:00</p>
-                <p style="font-size: 14px; margin-bottom: 15px; color: var(--text-secondary);"><strong>Телефон:</strong>
-                  +7 (777) 123-45-67</p>
-              </div>
-
-              <!-- Контент для Гранд Парк -->
-              <div id="info-map-mall" class="map-info-block d-none">
-                <div
-                  style="border-radius: var(--radius-md); overflow: hidden; height: 220px; margin-bottom: 15px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.05); display: flex; justify-content: center; align-items: center;">
-                  <img src="https://images.unsplash.com/photo-1528698827591-e19ccd7bc23d?w=800&q=80"
-                    style="width: 100%; height: 100%; object-fit: cover;" alt="Бутик Гранд Парк">
-                </div>
-                <h3 style="margin-bottom: 10px; color: var(--text-primary);">Гранд Парк</h3>
-                <p style="font-size: 14px; margin-bottom: 6px; color: var(--text-secondary);"><strong>Адрес:</strong>
-                  Гранд Парк, 1 блок, бутик 10</p>
-                <p style="font-size: 14px; margin-bottom: 6px; color: var(--text-secondary);"><strong>Режим
-                    работы:</strong> Ежедневно, 10:00 - 22:00</p>
-                <p style="font-size: 14px; margin-bottom: 15px; color: var(--text-secondary);"><strong>Телефон:</strong>
-                  +7 (778) 987-65-43</p>
-              </div>
-
-              <button class="btn-primary" id="btn-show-map-action" style="width: 100%; cursor: pointer;">Показать
-                интерактивную карту</button>
-            </div>
-
-            <!-- Контейнер для Карты -->
-            <div id="map-iframe-container"
-              style="border-radius: var(--radius-md); overflow: hidden; height: 350px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: center; position: relative;">
-              <div id="map-placeholder-text" style="padding: 20px; text-align: center; color: var(--text-secondary);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                  style="margin-bottom: 10px; color: var(--primary);">
-                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                <p>Нажмите на кнопку слева, чтобы запустить интерактивную карту</p>
-              </div>
-
-
-              <iframe id="map-iframe" src="" style="width:100%; height:100%; border:none; display:none;"
-                sandbox="allow-scripts" allowfullscreen="true"></iframe>
-            </div>
+      <section class="about-page container">
+        <div class="about-hero-card">
+          <span class="about-eyebrow">Семейный магазин с 2008 года</span>
+          <h1>Помогаем выбрать обувь, в которой удобно каждый день</h1>
+          <p>Мы лично проверяем посадку, материалы и качество каждой модели до того, как она попадёт на витрину.</p>
+          <div class="about-facts" aria-label="Коротко о магазине">
+            <div><strong>2008</strong><span>год основания</span></div>
+            <div><strong>2</strong><span>торговые точки</span></div>
+            <div><strong>Лично</strong><span>проверяем модели</span></div>
           </div>
         </div>
+
+        <div class="about-story-card">
+          <div class="about-section-heading">
+            <span class="about-eyebrow">Наша история</span>
+            <h2>От семейного бутика к двум торговым точкам</h2>
+          </div>
+          <div class="about-story-copy">
+            <p>Первый бутик MADIYAR открылся на базаре «Кулпаршын». С самого начала мы отбирали обувь вручную: проверяли швы, мягкость материалов, колодку и удобство посадки.</p>
+            <p>Позже появилась вторая точка в Гранд Парке. Мы сохранили семейный подход: помогаем подобрать размер, честно рассказываем о модели и остаёмся на связи после покупки.</p>
+          </div>
+        </div>
+
+        <section class="about-locations" aria-labelledby="about-locations-title">
+          <div class="about-section-heading">
+            <span class="about-eyebrow">Где нас найти</span>
+            <h2 id="about-locations-title">Наши торговые точки</h2>
+            <p>Выберите точку, чтобы посмотреть режим работы и расположение.</p>
+          </div>
+
+          <div class="about-location-tabs" role="tablist" aria-label="Торговые точки">
+            <button class="nav-tab-btn active" id="btn-map-bazaar" role="tab" aria-selected="true">Кулпаршын</button>
+            <button class="nav-tab-btn" id="btn-map-mall" role="tab" aria-selected="false">Гранд Парк</button>
+          </div>
+
+          <div class="about-location-layout">
+            <div class="about-location-content">
+              <article id="info-map-bazaar" class="map-info-block about-location-card">
+                <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=900&q=82" alt="Бутик на базаре Кулпаршын">
+                <div class="about-location-body">
+                  <h3>Базар «Кулпаршын»</h3>
+                  <dl>
+                    <div><dt>Адрес</dt><dd>Базар «Кулпаршын», бутик 25</dd></div>
+                    <div><dt>Режим работы</dt><dd>Вт–Вс, 09:00–18:00</dd></div>
+                    <div><dt>Телефон</dt><dd>+7 (777) 123-45-67</dd></div>
+                  </dl>
+                </div>
+              </article>
+
+              <article id="info-map-mall" class="map-info-block about-location-card d-none">
+                <img src="https://images.unsplash.com/photo-1528698827591-e19ccd7bc23d?w=900&q=82" alt="Бутик в Гранд Парке">
+                <div class="about-location-body">
+                  <h3>Гранд Парк</h3>
+                  <dl>
+                    <div><dt>Адрес</dt><dd>Гранд Парк, 1 блок, бутик 10</dd></div>
+                    <div><dt>Режим работы</dt><dd>Ежедневно, 10:00–22:00</dd></div>
+                    <div><dt>Телефон</dt><dd>+7 (778) 987-65-43</dd></div>
+                  </dl>
+                </div>
+              </article>
+
+              <button class="btn-primary about-map-button" id="btn-show-map-action">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                Показать на карте
+              </button>
+            </div>
+
+            <div id="map-iframe-container" class="about-map-container">
+              <div id="map-placeholder-text" class="about-map-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                <strong>Карта загрузится по нажатию</strong>
+                <span>Так страница открывается быстрее и расходует меньше мобильного интернета.</span>
+              </div>
+              <iframe id="map-iframe" src="" title="Карта торговой точки" sandbox="allow-scripts" allowfullscreen="true"></iframe>
+            </div>
+          </div>
+        </section>
       </section>
     </div>
 
@@ -811,30 +791,35 @@
 
       <!-- Форма входа/регистрации (показывается гостю) -->
       <div class="auth-box" id="auth-form-container">
-        <h2 class="auth-title" id="auth-modal-title">Данные для бронирования</h2>
-        <p class="auth-desc" id="auth-modal-desc">Укажите имя и телефон. Данные сохранятся только на этом устройстве для просмотра заявок.</p>
+        <div class="auth-intro-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div>
+        <h2 class="auth-title" id="auth-modal-title">Вход в профиль</h2>
+        <p class="auth-desc" id="auth-modal-desc">Сохраняйте бронирования и заявки Kaspi в одном месте.</p>
 
         <form id="auth-form">
-          <div class="form-group" id="name-group">
-            <label class="form-label">Ваши Имя и Фамилия</label>
-            <input type="text" class="form-input" id="auth-name" placeholder="Например, Арман Сериков" required>
+          <div class="form-group">
+            <label class="form-label" for="auth-phone">Номер телефона</label>
+            <input type="tel" class="form-input" id="auth-phone" placeholder="+7 777 123 45 67" autocomplete="tel" inputmode="tel" required>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Номер телефона</label>
-            <input type="tel" class="form-input" id="auth-phone" placeholder="+7 (777) 123-45-67" required>
+          <div class="form-group" id="name-group">
+            <label class="form-label" for="auth-name">Имя и фамилия</label>
+            <input type="text" class="form-input" id="auth-name" placeholder="Например, Арман Сериков" autocomplete="name" required>
           </div>
 
           <button type="submit" class="btn-submit" id="btn-auth-submit">Продолжить</button>
+          <p class="auth-privacy-note">Данные хранятся только на этом устройстве и используются для ваших заявок.</p>
         </form>
       </div>
 
       <!-- Панель профиля клиента (показывается авторизованному) -->
       <div class="profile-box d-none" id="profile-container">
-        <div class="profile-header" style="padding-right: 48px;">
-          <div>
+        <div class="profile-header">
+          <div class="profile-user-summary">
+            <div class="profile-avatar" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div>
+            <div>
             <h2 id="profile-user-name">Здравствуйте!</h2>
-            <p style="color:var(--text-secondary); font-size:14px;" id="profile-user-phone"></p>
+              <p id="profile-user-phone"></p>
+            </div>
           </div>
           <button class="btn-secondary btn-profile-logout" id="btn-logout">Выйти</button>
         </div>
@@ -1182,12 +1167,12 @@
   <script src="js/config.js?v=25"></script>
   <script src="js/utils.js?v=27"></script>
   <script src="js/db.js?v=25"></script>
-  <script src="js/auth.js?v=25"></script>
-  <script src="js/catalog.js?v=30"></script>
-  <script src="js/orders.js?v=26"></script>
-  <script src="js/admin.js?v=26"></script>
+  <script src="js/auth.js?v=26"></script>
+  <script src="js/catalog.js?v=31"></script>
+  <script src="js/orders.js?v=27"></script>
+  <script src="js/admin.js?v=27"></script>
   <script src="js/sales.js?v=26"></script>
-  <script src="js/app.js?v=31"></script>
+  <script src="js/app.js?v=32"></script>
 </body>
 
 </html>

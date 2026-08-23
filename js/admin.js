@@ -88,6 +88,7 @@ function showClientPage(pageId) {
   if (activePage) {
     activePage.classList.remove("d-none");
   }
+  window.scrollTo(0, 0);
 
   document.querySelectorAll(".nav-link").forEach(link => {
     link.classList.remove("active");

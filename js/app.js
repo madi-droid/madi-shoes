@@ -572,7 +572,9 @@ function initAboutPageMap() {
     btnBazaar.addEventListener("click", () => {
       activeStore = "bazaar";
       btnBazaar.classList.add("active");
+      btnBazaar.setAttribute("aria-selected", "true");
       if (btnMall) btnMall.classList.remove("active");
+      if (btnMall) btnMall.setAttribute("aria-selected", "false");
       if (infoBazaar) infoBazaar.classList.remove("d-none");
       if (infoMall) infoMall.classList.add("d-none");
       updateMapIframeSrc();
@@ -583,7 +585,9 @@ function initAboutPageMap() {
     btnMall.addEventListener("click", () => {
       activeStore = "mall";
       btnMall.classList.add("active");
+      btnMall.setAttribute("aria-selected", "true");
       if (btnBazaar) btnBazaar.classList.remove("active");
+      if (btnBazaar) btnBazaar.setAttribute("aria-selected", "false");
       if (infoMall) infoMall.classList.remove("d-none");
       if (infoBazaar) infoBazaar.classList.add("d-none");
       updateMapIframeSrc();
@@ -597,6 +601,8 @@ function initAboutPageMap() {
         mapIframe.style.display = "block";
         updateMapIframeSrc();
       }
+      btnShowMap.textContent = "Карта открыта";
+      btnShowMap.disabled = true;
     });
   }
 }

@@ -255,9 +255,9 @@ function renderClientOrders() {
   });
 
   if (myOrders.length === 0) {
-    const emptyP = createEl("p", "", "У вас пока нет активных заявок.");
-    emptyP.style.cssText = "color:var(--text-secondary); text-align:center; padding: 20px;";
-    container.appendChild(emptyP);
+    const emptyState = createEl("div", "profile-empty-state");
+    emptyState.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 2h9l3 3v17H6z"/><path d="M14 2v4h4M9 11h6M9 15h6"/></svg><strong>Заявок пока нет</strong><span>Выберите модель в каталоге и забронируйте подходящий размер.</span>`;
+    container.appendChild(emptyState);
     return;
   }
 
