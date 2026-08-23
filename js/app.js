@@ -332,10 +332,19 @@ function setupEventListeners() {
   if (btnCancelStaff) btnCancelStaff.addEventListener("click", () => closeModal("modal-admin-staff-edit"));
 
   // Закрытие модальных окон
+  const leaveStaffSignIn = () => {
+    closeModal("modal-admin-auth");
+    if (window.location.hash === "#staff") {
+      history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+    }
+    switchToClientView();
+  };
+
   document.querySelectorAll(".modal-overlay").forEach(overlay => {
     overlay.addEventListener("click", (e) => {
       if (e.target === overlay) {
-        closeModal(overlay.id);
+        if (overlay.id === "modal-admin-auth" && !isAdminLoggedIn()) leaveStaffSignIn();
+        else closeModal(overlay.id);
       }
     });
   });
@@ -343,14 +352,18 @@ function setupEventListeners() {
   document.querySelectorAll(".modal-close, .modal-close-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const modal = btn.closest(".modal-overlay");
-      if (modal) closeModal(modal.id);
+      if (!modal) return;
+      if (modal.id === "modal-admin-auth" && !isAdminLoggedIn()) leaveStaffSignIn();
+      else closeModal(modal.id);
     });
   });
 
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
     const modal = document.querySelector(".modal-overlay.open");
-    if (modal) closeModal(modal.id);
+    if (!modal) return;
+    if (modal.id === "modal-admin-auth" && !isAdminLoggedIn()) leaveStaffSignIn();
+    else closeModal(modal.id);
   });
 
   // Вкладки в админке
