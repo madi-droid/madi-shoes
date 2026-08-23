@@ -5086,6 +5086,12 @@ html .modal-content.is-swiping {
   background: var(--bg-deep) !important;
 }
 
+.details-help-text {
+  display: block;
+  width: 100%;
+  line-height: 1.45;
+}
+
 @media (max-width: 768px) {
   /* Статичный фон и отдельный слой шапки исключают вспышку возле логотипа на Android. */
   body {
@@ -5130,6 +5136,15 @@ html .modal-content.is-swiping {
 
   html body #modal-favorites-list .modal-container {
     min-height: 78dvh;
+  }
+
+  html body #modal-product-details .product-details {
+    padding-bottom: calc(30px + env(safe-area-inset-bottom)) !important;
+  }
+
+  html body #modal-product-details .details-help-text {
+    font-size: 12px !important;
+    margin: 14px 0 6px !important;
   }
 
   html body .product-image,
