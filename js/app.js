@@ -272,6 +272,9 @@ function setupEventListeners() {
   const btnThemeToggle = document.getElementById("btn-theme-toggle");
   if (btnThemeToggle) btnThemeToggle.addEventListener("click", toggleTheme);
 
+  const btnAdminThemeToggle = document.getElementById("btn-admin-theme-toggle");
+  if (btnAdminThemeToggle) btnAdminThemeToggle.addEventListener("click", toggleTheme);
+
   const authForm = document.getElementById("auth-form");
   if (authForm) authForm.addEventListener("submit", handleClientAuthSubmit);
 

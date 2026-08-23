@@ -181,7 +181,6 @@ function renderCatalog(resetPage = false) {
 
     const bazaarSum = Object.values(item.stock?.bazaar || {}).reduce((a, b) => a + b, 0);
     const mallSum = Object.values(item.stock?.mall || {}).reduce((a, b) => a + b, 0);
-    const totalStock = bazaarSum + mallSum;
 
     if (statusFilter === "in-stock" && totalStock <= 0) {
       return false;
@@ -242,10 +241,6 @@ function renderCatalog(resetPage = false) {
   const pageItems = filtered.slice(startIndex, endIndex);
 
   pageItems.forEach((item, idx) => {
-    const bazaarSum = Object.values(item.stock?.bazaar || {}).reduce((a, b) => a + b, 0);
-    const mallSum = Object.values(item.stock?.mall || {}).reduce((a, b) => a + b, 0);
-    const totalStock = bazaarSum + mallSum;
-
     const card = document.createElement("article");
     card.className = "product-card aura group relative flex flex-col border border-line bg-card/55 backdrop-blur-md animate-rise";
     card.style.animationDelay = `${Math.min(idx, 8) * 45}ms`;
@@ -302,12 +297,6 @@ function renderCatalog(resetPage = false) {
     // Моноширинный тег категории в верхнем левом углу
     const catTag = createEl("span", "absolute left-3 top-3 border border-line bg-bg-deep/60 px-2.5 py-1 font-mono text-[9px] tracking-[0.22em] text-cream/75 uppercase backdrop-blur-md card-category-tag", safeText(item.category || "Обувь", 30));
     imageWrap.appendChild(catTag);
-
-    // Бейдж Под заказ при отстутствии пар
-    if (totalStock === 0) {
-      const outTag = createEl("span", "absolute bottom-3 left-3 border border-kaspi/50 bg-bg-deep/75 px-2.5 py-1 font-mono text-[9px] tracking-[0.22em] text-kaspi uppercase backdrop-blur-md sold-out-badge", "Под заказ");
-      imageWrap.appendChild(outTag);
-    }
 
     card.appendChild(imageWrap);
 
@@ -659,20 +648,7 @@ window.updateProductCardStockGranular = function(productId, location, size, newQ
     if (!item.stock[location]) item.stock[location] = {};
     item.stock[location][String(size)] = newQty;
 
-    const bazaarSum = Object.values(item.stock?.bazaar || {}).reduce((a, b) => a + b, 0);
-    const mallSum = Object.values(item.stock?.mall || {}).reduce((a, b) => a + b, 0);
-    const totalStock = bazaarSum + mallSum;
-
-    if (card) {
-      const imgContainer = card.querySelector(".product-image-container");
-      if (imgContainer) {
-        let badge = imgContainer.querySelector(".sold-out-badge");
-        if (totalStock === 0 && !badge) {
-          imgContainer.appendChild(createEl("div", "sold-out-badge", "Под заказ"));
-        } else if (totalStock > 0 && badge) {
-          badge.remove();
-        }
-      }
-    }
+    // Витрина не показывает техническую плашку «Под заказ»:
+    // доступность клиент видит после открытия товара и выбора точки.
   }
 };

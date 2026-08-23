@@ -2340,6 +2340,348 @@ body.is-admin-portal .modal-overlay {
   background: rgba(27, 20, 13, 0.9) !important;
 }
 
+/* Финальная адаптация окон и панели управления для телефона. */
+.modal-close,
+body.is-admin-portal .modal-close {
+  top: 16px !important;
+  right: 16px !important;
+  width: 42px !important;
+  height: 42px !important;
+  background: var(--bg-card-soft) !important;
+  border: 1px solid var(--border-glow) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.product-image,
+#favorites-products-grid .product-image,
+.details-image-box img {
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+#toast-container {
+  bottom: calc(76px + env(safe-area-inset-bottom)) !important;
+  left: 16px;
+  right: 16px;
+  align-items: center;
+}
+
+.toast {
+  max-width: min(440px, 100%);
+  padding: 10px 14px !important;
+  font-size: 13px !important;
+}
+
+#modal-quick-contact .modal-container {
+  overflow-x: hidden;
+}
+
+#modal-quick-contact .favorites-modal-content {
+  padding: 76px 28px 28px !important;
+}
+
+.quick-contact-title {
+  padding-right: 42px;
+  font-size: clamp(25px, 7vw, 32px) !important;
+  line-height: 1.16;
+}
+
+.quick-contact-intro {
+  max-width: 38ch;
+  line-height: 1.55;
+}
+
+.quick-contact-card {
+  min-width: 0;
+}
+
+.quick-contact-actions {
+  flex-wrap: wrap;
+}
+
+.quick-contact-action {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.quick-contact-whatsapp {
+  flex: 1 1 180px !important;
+}
+
+.quick-contact-call {
+  flex: 1 1 150px !important;
+}
+
+body.is-admin-portal .admin-luxury-wrapper,
+body.is-admin-portal .admin-container {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+}
+
+body.is-admin-portal .admin-luxury-topbar,
+body.is-admin-portal .admin-logo-badge,
+body.is-admin-portal .admin-user-badge,
+body.is-admin-portal .btn-admin-action,
+body.is-admin-portal .btn-admin-logout {
+  background: var(--bg-surface) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: none !important;
+}
+
+body.is-admin-portal .gold-crown-icon {
+  display: none !important;
+}
+
+body.is-admin-portal .admin-brand-text .brand-title,
+body.is-admin-portal .admin-brand-text .brand-subtitle,
+body.is-admin-portal .admin-user-badge,
+body.is-admin-portal .user-role-tag {
+  color: var(--text-primary) !important;
+  text-shadow: none !important;
+}
+
+body.is-admin-portal .admin-dashboard-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+body.is-admin-portal .dash-card.luxury-card {
+  min-height: 132px;
+  padding: 18px !important;
+  flex-direction: row;
+  align-items: center;
+}
+
+body.is-admin-portal .dash-icon-glow {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  background: var(--bg-card-soft) !important;
+  border-color: var(--border-color) !important;
+  color: var(--primary) !important;
+}
+
+body.is-admin-portal .dash-icon-glow svg {
+  width: 22px;
+  height: 22px;
+}
+
+body.is-admin-portal .dash-card .dash-value {
+  color: var(--text-primary) !important;
+  font-family: var(--font-title) !important;
+}
+
+body.is-admin-portal .admin-tabs.luxury-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  overflow: visible !important;
+  padding: 6px !important;
+  background: var(--bg-card) !important;
+}
+
+body.is-admin-portal .admin-tabs.luxury-tabs .admin-tab {
+  min-width: 0;
+  padding: 11px 8px !important;
+  font-family: var(--font-body) !important;
+  font-size: 13px !important;
+  letter-spacing: 0 !important;
+  white-space: normal !important;
+  line-height: 1.2;
+}
+
+body.is-admin-portal #modal-admin-product-edit .modal-container {
+  background: var(--bg-modal) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+body.is-admin-portal #modal-admin-product-edit h2,
+body.is-admin-portal #modal-admin-product-edit h4,
+body.is-admin-portal #modal-admin-product-edit strong,
+body.is-admin-portal #modal-admin-product-edit .form-label {
+  color: var(--text-primary) !important;
+  text-shadow: none !important;
+}
+
+body.is-admin-portal #modal-admin-product-edit form,
+body.is-admin-portal #modal-admin-product-edit form > div:last-child {
+  background: transparent !important;
+}
+
+@media (max-width: 768px) {
+  .modal-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .modal-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: min(92dvh, 820px) !important;
+    border-radius: 22px 22px 0 0 !important;
+  }
+
+  #modal-product-details .product-details,
+  #modal-auth-profile .profile-box,
+  #modal-favorites-list .modal-container > div:not(.modal-close) {
+    padding-top: 72px !important;
+  }
+
+  #modal-product-details .details-image-box {
+    height: min(48dvh, 390px) !important;
+  }
+
+  #modal-favorites-list .products-grid {
+    gap: 12px;
+  }
+
+  #modal-favorites-list .product-image-container {
+    height: 210px !important;
+  }
+
+  .product-image-container {
+    height: clamp(210px, 61vw, 286px) !important;
+  }
+
+  .film-wash-overlay {
+    background: linear-gradient(to top, rgba(28, 23, 16, 0.42), rgba(28, 23, 16, 0.02) 58%) !important;
+  }
+
+  .quick-contact-actions {
+    display: grid !important;
+    grid-template-columns: 1fr;
+  }
+
+  .quick-contact-action,
+  .quick-contact-whatsapp,
+  .quick-contact-call {
+    width: 100%;
+    flex: none !important;
+  }
+
+  body.is-admin-portal .admin-luxury-topbar {
+    position: sticky;
+    top: 0;
+    display: block !important;
+    padding: 14px 16px !important;
+  }
+
+  body.is-admin-portal .admin-brand-info,
+  body.is-admin-portal .admin-topbar-controls,
+  body.is-admin-portal .admin-action-btns {
+    width: 100%;
+  }
+
+  body.is-admin-portal .admin-brand-text .brand-title {
+    font-size: 14px !important;
+    letter-spacing: 0.06em !important;
+  }
+
+  body.is-admin-portal .admin-brand-text .brand-subtitle,
+  body.is-admin-portal .admin-user-badge {
+    display: none !important;
+  }
+
+  body.is-admin-portal .admin-action-btns {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px !important;
+    margin-top: 10px;
+  }
+
+  body.is-admin-portal .btn-admin-action,
+  body.is-admin-portal .btn-admin-logout {
+    min-width: 0;
+    justify-content: center;
+    padding: 9px 5px !important;
+    font-size: 11px !important;
+  }
+
+  body.is-admin-portal .btn-admin-action span,
+  body.is-admin-portal .btn-admin-logout span {
+    display: none;
+  }
+
+  body.is-admin-portal .admin-container {
+    padding: 20px 16px calc(40px + env(safe-area-inset-bottom)) !important;
+  }
+
+  body.is-admin-portal .admin-dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  body.is-admin-portal .dash-card.luxury-card {
+    min-height: 112px;
+    padding: 14px !important;
+    gap: 10px;
+  }
+
+  body.is-admin-portal .dash-icon-glow {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+
+  body.is-admin-portal .dash-icon-glow svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  body.is-admin-portal .dash-card .dash-value {
+    font-size: 28px !important;
+  }
+
+  body.is-admin-portal .dash-card .dash-label {
+    font-size: 11px !important;
+    line-height: 1.25;
+  }
+
+  body.is-admin-portal .admin-tabs.luxury-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px !important;
+    border-radius: 12px !important;
+  }
+
+  body.is-admin-portal .admin-tabs.luxury-tabs .admin-tab:last-child {
+    grid-column: 1 / -1;
+  }
+
+  body.is-admin-portal #modal-admin-product-edit.modal-overlay {
+    align-items: flex-end !important;
+  }
+
+  body.is-admin-portal #modal-admin-product-edit .modal-container {
+    width: 100% !important;
+    max-height: 94dvh !important;
+    border-radius: 22px 22px 0 0 !important;
+  }
+
+  body.is-admin-portal #modal-admin-product-edit .modal-container > div:first-of-type {
+    padding: 72px 20px 18px !important;
+  }
+
+  body.is-admin-portal #modal-admin-product-edit form {
+    padding: 18px 20px !important;
+  }
+
+  body.is-admin-portal #modal-admin-product-edit .admin-sizes-inputs {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  body.is-admin-portal #modal-admin-product-edit form > div:last-child {
+    position: sticky;
+    bottom: 0;
+    display: grid !important;
+    grid-template-columns: 1fr 1.35fr;
+    padding: 14px 20px calc(14px + env(safe-area-inset-bottom)) !important;
+    background: var(--bg-modal) !important;
+    z-index: 4;
+  }
+}
+
 /* Панель сотрудников в палитре витрины, без старого синего неона. */
 body.is-admin-portal {
   background-color: var(--bg-main) !important;
@@ -4650,6 +4992,134 @@ body.is-admin-portal .modal-overlay {
 }
 
 /* Финальный слой палитры админки: тот же тёплый стиль, что и у витрины. */
+/* Приоритетный слой: нейтрализует оставшиеся старые синие правила админки. */
+body.is-admin-portal .admin-luxury-topbar,
+body.is-admin-portal .admin-logo-badge,
+body.is-admin-portal .admin-user-badge,
+body.is-admin-portal .btn-admin-action,
+body.is-admin-portal .btn-admin-logout,
+body.is-admin-portal .admin-panel-card,
+body.is-admin-portal .sales-form-card,
+body.is-admin-portal .sales-stats-card,
+body.is-admin-portal .dash-card.luxury-card,
+body.is-admin-portal .admin-table,
+body.is-admin-portal #modal-admin-product-edit .modal-container {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+body.is-admin-portal .admin-tabs.luxury-tabs,
+body.is-admin-portal .admin-table th,
+body.is-admin-portal .admin-table td,
+body.is-admin-portal input,
+body.is-admin-portal select,
+body.is-admin-portal textarea,
+body.is-admin-portal .form-group-btn {
+  background: var(--bg-deep) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: none !important;
+}
+
+body.is-admin-portal .gold-crown-icon { display: none !important; }
+body.is-admin-portal .admin-brand-text .brand-title,
+body.is-admin-portal .admin-brand-text .brand-subtitle,
+body.is-admin-portal .admin-user-badge,
+body.is-admin-portal .user-role-tag,
+body.is-admin-portal .dash-card .dash-value,
+body.is-admin-portal .dash-card .dash-label,
+body.is-admin-portal .admin-table th,
+body.is-admin-portal .admin-table td,
+body.is-admin-portal .form-label,
+body.is-admin-portal .form-group label,
+body.is-admin-portal #modal-admin-product-edit h2,
+body.is-admin-portal #modal-admin-product-edit h4,
+body.is-admin-portal #modal-admin-product-edit strong {
+  color: var(--text-primary) !important;
+  text-shadow: none !important;
+}
+
+body.is-admin-portal .dash-icon-glow {
+  background: var(--bg-card-soft) !important;
+  border-color: var(--border-color) !important;
+  color: var(--primary) !important;
+}
+
+body.is-admin-portal .dash-icon-glow svg { width: 22px; height: 22px; }
+
+body.is-admin-portal .admin-tabs.luxury-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  overflow: visible !important;
+  padding: 6px !important;
+}
+
+body.is-admin-portal .admin-tabs.luxury-tabs .admin-tab {
+  min-width: 0;
+  padding: 11px 8px !important;
+  color: var(--text-secondary) !important;
+  white-space: normal !important;
+  font-family: var(--font-body) !important;
+  font-size: 13px !important;
+  letter-spacing: 0 !important;
+  line-height: 1.2;
+}
+
+body.is-admin-portal .admin-tabs.luxury-tabs .admin-tab.active,
+body.is-admin-portal .form-group-btn.active,
+body.is-admin-portal .btn-primary,
+body.is-admin-portal button[type="submit"] {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: var(--bg-deep) !important;
+  box-shadow: 0 5px 16px var(--primary-glow) !important;
+}
+
+body.is-admin-portal #modal-admin-product-edit .modal-container > div:first-of-type,
+body.is-admin-portal #modal-admin-product-edit form,
+body.is-admin-portal #modal-admin-product-edit form > div:last-child {
+  background: var(--bg-modal) !important;
+}
+
+@media (max-width: 768px) {
+  .modal-overlay { align-items: flex-end !important; padding: 0 !important; }
+  .modal-container { width: 100% !important; max-width: 100% !important; max-height: 92dvh !important; border-radius: 22px 22px 0 0 !important; }
+  .modal-close, body.is-admin-portal .modal-close { top: 16px !important; right: 16px !important; width: 42px !important; height: 42px !important; background: var(--bg-card-soft) !important; border-color: var(--border-glow) !important; }
+  #modal-product-details .product-details, #modal-auth-profile .profile-box, #modal-favorites-list .modal-container > div:not(.modal-close) { padding-top: 72px !important; }
+  #modal-quick-contact .favorites-modal-content { padding: 76px 24px 28px !important; }
+  .quick-contact-title { padding-right: 42px; font-size: clamp(25px, 7vw, 32px) !important; line-height: 1.16; }
+  .quick-contact-actions { display: grid !important; grid-template-columns: 1fr; }
+  .quick-contact-action, .quick-contact-whatsapp, .quick-contact-call { width: 100%; flex: none !important; }
+  .product-image, #favorites-products-grid .product-image, .details-image-box img { object-fit: contain !important; object-position: center !important; }
+  .product-image-container { height: clamp(210px, 61vw, 286px) !important; }
+  #modal-favorites-list .product-image-container { height: 210px !important; }
+  .film-wash-overlay { background: linear-gradient(to top, rgba(28, 23, 16, 0.42), rgba(28, 23, 16, 0.02) 58%) !important; }
+  #toast-container { bottom: calc(76px + env(safe-area-inset-bottom)) !important; left: 16px; right: 16px; align-items: center; }
+  .toast { max-width: min(440px, 100%); padding: 10px 14px !important; font-size: 13px !important; }
+  body.is-admin-portal .admin-luxury-topbar { position: sticky; top: 0; display: block !important; padding: 14px 16px !important; }
+  body.is-admin-portal .admin-brand-info, body.is-admin-portal .admin-topbar-controls, body.is-admin-portal .admin-action-btns { width: 100%; }
+  body.is-admin-portal .admin-brand-text .brand-title { font-size: 14px !important; letter-spacing: 0.06em !important; }
+  body.is-admin-portal .admin-brand-text .brand-subtitle, body.is-admin-portal .admin-user-badge { display: none !important; }
+  body.is-admin-portal .admin-action-btns { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px !important; margin-top: 10px; }
+  body.is-admin-portal .btn-admin-action, body.is-admin-portal .btn-admin-logout { min-width: 0; justify-content: center; padding: 9px 5px !important; font-size: 11px !important; }
+  body.is-admin-portal .btn-admin-action span, body.is-admin-portal .btn-admin-logout span { display: none; }
+  body.is-admin-portal .admin-container { padding: 20px 16px calc(40px + env(safe-area-inset-bottom)) !important; }
+  body.is-admin-portal .admin-dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  body.is-admin-portal .dash-card.luxury-card { min-height: 112px; padding: 14px !important; flex-direction: row; align-items: center; gap: 10px; }
+  body.is-admin-portal .dash-icon-glow { width: 36px; height: 36px; flex: 0 0 36px; }
+  body.is-admin-portal .dash-icon-glow svg { width: 19px; height: 19px; }
+  body.is-admin-portal .dash-card .dash-value { font-size: 28px !important; }
+  body.is-admin-portal .dash-card .dash-label { font-size: 11px !important; line-height: 1.25; }
+  body.is-admin-portal .admin-tabs.luxury-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px !important; border-radius: 12px !important; }
+  body.is-admin-portal .admin-tabs.luxury-tabs .admin-tab:last-child { grid-column: 1 / -1; }
+  body.is-admin-portal #modal-admin-product-edit .modal-container { width: 100% !important; max-height: 94dvh !important; border-radius: 22px 22px 0 0 !important; }
+  body.is-admin-portal #modal-admin-product-edit .modal-container > div:first-of-type { padding: 72px 20px 18px !important; }
+  body.is-admin-portal #modal-admin-product-edit form { padding: 18px 20px !important; }
+  body.is-admin-portal #modal-admin-product-edit .admin-sizes-inputs { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; }
+  body.is-admin-portal #modal-admin-product-edit form > div:last-child { position: sticky; bottom: 0; display: grid !important; grid-template-columns: 1fr 1.35fr; padding: 14px 20px calc(14px + env(safe-area-inset-bottom)) !important; background: var(--bg-modal) !important; z-index: 4; }
+}
 body.is-admin-portal {
   background-color: var(--bg-main) !important;
   background-image:
