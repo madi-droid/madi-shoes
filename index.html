@@ -7,7 +7,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://*.supabase.co; img-src 'self' data: https://images.unsplash.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' https://cdn.jsdelivr.net; frame-src 'self'; base-uri 'self'; form-action 'self'">
 
   <title>MADIYAR SHOES — Премиум каталог и Учет остатков</title>
-  <link rel="stylesheet" href="css/style.css?v=1017">
+  <link rel="stylesheet" href="css/style.css?v=1018">
 </head>
 
 <body>
@@ -736,7 +736,7 @@
             fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
             <path d="m15 18-6-6 6-6"></path>
           </svg></button>
-        <div class="product-page-topbar-title">MADIYAR</div>
+        <div class="product-page-topbar-title" id="product-page-title"></div>
         <button type="button" class="product-page-share" id="btn-share-product" aria-label="Поделиться товаром">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"/></svg>
         </button>
@@ -783,7 +783,7 @@
 
           <!-- Действия с обувью -->
           <div class="details-actions-block">
-            <button class="btn-booking" id="btn-book-action" disabled>
+            <button class="btn-booking" id="btn-book-action">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
@@ -791,8 +791,8 @@
               </svg>
               Забронировать
             </button>
-            <button class="btn-buy-now" id="btn-buy-action" disabled>
-              <span>Оставить заявку Kaspi</span>
+            <button class="btn-buy-now" id="btn-buy-action">
+              <span>Kaspi</span>
             </button>
           </div>
         </div>
@@ -1183,8 +1183,8 @@
   <script src="js/utils.js?v=27"></script>
   <script src="js/db.js?v=25"></script>
   <script src="js/auth.js?v=25"></script>
-  <script src="js/catalog.js?v=29"></script>
-  <script src="js/orders.js?v=25"></script>
+  <script src="js/catalog.js?v=30"></script>
+  <script src="js/orders.js?v=26"></script>
   <script src="js/admin.js?v=26"></script>
   <script src="js/sales.js?v=26"></script>
   <script src="js/app.js?v=31"></script>

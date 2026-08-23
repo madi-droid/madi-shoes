@@ -2,7 +2,8 @@
 
 function handleBookingFlow(actionType) {
   if (!currentSelectedProduct || !currentSelectedSize || !currentSelectedLocation) {
-    showToast("Пожалуйста, выберите размер обуви!", "error");
+    document.querySelector("#modal-product-details .size-picker-section")?.scrollIntoView({ block: "start" });
+    showToast("Сначала выберите доступный размер и торговую точку", "error");
     return;
   }
 

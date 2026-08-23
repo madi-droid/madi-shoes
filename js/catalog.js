@@ -613,11 +613,10 @@ function openProductDetailsModal(productId) {
   detailsImg.onerror = function() { this.src = FALLBACK_PRODUCT_IMAGE; };
   document.getElementById("details-brand").textContent = safeText(item.brand, 80);
   document.getElementById("details-name").textContent = safeText(item.name, 120);
+  const pageTitle = document.getElementById("product-page-title");
+  if (pageTitle) pageTitle.textContent = safeText(item.brand, 80);
   document.getElementById("details-description").textContent = safeText(item.description, 500);
   document.getElementById("details-price").textContent = `${Number(item.price || 0).toLocaleString()} ₸`;
-
-  document.getElementById("btn-book-action").disabled = true;
-  document.getElementById("btn-buy-action").disabled = true;
 
   renderSizePills("bazaar", item.stock?.bazaar || {}, "bazaar-sizes-list", "bazaar-point-status");
   renderSizePills("mall", item.stock?.mall || {}, "mall-sizes-list", "mall-point-status");
@@ -665,8 +664,6 @@ function renderSizePills(pointId, stockObj, listContainerId, statusLabelId) {
         currentSelectedSize = size;
         currentSelectedLocation = pointId;
 
-        document.getElementById("btn-book-action").disabled = false;
-        document.getElementById("btn-buy-action").disabled = false;
       });
     }
 
