@@ -184,8 +184,10 @@ function switchAdminTab(tabName) {
 function renderAdminProductsTable() {
   if (!requireAdminAccess()) return;
   const tbody = document.getElementById("admin-products-list");
+  const mobileList = document.getElementById("admin-products-mobile-list");
   if (!tbody) return;
   tbody.innerHTML = "";
+  if (mobileList) mobileList.innerHTML = "";
 
   const searchInput = document.getElementById("admin-product-search");
   const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : "";
@@ -266,6 +268,33 @@ function renderAdminProductsTable() {
     tr.appendChild(tdActions);
 
     tbody.appendChild(tr);
+
+    if (mobileList) {
+      const mobileCard = document.createElement("article");
+      mobileCard.className = "admin-product-mobile-card";
+
+      const image = document.createElement("img");
+      image.className = "admin-product-mobile-image";
+      image.src = safeImageSrc(p.image);
+      image.alt = safeText(p.name, 80);
+      image.onerror = function() { this.src = FALLBACK_PRODUCT_IMAGE; };
+
+      const content = document.createElement("div");
+      content.className = "admin-product-mobile-content";
+      content.appendChild(createEl("span", "admin-product-mobile-article", safeText(p.article, 60)));
+      content.appendChild(createEl("strong", "", `${safeText(p.brand, 60)} ${safeText(p.name, 100)}`));
+      content.appendChild(createEl("span", "admin-product-mobile-stock", `Базар: ${formatStock(p.stock?.bazaar)} · Гранд Парк: ${formatStock(p.stock?.mall)}`));
+      content.appendChild(createEl("strong", "admin-product-mobile-price", `${Number(p.price || 0).toLocaleString()} ₸`));
+
+      const editMobileBtn = document.createElement("button");
+      editMobileBtn.type = "button";
+      editMobileBtn.className = "btn-secondary admin-product-mobile-edit";
+      editMobileBtn.textContent = "Открыть и изменить";
+      editMobileBtn.addEventListener("click", () => openProductEditModal(p.id));
+
+      mobileCard.append(image, content, editMobileBtn);
+      mobileList.appendChild(mobileCard);
+    }
   });
 }
 
@@ -551,7 +580,7 @@ async function renderAdminStaffTable() {
       });
 
       if (!error && profiles) {
-        staffProfilesList = profiles;
+        staffProfilesList = profiles.filter(profile => profile.is_active);
       }
     } catch (err) {
       console.warn("Ошибка загрузки профилей продавцов:", err);

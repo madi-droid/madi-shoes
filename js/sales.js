@@ -20,6 +20,31 @@ function saveOfflineQueue(queue) {
   safeSetJSON(OFFLINE_QUEUE_KEY, queue);
 }
 
+async function resolveServerProductId(product) {
+  if (!product) return null;
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(product.id || "")) {
+    return product.id;
+  }
+
+  const supabase = window.AppConfig ? window.AppConfig.getSupabaseClient() : null;
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("products")
+    .select("id")
+    .eq("article", product.article)
+    .eq("is_active", true)
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data?.id) return null;
+
+  product.id = data.id;
+  updateProductMap();
+  window.db.saveProducts(products);
+  return data.id;
+}
+
 function populateSaleProductsSelect() {
   if (!requireAdminAccess()) return;
   const searchInput = document.getElementById("sale-product-search");
@@ -262,6 +287,12 @@ window.handleOfflineSaleSubmit = async function() {
   const product = getProductById(productId);
   if (!product) return;
 
+  const serverProductId = await resolveServerProductId(product);
+  if (!serverProductId) {
+    showToast("Каталог ещё синхронизируется. Подождите несколько секунд и повторите продажу.", "error");
+    return;
+  }
+
   const clientSaleId = generateUUID();
   let paymentMethod = "kaspi_qr";
   if (rawPayment === "red") paymentMethod = "kaspi_red";
@@ -274,7 +305,7 @@ window.handleOfflineSaleSubmit = async function() {
     try {
       const { data, error } = await supabase.rpc('sell_product_item', {
         p_client_sale_id: clientSaleId,
-        p_product_id: productId,
+        p_product_id: serverProductId,
         p_location: point,
         p_size: parseInt(size, 10),
         p_payment_method: paymentMethod,
