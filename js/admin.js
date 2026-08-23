@@ -341,12 +341,14 @@ window.openProductEditModal = function(productId) {
   if (urlInput) urlInput.value = "";
   const previewDiv = document.getElementById("product-image-preview");
   const previewImg = document.getElementById("preview-img-tag");
+  const saveButton = document.getElementById("btn-save-product");
 
   if (productId) {
     const p = getProductById(productId);
     if (!p) return;
 
     document.getElementById("product-modal-title").textContent = "Редактирование товара";
+    if (saveButton) saveButton.textContent = "Сохранить изменения";
     document.getElementById("edit-product-id").value = p.id;
     document.getElementById("edit-product-article").value = p.article || "";
     document.getElementById("edit-product-brand").value = p.brand || "";
@@ -374,18 +376,20 @@ window.openProductEditModal = function(productId) {
 
     if (p.image && previewImg && previewDiv) {
       previewImg.src = safeImageSrc(p.image);
-      previewDiv.style.display = "flex";
+      previewDiv.classList.add("has-image");
     } else if (previewDiv) {
-      previewDiv.style.display = "none";
+      previewDiv.classList.remove("has-image");
     }
 
     generateSizesInputs("admin-sizes-bazaar", "bazaar", p.stock?.bazaar || {});
     generateSizesInputs("admin-sizes-mall", "mall", p.stock?.mall || {});
   } else {
     document.getElementById("product-modal-title").textContent = "Добавление новой модели";
+    if (saveButton) saveButton.textContent = "Добавить модель";
     document.getElementById("edit-product-id").value = "";
     document.getElementById("edit-product-image").value = "";
-    if (previewDiv) previewDiv.style.display = "none";
+    if (previewDiv) previewDiv.classList.remove("has-image");
+    if (previewImg) previewImg.removeAttribute("src");
 
     setFormBtnGroupValue("edit-product-gender-group", "мужской");
     setFormBtnGroupValue("edit-product-season-group", "весна");
@@ -768,8 +772,10 @@ function renderAdminOrdersTable() {
   if (!requireAdminAccess()) return;
   orders = window.db.loadOrders();
   const tbody = document.getElementById("admin-orders-list");
+  const mobileList = document.getElementById("admin-orders-mobile-list");
   if (!tbody) return;
   tbody.innerHTML = "";
+  if (mobileList) mobileList.innerHTML = "";
 
   if (orders.length === 0) {
     const emptyTr = document.createElement("tr");
@@ -778,6 +784,9 @@ function renderAdminOrdersTable() {
     emptyTd.style.cssText = "text-align:center; padding: 30px; color:var(--text-secondary);";
     emptyTr.appendChild(emptyTd);
     tbody.appendChild(emptyTr);
+    if (mobileList) {
+      mobileList.appendChild(createEl("div", "admin-mobile-empty", "Новых заявок пока нет"));
+    }
     return;
   }
 
@@ -843,7 +852,7 @@ function renderAdminOrdersTable() {
     const tdStatus = document.createElement("td");
     const statusSpan = document.createElement("span");
     statusSpan.className = `order-status-badge ${badgeClass}`;
-    statusSpan.textContent = getSafeOrderStatus(o.status);
+    statusSpan.textContent = getAdminOrderStatusLabel(o.status);
     tdStatus.appendChild(statusSpan);
     tr.appendChild(tdStatus);
 
@@ -872,6 +881,12 @@ function renderAdminOrdersTable() {
       doneBtn.textContent = "Выдан клиенту";
       doneBtn.addEventListener("click", () => window.changeOrderStatus(o.id, "completed"));
       actionsDiv.appendChild(doneBtn);
+
+      const cancelBtn = document.createElement("button");
+      cancelBtn.className = "btn-secondary admin-order-cancel";
+      cancelBtn.textContent = "Отменить";
+      cancelBtn.addEventListener("click", () => window.cancelOrderById(o.id));
+      actionsDiv.appendChild(cancelBtn);
     } else {
       const archSpan = document.createElement("span");
       archSpan.style.cssText = "color:var(--text-muted); font-size:12px;";
@@ -883,27 +898,107 @@ function renderAdminOrdersTable() {
     tr.appendChild(tdActions);
 
     tbody.appendChild(tr);
+
+    if (mobileList) {
+      const card = document.createElement("article");
+      card.className = "admin-order-mobile-card";
+
+      const header = document.createElement("div");
+      header.className = "admin-order-mobile-header";
+      const typeLabel = createEl("span", "admin-order-mobile-type", o.type === "Kaspi" ? "Kaspi" : "Бронь");
+      const mobileStatus = createEl("span", `order-status-badge ${badgeClass}`, getAdminOrderStatusLabel(o.status));
+      header.append(typeLabel, mobileStatus);
+
+      const client = document.createElement("div");
+      client.className = "admin-order-mobile-client";
+      client.append(
+        createEl("strong", "", safeText(o.userName, 80)),
+        createEl("span", "", formatPhoneDisplay(o.userPhone || ""))
+      );
+
+      const product = document.createElement("div");
+      product.className = "admin-order-mobile-product";
+      product.append(
+        createEl("span", "admin-order-mobile-article", safeText(o.productArticle, 50)),
+        createEl("strong", "", safeText(o.productName, 100))
+      );
+
+      const meta = document.createElement("div");
+      meta.className = "admin-order-mobile-meta";
+      meta.append(
+        createEl("span", "", `Размер ${safeText(o.size, 5)}`),
+        createEl("span", "", locText),
+        createEl("strong", "", `${Number(o.price || 0).toLocaleString()} ₸`)
+      );
+
+      const mobileActions = document.createElement("div");
+      mobileActions.className = "admin-order-mobile-actions";
+      const addMobileAction = (label, className, handler) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = className;
+        button.textContent = label;
+        button.addEventListener("click", handler);
+        mobileActions.appendChild(button);
+      };
+
+      if (o.status === "new" || o.status === "Новый") {
+        addMobileAction("Подтвердить", "btn-primary", () => window.changeOrderStatus(o.id, "contacted"));
+        addMobileAction("Отменить", "btn-secondary admin-order-cancel", () => window.cancelOrderById(o.id));
+      } else if (o.status === "contacted" || o.status === "Подтвержден") {
+        addMobileAction("Выдан клиенту", "btn-primary", () => window.changeOrderStatus(o.id, "completed"));
+        addMobileAction("Отменить", "btn-secondary admin-order-cancel", () => window.cancelOrderById(o.id));
+      }
+
+      card.append(header, client, product, meta);
+      if (mobileActions.childElementCount) card.appendChild(mobileActions);
+      mobileList.appendChild(card);
+    }
   });
+}
+
+function getAdminOrderStatusLabel(status) {
+  const normalized = getSafeOrderStatus(status);
+  const labels = {
+    new: "Новая",
+    contacted: "Подтверждена",
+    waiting_payment: "Ожидает оплату",
+    paid: "Оплачена",
+    completed: "Выдана",
+    cancelled: "Отменена"
+  };
+  return labels[normalized] || normalized;
+}
+
+async function updateOrderStatusOnServer(order, newStatus) {
+  const supabase = window.AppConfig ? window.AppConfig.getSupabaseClient() : null;
+  if (!supabase) return order.id;
+
+  const { data, error } = await supabase.rpc('update_reservation_status_compat', {
+    p_reservation_id: String(order.id || ""),
+    p_status: newStatus,
+    p_article: String(order.productArticle || ""),
+    p_size: parseInt(order.size, 10),
+    p_location: order.location || "bazaar",
+    p_customer_phone: order.userPhone || "",
+    p_created_at: order.date || null,
+    p_session_token: getStaffSessionToken()
+  });
+  if (error) throw error;
+  return data || order.id;
 }
 
 window.changeOrderStatus = async function(orderId, newStatus) {
   if (!requireAdminAccess()) return;
   const index = orders.findIndex(o => o.id === orderId);
   if (index !== -1) {
-    const supabase = window.AppConfig ? window.AppConfig.getSupabaseClient() : null;
-    if (supabase) {
-      try {
-        const { error } = await supabase.rpc('update_reservation_status', {
-          p_reservation_id: orderId,
-          p_status: newStatus,
-          p_session_token: getStaffSessionToken()
-        });
-        if (error) throw error;
-      } catch (err) {
-        console.warn("Ошибка обновления статуса заявки в Supabase:", err);
-        showToast("Не удалось обновить заявку на сервере", "error");
-        return;
-      }
+    try {
+      const canonicalId = await updateOrderStatusOnServer(orders[index], newStatus);
+      if (canonicalId && canonicalId !== orders[index].id) orders[index].id = canonicalId;
+    } catch (err) {
+      console.warn("Ошибка обновления статуса заявки в Supabase:", err);
+      showToast(err?.message || "Не удалось обновить заявку на сервере", "error");
+      return;
     }
 
     orders[index].status = newStatus;
@@ -920,20 +1015,13 @@ window.cancelOrderById = async function(orderId) {
   if (confirm(`Вы действительно хотите отменить заявку ${safeText(orderId, 30)}?`)) {
     const index = orders.findIndex(o => o.id === orderId);
     if (index !== -1) {
-      const supabase = window.AppConfig ? window.AppConfig.getSupabaseClient() : null;
-      if (supabase) {
-        try {
-          const { error } = await supabase.rpc('update_reservation_status', {
-            p_reservation_id: orderId,
-            p_status: 'cancelled',
-            p_session_token: getStaffSessionToken()
-          });
-          if (error) throw error;
-        } catch (err) {
-          console.warn("Ошибка отмены заявки в Supabase:", err);
-          showToast("Не удалось отменить заявку на сервере", "error");
-          return;
-        }
+      try {
+        const canonicalId = await updateOrderStatusOnServer(orders[index], "cancelled");
+        if (canonicalId && canonicalId !== orders[index].id) orders[index].id = canonicalId;
+      } catch (err) {
+        console.warn("Ошибка отмены заявки в Supabase:", err);
+        showToast(err?.message || "Не удалось отменить заявку на сервере", "error");
+        return;
       }
 
       orders[index].status = "cancelled";

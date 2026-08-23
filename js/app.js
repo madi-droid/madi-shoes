@@ -384,6 +384,28 @@ function setupEventListeners() {
   const productEditForm = document.getElementById("product-edit-form");
   if (productEditForm) productEditForm.addEventListener("submit", handleProductSaveSubmit);
 
+  const productFileInput = document.getElementById("edit-product-file");
+  const productUrlInput = document.getElementById("edit-product-image-url");
+  const productPreview = document.getElementById("product-image-preview");
+  const productPreviewImage = document.getElementById("preview-img-tag");
+  let previewObjectUrl = "";
+  const showProductPreview = source => {
+    if (!productPreview || !productPreviewImage || !source) return;
+    productPreviewImage.src = source;
+    productPreview.classList.add("has-image");
+  };
+  productFileInput?.addEventListener("change", () => {
+    const file = productFileInput.files?.[0];
+    if (!file) return;
+    if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+    previewObjectUrl = URL.createObjectURL(file);
+    showProductPreview(previewObjectUrl);
+  });
+  productUrlInput?.addEventListener("change", () => {
+    const url = productUrlInput.value.trim();
+    if (url) showProductPreview(url);
+  });
+
   const btnCancelEdit = document.getElementById("btn-cancel-edit");
   if (btnCancelEdit) btnCancelEdit.addEventListener("click", () => closeModal("modal-admin-product-edit"));
 
@@ -419,7 +441,7 @@ function setupEventListeners() {
   });
 
   // На телефоне окно можно закрыть естественным свайпом вниз за свободную область.
-  document.querySelectorAll(".modal-overlay:not(#modal-product-details)").forEach(overlay => {
+  document.querySelectorAll(".modal-overlay:not(#modal-product-details):not(#modal-admin-product-edit)").forEach(overlay => {
     const sheet = overlay.querySelector(".modal-container, .modal-content");
     if (!sheet) return;
     let startY = null;

@@ -72,7 +72,7 @@ async function executeBooking() {
     const supabase = window.AppConfig ? window.AppConfig.getSupabaseClient() : null;
     if (supabase) {
       try {
-        const { error } = await supabase.rpc('create_reservation', {
+        const { data: reservationId, error } = await supabase.rpc('create_reservation', {
           p_product_id: canonicalProduct.id,
           p_size: parseInt(currentSelectedSize, 10),
           p_location: locKey,
@@ -87,6 +87,7 @@ async function executeBooking() {
           showToast("Не удалось подтвердить бронь на сервере", "error");
           return;
         }
+        if (reservationId) newOrder.id = reservationId;
       } catch (err) {
         console.warn("Ошибка соединения с Supabase:", err);
         showToast("Нет соединения с сервером. Бронь не была создана.", "error");
@@ -194,7 +195,7 @@ async function processKaspiPaymentConfirm() {
     const supabase = window.AppConfig ? window.AppConfig.getSupabaseClient() : null;
     if (supabase) {
       try {
-        const { error } = await supabase.rpc('create_reservation', {
+        const { data: reservationId, error } = await supabase.rpc('create_reservation', {
           p_product_id: canonicalProduct.id,
           p_size: parseInt(currentSelectedSize, 10),
           p_location: locKey,
@@ -209,6 +210,7 @@ async function processKaspiPaymentConfirm() {
           showToast("Не удалось подтвердить заявку на сервере", "error");
           return;
         }
+        if (reservationId) newOrder.id = reservationId;
       } catch (err) {
         console.warn("Ошибка сети при отправке в Supabase:", err);
         showToast("Нет соединения с сервером. Заявка не была создана.", "error");

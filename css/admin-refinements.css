@@ -1,0 +1,682 @@
+/* Единый рабочий интерфейс админки и полноэкранный редактор товара. */
+
+body.is-admin-portal {
+  background: var(--bg-main) !important;
+  color: var(--text-primary) !important;
+}
+
+body.is-admin-portal .admin-luxury-wrapper {
+  min-height: 100dvh;
+  background:
+    radial-gradient(80% 45% at 50% -8%, rgba(194, 163, 112, .14), transparent 68%),
+    var(--bg-main) !important;
+}
+
+body.is-admin-portal .admin-luxury-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  border-bottom: 1px solid var(--border-color) !important;
+  background: color-mix(in srgb, var(--bg-card) 96%, transparent) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .18) !important;
+}
+
+body.is-admin-portal .admin-container {
+  width: min(100%, 1240px);
+  margin: 0 auto;
+}
+
+body.is-admin-portal .admin-dashboard-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+body.is-admin-portal .dash-card.luxury-card {
+  min-width: 0;
+  border-radius: 16px !important;
+  background: var(--bg-card) !important;
+  box-shadow: none !important;
+}
+
+body.is-admin-portal .admin-tabs.luxury-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px !important;
+  overflow: visible !important;
+  padding: 6px !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 16px !important;
+  background: var(--bg-card) !important;
+}
+
+body.is-admin-portal .admin-tabs .admin-tab {
+  min-width: 0 !important;
+  min-height: 46px;
+  padding: 9px 10px !important;
+  border-radius: 11px !important;
+  color: var(--text-secondary) !important;
+  font-family: var(--font-body) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.25;
+  text-transform: none !important;
+  white-space: normal !important;
+}
+
+body.is-admin-portal .admin-tabs .admin-tab.active {
+  background: var(--primary) !important;
+  color: var(--bg-deep) !important;
+  box-shadow: none !important;
+}
+
+body.is-admin-portal .admin-panel-content {
+  padding: 24px !important;
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  background: var(--bg-card);
+}
+
+body.is-admin-portal .admin-actions-row {
+  align-items: center;
+  gap: 14px;
+}
+
+body.is-admin-portal #admin-product-search {
+  min-height: 48px;
+  border-radius: 13px !important;
+  background: var(--bg-card-soft) !important;
+}
+
+body.is-admin-portal #btn-add-product-modal {
+  min-height: 48px;
+  border-radius: 13px !important;
+}
+
+.admin-orders-mobile-list {
+  display: none;
+}
+
+.admin-order-cancel {
+  border-color: color-mix(in srgb, var(--accent-red) 70%, transparent) !important;
+  color: #e07575 !important;
+}
+
+/* Редактор товара */
+body.is-admin-portal #modal-admin-product-edit {
+  z-index: 2400;
+  padding: 18px !important;
+  background: rgba(20, 16, 11, .9) !important;
+}
+
+body.is-admin-portal #modal-admin-product-edit .product-editor-container {
+  display: flex !important;
+  width: min(100%, 940px) !important;
+  max-width: 940px !important;
+  height: min(94dvh, 920px) !important;
+  max-height: min(94dvh, 920px) !important;
+  flex-direction: column;
+  overflow: clip !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 22px !important;
+  background: var(--bg-modal) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+body.is-admin-portal #modal-admin-product-edit .product-editor-header {
+  position: relative;
+  z-index: 5;
+  display: grid !important;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: center;
+  gap: 13px;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-card);
+}
+
+html body #modal-admin-product-edit .product-editor-back {
+  position: static !important;
+  display: grid !important;
+  width: 44px !important;
+  height: 44px !important;
+  place-items: center;
+  border-radius: 50% !important;
+  background: var(--bg-card-soft) !important;
+  color: var(--text-primary) !important;
+}
+
+.product-editor-back svg {
+  width: 21px;
+  height: 21px;
+}
+
+.product-editor-eyebrow {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--primary);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+
+body.is-admin-portal #modal-admin-product-edit .product-editor-header h2 {
+  margin: 0 !important;
+  color: var(--text-primary) !important;
+  font-family: var(--font-title) !important;
+  font-size: 23px !important;
+  font-weight: 400 !important;
+  line-height: 1.2;
+}
+
+.product-editor-header p {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+body.is-admin-portal #modal-admin-product-edit .product-editor-form {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 18px 0 !important;
+  background: var(--bg-main) !important;
+  overscroll-behavior: contain;
+}
+
+.product-editor-section {
+  margin-bottom: 14px;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 17px;
+  background: var(--bg-card);
+}
+
+.product-editor-section-title {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 18px;
+}
+
+.product-editor-section-title > span {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--bg-card-soft);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+body.is-admin-portal #modal-admin-product-edit .product-editor-section-title h3 {
+  margin: 0 !important;
+  color: var(--text-primary) !important;
+  font-family: var(--font-body) !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+}
+
+.product-editor-section-title p {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+body.is-admin-portal #modal-admin-product-edit .edit-form-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px !important;
+}
+
+body.is-admin-portal #modal-admin-product-edit .form-group {
+  min-width: 0;
+  margin: 0 !important;
+}
+
+body.is-admin-portal #modal-admin-product-edit .form-full-width {
+  grid-column: 1 / -1;
+}
+
+body.is-admin-portal #modal-admin-product-edit .form-input {
+  min-height: 49px;
+  padding: 12px 13px !important;
+  border-radius: 12px !important;
+  background: var(--bg-card-soft) !important;
+  color: var(--text-primary) !important;
+  font-size: 15px !important;
+}
+
+body.is-admin-portal #modal-admin-product-edit textarea.form-input {
+  min-height: 94px;
+  resize: vertical;
+}
+
+.product-category-field {
+  position: relative;
+}
+
+.product-image-editor {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: 18px;
+}
+
+.product-image-preview {
+  position: relative;
+  display: grid !important;
+  width: 100% !important;
+  height: 220px !important;
+  overflow: hidden;
+  place-items: center;
+  border: 1px dashed var(--border-color) !important;
+  border-radius: 15px !important;
+  background: var(--bg-card-soft) !important;
+}
+
+.product-image-preview img {
+  display: none;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-image-preview.has-image img {
+  display: block;
+}
+
+.product-image-placeholder {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.product-image-preview.has-image .product-image-placeholder {
+  display: none;
+}
+
+.product-image-controls {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 9px;
+}
+
+#edit-product-file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+}
+
+.product-file-picker {
+  display: flex;
+  min-height: 68px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 13px;
+  background: var(--bg-card-soft);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.product-file-picker svg {
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+  color: var(--primary);
+}
+
+.product-file-picker span {
+  display: grid;
+  gap: 2px;
+}
+
+.product-file-picker strong {
+  font-size: 13px;
+}
+
+.product-file-picker small {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.product-characteristics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+body.is-admin-portal #modal-admin-product-edit .form-btn-group {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px !important;
+}
+
+body.is-admin-portal #modal-admin-product-edit .form-group-btn {
+  min-width: 0;
+  min-height: 43px;
+  padding: 8px 7px !important;
+  border-radius: 10px !important;
+  font-family: var(--font-body) !important;
+  font-size: 11px !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+body.is-admin-portal #modal-admin-product-edit .form-group-btn.active {
+  background: var(--primary) !important;
+  color: var(--bg-deep) !important;
+}
+
+body.is-admin-portal #modal-admin-product-edit .admin-stock-editor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+body.is-admin-portal #modal-admin-product-edit .admin-stock-point {
+  overflow: hidden;
+  padding: 0 !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 14px !important;
+  background: var(--bg-card-soft) !important;
+}
+
+.admin-stock-point summary {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  list-style: none;
+}
+
+.admin-stock-point summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-stock-point summary::after {
+  content: "+";
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--primary);
+  font-size: 20px;
+}
+
+.admin-stock-point[open] summary::after {
+  content: "−";
+}
+
+.admin-stock-point summary span {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.admin-stock-point summary small {
+  grid-column: 1;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+body.is-admin-portal #modal-admin-product-edit .admin-sizes-inputs {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 7px !important;
+  padding: 0 12px 14px;
+}
+
+body.is-admin-portal #modal-admin-product-edit .size-input-group {
+  display: grid !important;
+  min-width: 0;
+  gap: 4px;
+}
+
+body.is-admin-portal #modal-admin-product-edit .size-input-label {
+  color: var(--text-secondary) !important;
+  font-size: 10px !important;
+  text-align: center;
+}
+
+body.is-admin-portal #modal-admin-product-edit .stock-input {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 42px !important;
+  padding: 5px !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 9px !important;
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  font-size: 14px !important;
+  text-align: center;
+}
+
+body.is-admin-portal #modal-admin-product-edit .product-editor-actions {
+  position: sticky;
+  right: -18px;
+  bottom: 0;
+  left: -18px;
+  z-index: 9;
+  display: grid !important;
+  grid-template-columns: .8fr 1.2fr;
+  gap: 9px !important;
+  margin: 4px -18px 0;
+  padding: 12px 18px calc(12px + env(safe-area-inset-bottom)) !important;
+  border-top: 1px solid var(--border-color) !important;
+  background: var(--bg-modal) !important;
+}
+
+.product-editor-actions button {
+  min-height: 50px;
+  border-radius: 12px !important;
+}
+
+@media (max-width: 768px) {
+  body.is-admin-portal .admin-luxury-topbar {
+    padding: 12px !important;
+  }
+
+  body.is-admin-portal .admin-container {
+    padding: 14px 12px calc(30px + env(safe-area-inset-bottom)) !important;
+  }
+
+  body.is-admin-portal .admin-dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  body.is-admin-portal .dash-card.luxury-card {
+    min-height: 94px !important;
+    padding: 12px !important;
+  }
+
+  body.is-admin-portal .admin-tabs.luxury-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body.is-admin-portal .admin-tabs .admin-tab:last-child {
+    grid-column: 1 / -1;
+  }
+
+  body.is-admin-portal .admin-panel-content {
+    padding: 16px !important;
+    border-radius: 15px;
+  }
+
+  body.is-admin-portal .admin-actions-row,
+  body.is-admin-portal .admin-actions-row > div {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100%;
+  }
+
+  body.is-admin-portal #admin-product-search,
+  body.is-admin-portal #btn-add-product-modal {
+    width: 100% !important;
+  }
+
+  body.is-admin-portal #panel-orders .table-responsive {
+    display: none !important;
+  }
+
+  .admin-orders-mobile-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .admin-order-mobile-card {
+    display: grid;
+    gap: 12px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    background: var(--bg-card-soft);
+  }
+
+  .admin-order-mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .admin-order-mobile-type,
+  .admin-order-mobile-article {
+    color: var(--primary);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .admin-order-mobile-client,
+  .admin-order-mobile-product {
+    display: grid;
+    gap: 3px;
+  }
+
+  .admin-order-mobile-client strong,
+  .admin-order-mobile-product strong {
+    color: var(--text-primary);
+    font-size: 14px;
+  }
+
+  .admin-order-mobile-client span {
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+
+  .admin-order-mobile-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+
+  .admin-order-mobile-meta > * {
+    padding: 8px 9px;
+    border-radius: 9px;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 11px;
+  }
+
+  .admin-order-mobile-meta strong {
+    grid-column: 1 / -1;
+    color: var(--text-primary);
+    font-size: 15px;
+  }
+
+  .admin-order-mobile-actions {
+    display: grid;
+    grid-template-columns: 1.2fr .8fr;
+    gap: 8px;
+  }
+
+  .admin-order-mobile-actions button {
+    min-height: 44px;
+    padding: 8px !important;
+    border-radius: 10px !important;
+    font-size: 12px !important;
+  }
+
+  .admin-mobile-empty {
+    padding: 28px 16px;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
+  html body.is-admin-portal #modal-admin-product-edit.modal-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    align-items: stretch !important;
+    padding: 0 !important;
+  }
+
+  html body.is-admin-portal #modal-admin-product-edit .product-editor-container {
+    width: 100% !important;
+    max-width: none !important;
+    height: 100dvh !important;
+    max-height: none !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  body.is-admin-portal #modal-admin-product-edit .product-editor-header {
+    flex: 0 0 auto;
+    padding: max(10px, env(safe-area-inset-top)) 12px 10px;
+  }
+
+  body.is-admin-portal #modal-admin-product-edit .product-editor-header h2 {
+    font-size: 18px !important;
+  }
+
+  .product-editor-header p {
+    display: none;
+  }
+
+  body.is-admin-portal #modal-admin-product-edit .product-editor-form {
+    padding: 10px 10px 0 !important;
+  }
+
+  .product-editor-section {
+    margin-bottom: 9px;
+    padding: 16px 13px;
+    border-radius: 14px;
+  }
+
+  body.is-admin-portal #modal-admin-product-edit .edit-form-grid,
+  .product-image-editor,
+  .product-characteristics-grid,
+  body.is-admin-portal #modal-admin-product-edit .admin-stock-editor {
+    grid-template-columns: 1fr !important;
+  }
+
+  .product-image-preview {
+    height: min(72vw, 300px) !important;
+  }
+
+  body.is-admin-portal #modal-admin-product-edit .admin-sizes-inputs {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  body.is-admin-portal #modal-admin-product-edit .product-editor-actions {
+    right: -10px;
+    left: -10px;
+    margin-right: -10px;
+    margin-left: -10px;
+    padding-right: 10px !important;
+    padding-left: 10px !important;
+  }
+}

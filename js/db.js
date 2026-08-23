@@ -665,10 +665,32 @@ async function fetchOrdersFromSupabase() {
       date: r.created_at || new Date().toISOString()
     }));
 
-    // Объединение без затирания локальных заявок
-    const mergedMap = new Map();
-    localOrders.forEach(o => { if (o && o.id) mergedMap.set(o.id, o); });
-    sbOrders.forEach(o => { if (o && o.id) mergedMap.set(o.id, o); });
+    const normalizeOrderPhone = value => String(value || "").replace(/\D/g, "");
+    const isSameReservation = (localOrder, serverOrder) => {
+      if (!localOrder || !serverOrder) return false;
+      const localTime = new Date(localOrder.date || 0).getTime();
+      const serverTime = new Date(serverOrder.date || 0).getTime();
+      return String(localOrder.productArticle || "") === String(serverOrder.productArticle || "")
+        && String(localOrder.size || "") === String(serverOrder.size || "")
+        && String(localOrder.location || "") === String(serverOrder.location || "")
+        && normalizeOrderPhone(localOrder.userPhone) === normalizeOrderPhone(serverOrder.userPhone)
+        && Number.isFinite(localTime) && Number.isFinite(serverTime)
+        && Math.abs(localTime - serverTime) <= 15 * 60 * 1000;
+    };
+
+    // Серверная запись является основной. Старый локальный RES-номер объединяется с её UUID.
+    const mergedMap = new Map(sbOrders.map(order => [order.id, order]));
+    localOrders.forEach(localOrder => {
+      if (!localOrder?.id) return;
+      const serverMatch = sbOrders.find(serverOrder => isSameReservation(localOrder, serverOrder));
+      if (serverMatch) {
+        serverMatch.price = Number(localOrder.price || serverMatch.price || 0);
+        serverMatch.kaspiPhone = localOrder.kaspiPhone || serverMatch.kaspiPhone || "";
+        mergedMap.set(serverMatch.id, serverMatch);
+      } else {
+        mergedMap.set(localOrder.id, localOrder);
+      }
+    });
 
     const mergedOrders = Array.from(mergedMap.values());
     mergedOrders.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
