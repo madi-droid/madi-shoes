@@ -352,6 +352,41 @@ function setupEventListeners() {
     });
   });
 
+  // На телефоне окно можно закрыть естественным свайпом вниз за свободную область.
+  document.querySelectorAll(".modal-overlay").forEach(overlay => {
+    const sheet = overlay.querySelector(".modal-container, .modal-content");
+    if (!sheet) return;
+    let startY = null;
+    let offset = 0;
+
+    sheet.addEventListener("touchstart", (event) => {
+      if (!overlay.classList.contains("open")) return;
+      if (event.target.closest("button, a, input, textarea, select, label")) return;
+      if (event.touches[0].clientY - sheet.getBoundingClientRect().top > 76) return;
+      startY = event.touches[0].clientY;
+      offset = 0;
+      sheet.classList.add("is-swiping");
+    }, { passive: true });
+
+    sheet.addEventListener("touchmove", (event) => {
+      if (startY === null) return;
+      offset = Math.max(0, event.touches[0].clientY - startY);
+      if (!offset) return;
+      sheet.style.transform = `translateY(${Math.min(offset, 180)}px)`;
+      overlay.style.opacity = String(Math.max(0.45, 1 - offset / 420));
+    }, { passive: true });
+
+    sheet.addEventListener("touchend", () => {
+      if (startY === null) return;
+      sheet.classList.remove("is-swiping");
+      sheet.style.transform = "";
+      overlay.style.opacity = "";
+      if (offset > 90) closeModal(overlay.id);
+      startY = null;
+      offset = 0;
+    });
+  });
+
   document.querySelectorAll(".modal-close, .modal-close-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const modal = btn.closest(".modal-overlay");

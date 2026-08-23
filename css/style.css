@@ -5028,7 +5028,93 @@ html .header-actions button {
   animation: none !important;
 }
 
+/* Возвращаем только дешёвые анимации: opacity и transform без перерасчёта разметки. */
+@keyframes calm-card-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+html .animate-rise {
+  animation: calm-card-in 180ms ease-out both !important;
+}
+
+html .btn-icon,
+html .btn-fav-card,
+html .btn-primary,
+html .btn-secondary,
+html .admin-tab,
+html .form-group-btn,
+html .bottom-nav-item {
+  transition: transform 140ms ease, background-color 140ms ease, color 140ms ease, border-color 140ms ease !important;
+}
+
+html .btn-icon:active,
+html .btn-fav-card:active,
+html .btn-primary:active,
+html .btn-secondary:active,
+html .admin-tab:active,
+html .form-group-btn:active,
+html .bottom-nav-item:active {
+  transform: scale(0.97) !important;
+}
+
+html .modal-overlay {
+  transition: opacity 180ms ease !important;
+}
+
+html .modal-container,
+html .modal-content {
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), opacity 180ms ease !important;
+}
+
+html .modal-container.is-swiping,
+html .modal-content.is-swiping {
+  transition: none !important;
+}
+
 @media (max-width: 768px) {
+  html body .modal-overlay,
+  html body #modal-admin-product-edit.modal-overlay,
+  html body #modal-admin-staff-edit.modal-overlay {
+    align-items: center !important;
+    padding: 14px !important;
+  }
+
+  html body .modal-container,
+  html body #modal-admin-product-edit .modal-container,
+  html body #modal-admin-staff-edit .modal-content {
+    width: 100% !important;
+    max-width: 560px !important;
+    max-height: 88dvh !important;
+    margin: 0 auto !important;
+    border-radius: 18px !important;
+  }
+
+  html body #modal-favorites-list .modal-container,
+  html body #modal-product-details .modal-container,
+  html body #modal-quick-contact .modal-container {
+    min-height: min(70dvh, 650px);
+  }
+
+  html body #modal-favorites-list .modal-container {
+    min-height: 78dvh;
+  }
+
+  html body .product-image,
+  html body #favorites-products-grid .product-image,
+  html body .details-image-box img {
+    object-fit: cover !important;
+    object-position: center center !important;
+  }
+
+  html body .product-image-container {
+    height: clamp(238px, 68vw, 320px) !important;
+  }
+
+  html body #modal-favorites-list .product-image-container {
+    height: 260px !important;
+  }
+
   header,
   .modal-overlay,
   .toast,
