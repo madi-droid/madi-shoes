@@ -5089,6 +5089,9 @@ html .modal-content.is-swiping {
 .details-help-text {
   display: block;
   width: 100%;
+  margin: 10px 0 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
   line-height: 1.45;
 }
 
