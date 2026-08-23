@@ -4992,6 +4992,41 @@ body.is-admin-portal .modal-overlay {
 }
 
 /* Финальный слой палитры админки: тот же тёплый стиль, что и у витрины. */
+/* Производительность: сайт должен оставаться неподвижным при прокрутке и смене темы. */
+html {
+  scroll-behavior: auto !important;
+}
+
+body {
+  background-attachment: scroll !important;
+  transition: none !important;
+}
+
+*,
+*::before,
+*::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+@media (max-width: 768px) {
+  header,
+  .modal-overlay,
+  .toast,
+  .card-category-tag,
+  .btn-fav-card,
+  .product-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .product-card:hover,
+  .aura:hover,
+  .modal-close:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
 /* Приоритетный слой: нейтрализует оставшиеся старые синие правила админки. */
 body.is-admin-portal .admin-luxury-topbar,
 body.is-admin-portal .admin-logo-badge,
