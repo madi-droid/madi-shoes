@@ -1,26 +1,17 @@
-// MADIYAR SHOES — модули авторизации админа и пользователей (auth.js)
+// MADIYAR SHOES — модуль авторизации сотрудников и клиентов (auth.js)
 
 function isAdminLoggedIn() {
-  const token = sessionStorage.getItem("shoe_store_admin_token");
+  const token = getStaffSessionToken();
   const phone = sessionStorage.getItem("shoe_store_admin_phone");
   const loginTime = Number(sessionStorage.getItem("shoe_store_admin_login_time") || 0);
-  const sig = sessionStorage.getItem("shoe_store_admin_sig");
 
-  if (!token || !phone || !loginTime || !sig) {
+  if (!token || !phone || !loginTime) {
     purgeAdminSession();
     return false;
   }
 
-  // Защита от истечения сессии
+  // TTL Session Check (2 hours)
   if (Date.now() - loginTime > ADMIN_SESSION_TTL_MS) {
-    purgeAdminSession();
-    return false;
-  }
-
-  // Защита от подделки сессии через DevTools
-  const expectedSig = generateSessionSig(token, phone, String(loginTime));
-  if (sig !== expectedSig) {
-    console.warn("Обнаружена попытка подделки сессии администратора!");
     purgeAdminSession();
     return false;
   }
@@ -29,11 +20,12 @@ function isAdminLoggedIn() {
 }
 
 function purgeAdminSession() {
-  sessionStorage.removeItem("shoe_store_admin_token");
+  sessionStorage.removeItem("shoe_store_staff_session_token");
   sessionStorage.removeItem("shoe_store_admin_phone");
   sessionStorage.removeItem("shoe_store_admin_name");
+  sessionStorage.removeItem("shoe_store_admin_role");
+  sessionStorage.removeItem("shoe_store_admin_location");
   sessionStorage.removeItem("shoe_store_admin_login_time");
-  sessionStorage.removeItem("shoe_store_admin_sig");
   sessionStorage.removeItem("shoe_store_admin_logged");
 }
 
@@ -41,20 +33,22 @@ function checkAdminAccess() {
   if (isAdminLoggedIn()) {
     switchToAdminView();
   } else {
-    document.getElementById("admin-pin-input").value = "";
+    const pinEl = document.getElementById("admin-pin-input");
+    if (pinEl) pinEl.value = "";
     openModal("modal-admin-auth");
   }
 }
 
 function requireAdminAccess() {
   if (!isAdminLoggedIn()) {
-    showToast("Требуется вход администратора", "error");
+    showToast("Требуется авторизация сотрудника", "error");
     checkAdminAccess();
     return false;
   }
   return true;
 }
 
+// Авторизация сотрудника по Номеру Телефона и 4-значному PIN-коду через RPC login_staff_pin
 async function handleAdminLoginSubmit(e) {
   e.preventDefault();
 
@@ -64,51 +58,41 @@ async function handleAdminLoginSubmit(e) {
   const phoneNorm = normalizePhone(phoneInput);
   const pin = pinInput.trim();
 
-  // Проверка персистентной блокировки (не сбрасывается при F5)
-  const lockout = getAdminLockoutInfo();
-  const now = Date.now();
-  if (now < lockout.lockoutUntil) {
-    const secsLeft = Math.ceil((lockout.lockoutUntil - now) / 1000);
-    showToast(`Слишком много попыток. Подождите ${secsLeft} сек.`, "error");
+  if (pin.length < 8 || pin.length > 64 || !/^[A-Za-z0-9]+$/.test(pin)) {
+    showToast("Пароль должен содержать 8–64 латинских букв или цифр", "error");
     return;
   }
 
-  const matchedAdmin = ADMIN_ACCOUNTS.find(acc => normalizePhone(acc.phone) === phoneNorm);
-  const pinHash = await sha256Async(pin);
+  // 1. Вызов RPC-функции login_staff_pin в Supabase
+  const supabase = window.AppConfig ? window.AppConfig.getSupabaseClient() : null;
+  if (supabase) {
+    try {
+      const { data, error } = await supabase.rpc('login_staff_pin', {
+        p_phone: phoneNorm,
+        p_pin: pin
+      });
 
-  // Валидация ПИН-кода по разрешенным криптографическим хэшам
-  const isValidPin = ALLOWED_PIN_HASHES.includes(pinHash);
+      if (error || !data || !data.success || !data.session_token || !data.profile) {
+        throw new Error(data?.message || error?.message || "Не удалось выполнить вход");
+      }
 
-  if (matchedAdmin && isValidPin) {
-    setAdminLockoutInfo(0, 0);
-
-    const token = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()) + Date.now();
-    const loginTimeStr = String(Date.now());
-    const sig = generateSessionSig(token, phoneNorm, loginTimeStr);
-
-    sessionStorage.setItem("shoe_store_admin_token", token);
-    sessionStorage.setItem("shoe_store_admin_phone", phoneNorm);
-    sessionStorage.setItem("shoe_store_admin_name", matchedAdmin.name);
-    sessionStorage.setItem("shoe_store_admin_login_time", loginTimeStr);
-    sessionStorage.setItem("shoe_store_admin_sig", sig);
-
-    closeModal("modal-admin-auth");
-    showToast(`Вход выполнен: ${matchedAdmin.name}`, "success");
-    switchToAdminView();
-  } else if (!matchedAdmin) {
-    showToast("Номер телефона отсутствует в списке администраторов!", "error");
-  } else {
-    let attempts = lockout.attempts + 1;
-    let lockoutUntil = 0;
-    if (attempts >= ADMIN_MAX_ATTEMPTS) {
-      lockoutUntil = Date.now() + ADMIN_BLOCK_SECONDS * 1000;
-      attempts = 0;
-      showToast(`Слишком много попыток. Доступ заблокирован на ${ADMIN_BLOCK_SECONDS} сек.`, "error");
-    } else {
-      showToast(`Неверный ПИН-код! Осталось попыток: ${ADMIN_MAX_ATTEMPTS - attempts}`, "error");
+      sessionStorage.setItem("shoe_store_staff_session_token", data.session_token);
+      sessionStorage.setItem("shoe_store_admin_phone", phoneNorm);
+      sessionStorage.setItem("shoe_store_admin_name", data.profile.full_name);
+      sessionStorage.setItem("shoe_store_admin_role", data.profile.role);
+      sessionStorage.setItem("shoe_store_admin_location", data.profile.location || "bazaar");
+      sessionStorage.setItem("shoe_store_admin_login_time", String(Date.now()));
+      closeModal("modal-admin-auth");
+      showToast(`Вход выполнен: ${data.profile.full_name}`, "success");
+      switchToAdminView();
+      return;
+    } catch (err) {
+      console.warn("Ошибка входа сотрудника:", err);
+      showToast(err.message || "Неверный телефон, пароль или временная блокировка", "error");
+      return;
     }
-    setAdminLockoutInfo(attempts, lockoutUntil);
   }
+  showToast("Сервер авторизации недоступен. Оффлайн-вход отключён для защиты данных.", "error");
 }
 
 // Авторизация клиента
@@ -130,10 +114,12 @@ function openProfileModal() {
     const descEl = document.getElementById("auth-modal-desc");
     const nameGroup = document.getElementById("name-group");
     const submitBtn = document.getElementById("btn-auth-submit");
+    const authNameEl = document.getElementById("auth-name");
 
-    if (titleEl) titleEl.textContent = "Вход или Регистрация";
-    if (descEl) descEl.textContent = "Укажите ваш номер телефона, имя и пароль для создания аккаунта или входа.";
+    if (titleEl) titleEl.textContent = "Данные для бронирования";
+    if (descEl) descEl.textContent = "Введите имя и телефон. Они сохраняются только на этом устройстве.";
     if (nameGroup) nameGroup.classList.remove("d-none");
+    if (authNameEl) authNameEl.required = true;
     if (submitBtn) submitBtn.textContent = "Продолжить";
 
     document.getElementById("auth-form").reset();
@@ -157,40 +143,26 @@ function initClientAuthListeners() {
       const users = window.db.loadUsers();
       const found = users.find(u => u.phone === norm);
       if (found) {
-        if (titleEl) titleEl.textContent = "Вход в аккаунт";
-        if (descEl) descEl.textContent = "С возвращением! Введите пароль для входа в профиль.";
+        if (titleEl) titleEl.textContent = "Ваши данные";
+        if (descEl) descEl.textContent = "Данные найдены на этом устройстве. Проверьте их перед продолжением.";
         if (found.name && authNameEl) authNameEl.value = formatFullName(found.name);
-        if (nameGroup) nameGroup.classList.add("d-none");
-        if (submitBtn) submitBtn.textContent = "Войти";
-        showToast(`Аккаунт найден: ${formatFullName(found.name)}`, "info");
-      } else {
-        if (titleEl) titleEl.textContent = "Регистрация аккаунта";
-        if (descEl) descEl.textContent = "Введите ваши Имя, Фамилию и придумайте пароль.";
         if (nameGroup) nameGroup.classList.remove("d-none");
+        if (authNameEl) authNameEl.required = true;
+        if (submitBtn) submitBtn.textContent = "Продолжить";
+      } else {
+        if (titleEl) titleEl.textContent = "Данные для бронирования";
+        if (descEl) descEl.textContent = "Введите имя и фамилию для связи по заявке.";
+        if (nameGroup) nameGroup.classList.remove("d-none");
+        if (authNameEl) authNameEl.required = true;
         if (submitBtn) submitBtn.textContent = "Зарегистрироваться";
       }
     } else {
-      if (titleEl) titleEl.textContent = "Вход или Регистрация";
+      if (titleEl) titleEl.textContent = "Данные для бронирования";
       if (nameGroup) nameGroup.classList.remove("d-none");
+      if (authNameEl) authNameEl.required = true;
       if (submitBtn) submitBtn.textContent = "Продолжить";
     }
   });
-
-  const btnToggleAuthPwd = document.getElementById("btn-toggle-password");
-  const authPasswordInput = document.getElementById("auth-password");
-  const eyeIconAuth = document.getElementById("eye-icon-auth");
-
-  if (btnToggleAuthPwd && authPasswordInput) {
-    btnToggleAuthPwd.addEventListener("click", () => {
-      const isPwd = authPasswordInput.type === "password";
-      authPasswordInput.type = isPwd ? "text" : "password";
-      if (eyeIconAuth) {
-        eyeIconAuth.innerHTML = isPwd
-          ? `<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/>`
-          : `<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>`;
-      }
-    });
-  }
 
   const btnToggleAdminPin = document.getElementById("btn-toggle-admin-pin");
   const adminPinInput = document.getElementById("admin-pin-input");
@@ -214,8 +186,6 @@ function handleClientAuthSubmit(e) {
 
   const nameInput = document.getElementById("auth-name").value.trim();
   const phoneInput = document.getElementById("auth-phone").value.trim();
-  const passwordInput = document.getElementById("auth-password").value.trim();
-
   const normPhone = normalizePhone(phoneInput);
 
   if (!isValidKazakhstanPhone(phoneInput)) {
@@ -223,27 +193,10 @@ function handleClientAuthSubmit(e) {
     return;
   }
 
-  if (!isValidPassword(passwordInput)) {
-    showToast("Пароль должен быть от 6 символов и содержать хотя бы одну букву и одну цифру", "error");
-    return;
-  }
-
   let users = window.db.loadUsers();
-  let existingUser = users.find(u => u.phone === normPhone);
-
-  const pwdHash = secureHashSync(passwordInput);
+  let existingUser = users.find(u => u.phone === normPhone || (typeof normalizePhone === "function" && normalizePhone(u.phone) === normPhone));
 
   if (existingUser) {
-    if (existingUser.passwordHash && existingUser.passwordHash !== pwdHash && existingUser.password !== passwordInput) {
-      showToast("Неверный пароль! Попробуйте еще раз.", "error");
-      return;
-    }
-
-    if (!existingUser.passwordHash) {
-      existingUser.passwordHash = pwdHash;
-      window.db.saveUsers(users);
-    }
-
     const finalName = formatFullName(existingUser.name);
     currentUser = { name: finalName, phone: normPhone };
     window.db.setCurrentUser(currentUser);
@@ -257,7 +210,6 @@ function handleClientAuthSubmit(e) {
     const newUser = {
       name: finalName,
       phone: normPhone,
-      passwordHash: pwdHash,
       createdAt: new Date().toISOString()
     };
     users.push(newUser);

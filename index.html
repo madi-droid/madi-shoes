@@ -4,10 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; iframe-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://*.supabase.co; img-src 'self' data: https://images.unsplash.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' https://cdn.jsdelivr.net; frame-src 'self'; base-uri 'self'; form-action 'self'">
+
   <title>MADIYAR SHOES — Премиум каталог и Учет остатков</title>
-  <link rel="stylesheet" href="css/style.css?v=23">
+  <link rel="stylesheet" href="css/style.css?v=1005">
 </head>
 
 <body>
@@ -15,21 +15,40 @@
   <!-- Шапка сайта -->
   <header>
     <div class="container header-wrapper">
-      <div class="logo" id="btn-logo">
+      <button type="button" class="logo" id="btn-logo" aria-label="На главную страницу">
         <div class="logo-icon-container" style="display: flex; align-items: center; justify-content: center;">
           <img src="assets/images/logo.png?v=1" alt="Madiyar Shoes Logo"
-            style="width: 58px; height: 58px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--border-color); background: #ffffff;">
+            style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--border-color); background: #ffffff;">
         </div>
-        <span
-          style="font-family: var(--font-title); font-weight: 800; letter-spacing: 0.05em; margin-left: 12px; font-size: 18px;">MADIYAR</span>
-      </div>
+        <div style="display: flex; flex-direction: column; margin-left: 10px;">
+          <span style="font-family: var(--font-title); font-weight: 400; letter-spacing: 0.12em; font-size: 18px; color: var(--text-primary);">MADIYAR</span>
+          <span style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.38em; color: var(--primary); text-transform: uppercase; margin-top: 1px;">SHOES &bull; ЖЕТЫСАЙ</span>
+        </div>
+      </button>
 
       <nav class="nav-menu" id="nav-menu">
-        <span class="nav-link active" id="nav-catalog">Каталог</span>
-        <span class="nav-link" id="nav-about">О нас</span>
+        <button type="button" class="nav-link active" id="nav-catalog">Каталог</button>
+        <button type="button" class="nav-link" id="nav-about">О нас</button>
       </nav>
 
       <div class="header-actions">
+        <!-- Быстрая связь -->
+        <button class="btn-icon" id="btn-contact-quick" title="Быстрая связь">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+        </button>
+
+        <!-- Избранное -->
+        <button class="btn-icon" id="btn-favorites" title="Избранное" style="position: relative;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+          </svg>
+          <span class="badge-count d-none" id="fav-badge">0</span>
+        </button>
+
         <!-- Кнопка смены темы -->
         <button class="btn-icon" id="btn-theme-toggle" title="Сменить тему">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -63,38 +82,48 @@
   <!-- ==================== КЛИЕНТСКИЙ РАЗДЕЛ ==================== -->
   <main id="client-section">
 
-    <!-- 2. СТРАНИЦА КАТАЛОГА С ФИЛЬТРАМИ -->
+    <!-- 2. СТРАНИЦА КАТАЛОГА С ОБЪЕДИНЕННОЙ ПАНЕЛЬЮ ФИЛЬТРОВ -->
     <div id="page-catalog" class="client-page">
-      <!-- Поиск и слоган -->
-      <section class="hero-section" style="padding: 40px 0 20px;">
-        <div class="container">
-          <h1 class="hero-title">Каталог обуви MADIYAR</h1>
-          <div class="search-bar-container">
-            <svg class="search-icon-inside" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
-            <input type="text" class="search-input" id="search-input"
-              placeholder="Поиск по артикулу или названию обуви...">
-          </div>
-        </div>
-      </section>
+      
+      <!-- Заголовок и Объединенная Панель Поиска и Фильтров -->
+      <section class="container" style="padding-top: 36px; padding-bottom: 24px;">
+        <h1 class="hero-title" style="text-align: center; margin-bottom: 12px;">Обувь, которую <span style="color: var(--primary);">выбирают руками</span></h1>
+        <p class="hero-subtitle" style="text-align: center; margin-bottom: 28px;">Кожа, колодка и посадка — проверены до витрины. Найдите свою пару и забронируйте её в удобном бутике Жетысая.</p>
 
-      <!-- Фильтры -->
-      <section class="container">
-        <div class="filters-section">
+        <!-- Единая Премиум Карта Фильтров -->
+        <div class="filters-section unified-filters-card">
+          
+          <!-- Поисковая строка вверху панели -->
+          <div class="search-bar-row">
+            <div class="search-bar-container" style="max-width: 100%;">
+              <svg class="search-icon-inside" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+              <input type="text" class="search-input" id="search-input"
+                placeholder="Поиск по бренду или названию обуви (например: Etor)...">
+            </div>
+            
+            <button type="button" class="btn-secondary btn-reset-filters d-none" id="btn-reset-filters" title="Сбросить все фильтры">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              <span>Сбросить все</span>
+            </button>
+          </div>
+
+          <!-- Кнопка разворачивания на мобильных -->
           <div class="filters-toggle-bar">
-            <button type="button" class="btn-filters-toggle" id="btn-toggle-filters" aria-expanded="false">
+            <button type="button" class="btn-filters-toggle" id="btn-toggle-filters" aria-expanded="false" aria-controls="filters-grid-container mobile-filter-options">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-              <span>Фильтры и сортировка</span>
+              <span>Параметры и фильтры</span>
               <span class="filters-badge d-none" id="filters-active-badge">0</span>
               <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </button>
           </div>
+
           <div class="filters-grid" id="filters-grid-container">
-            <!-- Точка продаж -->
+            <!-- Выпадающие селекторы (Точка, Размер, Наличие, Цена, Сортировка) -->
             <div class="filter-group">
               <label class="filter-label">Точка продаж</label>
               <select class="filter-select" id="filter-location">
@@ -103,7 +132,7 @@
                 <option value="mall">Гранд Парк (1 блок, 10 бутик)</option>
               </select>
             </div>
-            <!-- Размер -->
+
             <div class="filter-group">
               <label class="filter-label">Размер</label>
               <select class="filter-select" id="filter-size">
@@ -111,16 +140,16 @@
                 <!-- Размеры добавятся динамически из JS -->
               </select>
             </div>
-            <!-- Сортировка -->
+
             <div class="filter-group">
-              <label class="filter-label">Сортировка</label>
-              <select class="filter-select" id="filter-sort">
-                <option value="default">По умолчанию</option>
-                <option value="price-asc">Сначала дешевые</option>
-                <option value="price-desc">Сначала дорогие</option>
-              </select>
+              <label class="filter-label">Цена (₸)</label>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="number" id="filter-price-min" min="0" placeholder="От ₸" class="filter-select filter-price-input" style="padding-right: 8px !important; padding-left: 10px !important; background-image: none; font-size: 13px;">
+                <span style="color: var(--text-muted); font-size: 13px;">—</span>
+                <input type="number" id="filter-price-max" min="0" placeholder="До ₸" class="filter-select filter-price-input" style="padding-right: 8px !important; padding-left: 10px !important; background-image: none; font-size: 13px;">
+              </div>
             </div>
-            <!-- Наличие -->
+
             <div class="filter-group">
               <label class="filter-label">Наличие</label>
               <select class="filter-select" id="filter-status">
@@ -129,55 +158,65 @@
               </select>
             </div>
           </div>
+
+          <!-- Чипсы мультивыбора Категорий, Пола, Сезона -->
+          <div class="chips-filters-wrapper mobile-filter-options" id="mobile-filter-options">
+            <!-- Пол -->
+            <div class="nav-filter-group">
+              <span class="nav-filter-label">Пол:</span>
+              <div class="nav-tabs" id="tabs-gender">
+                <button class="nav-tab-btn active" data-gender="all">Все</button>
+                <button class="nav-tab-btn" data-gender="мужской">Мужская</button>
+                <button class="nav-tab-btn" data-gender="женский">Женская</button>
+              </div>
+            </div>
+
+            <!-- Сезон -->
+            <div class="nav-filter-group">
+              <span class="nav-filter-label">Сезон:</span>
+              <div class="nav-tabs" id="tabs-season">
+                <button class="nav-tab-btn active" data-season="all">Все сезоны</button>
+                <button class="nav-tab-btn" data-season="зима">Зима</button>
+                <button class="nav-tab-btn" data-season="весна">Весна</button>
+                <button class="nav-tab-btn" data-season="лето">Лето</button>
+                <button class="nav-tab-btn" data-season="осень">Осень</button>
+              </div>
+            </div>
+
+            <!-- Горизонтально прокручиваемые Категории -->
+            <div class="nav-filter-group" style="align-items: flex-start;">
+              <span class="nav-filter-label" style="margin-top: 6px;">Категории:</span>
+              <div class="categories-scroll-wrapper nav-tabs" id="tabs-category">
+                <button class="nav-tab-btn active" data-category="all">Все</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Плашка активных тегов фильтрации -->
+          <div class="active-filter-tags-row d-none" id="active-filters-tags"></div>
         </div>
       </section>
 
-      <!-- Категории навигации (Пол, Сезон, Тип) -->
-      <section class="container" style="margin-bottom: 30px;">
-        <div class="filters-section" style="display:flex; flex-direction:column; gap:16px; padding: 20px;">
-          <!-- Селектор пола -->
-          <div class="nav-filter-group">
-            <span class="nav-filter-label">Пол:</span>
-            <div class="nav-tabs" id="tabs-gender">
-              <button class="nav-tab-btn active" data-gender="all">Все</button>
-              <button class="nav-tab-btn" data-gender="мужской">Мужская</button>
-              <button class="nav-tab-btn" data-gender="женский">Женская</button>
-            </div>
-          </div>
-
-          <!-- Селектор сезона -->
-          <div class="nav-filter-group">
-            <span class="nav-filter-label">Сезон:</span>
-            <div class="nav-tabs" id="tabs-season">
-              <button class="nav-tab-btn active" data-season="all">Все сезоны</button>
-              <button class="nav-tab-btn" data-season="зима">Зима</button>
-              <button class="nav-tab-btn" data-season="весна">Весна</button>
-              <button class="nav-tab-btn" data-season="лето">Лето</button>
-              <button class="nav-tab-btn" data-season="осень">Осень</button>
-            </div>
-          </div>
-
-          <!-- Селектор категории -->
-          <div class="nav-filter-group">
-            <span class="nav-filter-label">Категория:</span>
-            <div class="nav-tabs" id="tabs-category">
-              <button class="nav-tab-btn active" data-category="all">Все</button>
-              <button class="nav-tab-btn" data-category="кроссовки">Кроссовки</button>
-              <button class="nav-tab-btn" data-category="туфли">Туфли</button>
-              <button class="nav-tab-btn" data-category="кроксы">Кроксы</button>
-              <button class="nav-tab-btn" data-category="мокасины">Мокасины</button>
-              <button class="nav-tab-btn" data-category="сапоги">Сапоги</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Сетка товаров каталога -->
-      <section class="container">
+      <!-- Сетка товаров каталога с панелью сортировки -->
+      <section class="container" style="padding-top: 32px;">
         <div class="catalog-title-bar">
-          <h2 class="catalog-title">Модели в ассортименте</h2>
-          <div class="catalog-count" id="catalog-count">Найдено: 0 моделей</div>
+          <div>
+            <h2 class="catalog-title">Модели в ассортименте</h2>
+            <div class="catalog-count" id="catalog-count">Найдено: 0 моделей</div>
+          </div>
+
+          <!-- Видная сортировка рядом со счетчиком -->
+          <div class="catalog-sort-wrapper">
+            <label for="catalog-sort-select" class="sort-label">Сортировка:</label>
+            <select class="filter-select catalog-sort-select" id="catalog-sort-select">
+              <option value="default">По умолчанию</option>
+              <option value="price-asc">Сначала дешевле ↑</option>
+              <option value="price-desc">Сначала дороже ↓</option>
+              <option value="name-asc">По названию (А-Я)</option>
+            </select>
+          </div>
         </div>
+
         <div class="products-grid" id="products-grid">
           <!-- Карточки товаров заполняются динамически через JS -->
         </div>
@@ -292,61 +331,100 @@
       </section>
     </div>
 
-    <!-- Футер с секретной кнопкой админа -->
+    <!-- Футер публичного сайта -->
     <footer
       style="text-align: center; padding: 40px 0; color: var(--text-secondary); font-size: 14px; border-top: 1px dashed var(--border-color); margin-top: 60px;">
       <div class="container">
-        <p>© 2026 MADIYAR. Все права защищены. <span id="secret-admin-key"
-            style="cursor: pointer; opacity: 0.4; margin-left: 8px;" title="Панель учета">🔑</span></p>
+        <p>© 2026 MADIYAR SHOES. Премиум коллекция обуви. Все права защищены.</p>
       </div>
     </footer>
   </main>
 
 
-  <!-- ==================== АДМИНИСТРАТИВНЫЙ РАЗДЕЛ ==================== -->
-  <main class="container d-none" id="admin-section">
-    <div class="admin-layout">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-        <h2>Панель учета товаров и броней</h2>
-        <div style="display:flex; gap:8px; align-items:center;">
-          <button class="btn-secondary" id="btn-export-backup" style="font-size:13px; padding:8px 12px;">💾 Экспорт
-            БД</button>
-          <button class="btn-secondary" id="btn-import-backup" style="font-size:13px; padding:8px 12px;">📂 Импорт
-            БД</button>
-          <button class="btn-secondary" id="btn-exit-admin" style="font-size:13px; padding:8px 12px;">Выйти</button>
+  <!-- ==================== ПАНЕЛЬ СОТРУДНИКОВ (staff.html) ==================== -->
+  <main class="d-none" id="admin-section">
+    <div class="admin-luxury-wrapper">
+      
+      <!-- Бэк-офисный Хедер Control Center -->
+      <header class="admin-luxury-topbar">
+        <div class="admin-brand-info">
+          <div class="admin-logo-badge">
+            <span class="gold-crown-icon">👑</span>
+            <div class="admin-brand-text">
+              <span class="brand-title">MADIYAR CONTROL CENTER</span>
+              <span class="brand-subtitle">Панель управления для сотрудников</span>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <!-- Дашборд со статистикой -->
-      <div class="admin-dashboard-grid">
-        <div class="dash-card">
-          <div class="dash-value" id="dash-total-models">0</div>
-          <div class="dash-label">Всего моделей</div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-value" id="dash-bazaar-stock">0</div>
-          <div class="dash-label">Пар на Базаре «Кулпаршын»</div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-value" id="dash-mall-stock">0</div>
-          <div class="dash-label">Пар в Гранд Парке</div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-value" id="dash-pending-orders">0</div>
-          <div class="dash-label">Новых броней</div>
-        </div>
-      </div>
+        <div class="admin-topbar-controls">
+          <div class="admin-user-badge" id="admin-logged-user-badge">
+            <span class="user-status-dot online"></span>
+            <span id="admin-user-display-name">Сотрудник</span>
+            <span class="user-role-tag" id="admin-user-display-role">Админ</span>
+          </div>
 
-      <!-- Вкладки управления -->
-      <div class="admin-tabs">
-        <button class="admin-tab active" id="tab-products">Товары</button>
-        <button class="admin-tab" id="tab-orders">Заказы и бронирование</button>
-        <button class="admin-tab" id="tab-sales">Оффлайн-продажи</button>
-        <button class="admin-tab" id="tab-backup">Резервная копия</button>
-      </div>
+          <div class="admin-action-btns">
+            <button class="btn-admin-action" id="btn-export-backup" title="Экспорт локальной БД">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+              <span>Экспорт БД</span>
+            </button>
+            <button class="btn-admin-action" id="btn-import-backup" title="Импорт базы данных">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+              <span>Импорт БД</span>
+            </button>
+            <button class="btn-admin-logout" id="btn-exit-admin" title="Выйти из панели сотрудников">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+              <span>Выйти</span>
+            </button>
+          </div>
+        </div>
+      </header>
 
-      <!-- Вкладка 1: Список товаров -->
-      <div class="admin-panel-content active" id="panel-products">
+      <div class="container admin-container">
+        <!-- Дашборд со статистикой в тёмном люксовом стиле -->
+        <div class="admin-dashboard-grid">
+          <div class="dash-card luxury-card">
+            <div class="dash-icon-glow">👟</div>
+            <div>
+              <div class="dash-value" id="dash-total-models">0</div>
+              <div class="dash-label">Моделей в каталоге</div>
+            </div>
+          </div>
+          <div class="dash-card luxury-card">
+            <div class="dash-icon-glow">🏬</div>
+            <div>
+              <div class="dash-value" id="dash-bazaar-stock">0</div>
+              <div class="dash-label">Пар (Базар «Кулпаршын»)</div>
+            </div>
+          </div>
+          <div class="dash-card luxury-card">
+            <div class="dash-icon-glow">🏢</div>
+            <div>
+              <div class="dash-value" id="dash-mall-stock">0</div>
+              <div class="dash-label">Пар (Гранд Парк)</div>
+            </div>
+          </div>
+          <div class="dash-card luxury-card">
+            <div class="dash-icon-glow">📋</div>
+            <div>
+              <div class="dash-value" id="dash-pending-orders">0</div>
+              <div class="dash-label">Новых броней</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Вкладки управления -->
+        <div class="admin-tabs luxury-tabs">
+          <button class="admin-tab active" id="tab-products">📦 Товары и Остатки</button>
+          <button class="admin-tab" id="tab-orders">📝 Заявки и Брони</button>
+          <button class="admin-tab" id="tab-sales">💰 Касса и Продажи</button>
+          <button class="admin-tab" id="tab-staff">👥 Сотрудники</button>
+          <button class="admin-tab" id="tab-backup">💾 Резервная Копия</button>
+        </div>
+
+        <!-- Вкладка 1: Список товаров -->
+        <div class="admin-panel-content active" id="panel-products">
         <div class="admin-actions-row">
           <h3>Каталог товаров</h3>
           <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
@@ -457,7 +535,7 @@
               style="margin-top: 0; margin-bottom: 16px; font-family: var(--font-title); font-size: 18px; color: var(--text-primary);">
               Записать продажу обуви</h4>
 
-            <form id="offline-sale-form" onsubmit="event.preventDefault(); handleOfflineSaleSubmit();">
+            <form id="offline-sale-form">
               <div style="display: flex; gap: 16px; flex-wrap: wrap;">
                 <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 14px; position: relative;">
                   <label class="form-label">Поиск модели по артикулу</label>
@@ -585,6 +663,37 @@
           </table>
         </div>
       </div>
+
+      <!-- Вкладка 4: Управление продавцами -->
+      <div class="admin-panel-content" id="panel-staff">
+        <div class="admin-actions-row">
+          <h3>Управление продавцами и доступом</h3>
+          <button class="btn-primary" id="btn-add-staff-modal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="16" x2="22" y1="11" y2="11"/>
+            </svg>
+            <span>Добавить сотрудника</span>
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ФИО Сотрудника</th>
+                <th>Телефон</th>
+                <th>Роль</th>
+                <th>Точка</th>
+                <th>Статус</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody id="admin-staff-list">
+              <!-- Заполняется динамически -->
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
     </div>
   </main>
@@ -593,7 +702,7 @@
   <!-- ==================== МОДАЛЬНЫЕ ОКНА ==================== -->
 
   <!-- 1. Модальное окно деталей товара (Client View) -->
-  <div class="modal-overlay" id="modal-product-details">
+  <div class="modal-overlay" id="modal-product-details" role="dialog" aria-modal="true" aria-labelledby="details-name">
     <div class="modal-container">
       <button class="modal-close"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
           fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -607,7 +716,6 @@
         <div class="details-info">
           <div class="details-brand" id="details-brand"></div>
           <h2 class="details-name" id="details-name"></h2>
-          <div class="details-article" id="details-article"></div>
           <p class="details-description" id="details-description"></p>
           <div class="details-price" id="details-price"></div>
 
@@ -651,7 +759,7 @@
               Забронировать
             </button>
             <button class="btn-buy-now" id="btn-buy-action" disabled>
-              <span>Купить с Kaspi</span>
+              <span>Оставить заявку Kaspi</span>
             </button>
           </div>
           <span style="font-size: 11px; color: var(--text-muted); margin-top: 10px; text-align: center;">При
@@ -663,7 +771,7 @@
   </div>
 
   <!-- 2. Модальное окно авторизации/профиля (Client Auth) -->
-  <div class="modal-overlay" id="modal-auth-profile">
+  <div class="modal-overlay" id="modal-auth-profile" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
     <div class="modal-container" style="max-width: 500px;">
       <button class="modal-close"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
           fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -673,10 +781,10 @@
 
       <!-- Форма входа/регистрации (показывается гостю) -->
       <div class="auth-box" id="auth-form-container">
-        <h2 class="auth-title" id="auth-modal-title">Вход или Регистрация</h2>
-        <p class="auth-desc" id="auth-modal-desc">Укажите ваш номер телефона, имя и пароль для создания аккаунта или входа.</p>
+        <h2 class="auth-title" id="auth-modal-title">Данные для бронирования</h2>
+        <p class="auth-desc" id="auth-modal-desc">Укажите имя и телефон. Данные сохранятся только на этом устройстве для просмотра заявок.</p>
 
-        <form id="auth-form" onsubmit="event.preventDefault();">
+        <form id="auth-form">
           <div class="form-group" id="name-group">
             <label class="form-label">Ваши Имя и Фамилия</label>
             <input type="text" class="form-input" id="auth-name" placeholder="Например, Арман Сериков" required>
@@ -685,20 +793,6 @@
           <div class="form-group">
             <label class="form-label">Номер телефона</label>
             <input type="tel" class="form-input" id="auth-phone" placeholder="+7 (777) 123-45-67" required>
-          </div>
-
-          <div class="form-group" id="password-group">
-            <label class="form-label">Пароль</label>
-            <div style="position: relative; width: 100%;">
-              <input type="password" class="form-input" id="auth-password" placeholder="Минимум 6 символов (буквы и цифры)" required autocomplete="current-password" style="padding-right: 42px;">
-              <button type="button" id="btn-toggle-password" title="Показать/скрыть пароль" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;">
-                <svg id="eye-icon-auth" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-              </button>
-            </div>
-            <span style="font-size: 11px; color: var(--text-muted); display:block; margin-top:4px;">Пароль должен содержать от 6 символов, хотя бы одну букву и цифру</span>
           </div>
 
           <button type="submit" class="btn-submit" id="btn-auth-submit">Продолжить</button>
@@ -735,16 +829,16 @@
         <h2 class="auth-title">Вход в Панель Учета</h2>
         <p class="auth-desc">Доступ только для владельцев и продавцов магазина.</p>
 
-        <form id="admin-login-form" onsubmit="event.preventDefault();">
+        <form id="admin-login-form">
           <div class="form-group">
             <label class="form-label">Номер телефона администратора</label>
             <input type="tel" class="form-input" id="admin-phone-input" placeholder="+7 (701) 999-88-77" required>
           </div>
           <div class="form-group">
-            <label class="form-label">Введите ПИН-код</label>
+            <label class="form-label">Пароль сотрудника</label>
             <div style="position: relative; width: 100%;">
-              <input type="password" class="form-input" id="admin-pin-input" placeholder="Введите пин-код" required style="padding-right: 42px;">
-              <button type="button" id="btn-toggle-admin-pin" title="Показать/скрыть ПИН-код" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;">
+              <input type="password" autocomplete="current-password" minlength="8" maxlength="64" class="form-input" id="admin-pin-input" placeholder="Пароль сотрудника" required style="padding-right: 42px;">
+              <button type="button" id="btn-toggle-admin-pin" title="Показать или скрыть пароль" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;">
                 <svg id="eye-icon-admin" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
                   <circle cx="12" cy="12" r="3"/>
@@ -759,7 +853,7 @@
   </div>
 
   <!-- 4. Модальное окно симуляции оплаты Kaspi (QR / Red / Credit) -->
-  <div class="modal-overlay" id="modal-kaspi-sim">
+  <div class="modal-overlay" id="modal-kaspi-sim" role="dialog" aria-modal="true">
     <div class="modal-container kaspi-modal-container">
       <button class="modal-close"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
           fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -805,7 +899,7 @@
         <h2 id="product-modal-title">Добавление нового товара</h2>
       </div>
 
-      <form id="product-edit-form" onsubmit="event.preventDefault();">
+      <form id="product-edit-form">
         <input type="hidden" id="edit-product-id">
         <div class="edit-form-grid">
 
@@ -837,8 +931,9 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Фото товара (загрузить из галереи)</label>
+            <label class="form-label">Фото товара (загрузить файл или указать URL)</label>
             <input type="file" class="form-input" id="edit-product-file" accept="image/*" style="padding: 8px 12px;">
+            <input type="text" class="form-input" id="edit-product-image-url" placeholder="Или вставьте прямую URL-ссылку..." style="margin-top: 6px;">
             <input type="hidden" id="edit-product-image">
             <div id="product-image-preview"
               style="margin-top: 10px; display: none; width: 60px; height: 60px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); overflow: hidden; align-items: center; justify-content: center; background: #1e293b;">
@@ -904,6 +999,123 @@
     </div>
   </div>
 
+  <!-- Модальное окно управления сотрудниками -->
+  <div class="modal-overlay" id="modal-admin-staff-edit">
+    <div class="modal-content" style="max-width: 500px; border-radius: var(--radius-md); overflow: hidden; position: relative;">
+      <button class="modal-close-btn">&times;</button>
+      <div style="padding: 24px; border-bottom: 1px solid rgba(255, 215, 0, 0.25);">
+        <h2 id="staff-modal-title" style="margin: 0; font-family: var(--font-title); font-size: 20px;">Добавление сотрудника</h2>
+      </div>
+
+      <form id="staff-edit-form" style="padding: 24px;">
+        <input type="hidden" id="edit-staff-id">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label" style="display:block; margin-bottom: 6px; font-size: 13px; font-weight: 600;">ФИО Продавца</label>
+          <input type="text" class="form-input" id="edit-staff-name" placeholder="Например: Арман Сериков" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label" style="display:block; margin-bottom: 6px; font-size: 13px; font-weight: 600;">Номер телефона РК</label>
+          <input type="text" class="form-input" id="edit-staff-phone" placeholder="+7 (707) 123-45-67" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label" style="display:block; margin-bottom: 6px; font-size: 13px; font-weight: 600;">Пароль сотрудника</label>
+          <input type="password" autocomplete="new-password" minlength="8" maxlength="64" class="form-input" id="edit-staff-pin" placeholder="8–64 букв и цифр" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label" style="display:block; margin-bottom: 6px; font-size: 13px; font-weight: 600;">Роль</label>
+          <div class="form-btn-group" id="edit-staff-role-group">
+            <button type="button" class="form-group-btn active" data-value="seller">Продавец</button>
+            <button type="button" class="form-group-btn" data-value="admin">Администратор</button>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 24px;">
+          <label class="form-label" style="display:block; margin-bottom: 6px; font-size: 13px; font-weight: 600;">Привязанная точка продаж</label>
+          <div class="form-btn-group" id="edit-staff-location-group">
+            <button type="button" class="form-group-btn active" data-value="bazaar">Базар</button>
+            <button type="button" class="form-group-btn" data-value="mall">Гранд Парк</button>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px;">
+          <button type="button" class="btn-secondary" id="btn-cancel-staff">Отмена</button>
+          <button type="submit" class="btn-primary" id="btn-save-staff">Сохранить сотрудника</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. Модальное окно Быстрой связи (WhatsApp / Звонок продавцу) -->
+  <div class="modal-overlay" id="modal-quick-contact" role="dialog" aria-modal="true">
+    <div class="modal-container" style="max-width: 480px;">
+      <button class="modal-close"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg></button>
+      <div style="padding: 24px;">
+        <h2 style="font-family: var(--font-title); font-size: 22px; margin-bottom: 8px;">Быстрая связь с бутикам MADIYAR</h2>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 24px;">Выберите интересующий вас бутик для консультации по остаткам, выбору размера и доставке:</p>
+
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <!-- Точка 1: Базар -> Рыскул -->
+          <div style="background: var(--bg-card); padding: 20px; border-radius: 2px; border: 1px solid var(--border-color);" class="aura">
+            <h4 style="margin-bottom: 4px; font-family: var(--font-title); font-size: 17px; color: var(--text-primary);">Базар «Кулпаршын» (25 бутик)</h4>
+            <p style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.15em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 14px;">Рыскул / Администрация</p>
+            <div style="display: flex; gap: 10px;">
+              <a href="https://wa.me/77027570109?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%AF%20%D0%BF%D0%BE%20%D0%BF%D0%BE%D0%B2%D0%BE%D0%B4%D1%83%20%D0%BE%D0%B1%D1%83%D0%B2%D0%B8%20MADIYAR" target="_blank" class="aura" style="flex: 1.2; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: rgba(37, 211, 102, 0.12); border: 1px solid rgba(37, 211, 102, 0.4); color: #25D366; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 10px 14px; border-radius: 2px; text-decoration: none;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.99c-.002 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413"/></svg>
+                WhatsApp
+              </a>
+              <a href="tel:+77027570109" class="aura" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 14px; border-radius: 2px; text-decoration: none;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                Позвонить
+              </a>
+            </div>
+          </div>
+
+          <!-- Точка 2: Гранд Парк -> Жидебай -->
+          <div style="background: var(--bg-card); padding: 20px; border-radius: 2px; border: 1px solid var(--border-color);" class="aura">
+            <h4 style="margin-bottom: 4px; font-family: var(--font-title); font-size: 17px; color: var(--text-primary);">Гранд Парк (1 блок, 10 бутик)</h4>
+            <p style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.15em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 14px;">Жидебай / Администрация</p>
+            <div style="display: flex; gap: 10px;">
+              <a href="https://wa.me/77757157560?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%AF%20%D0%BF%D0%BE%20%D0%BF%D0%BE%D0%B2%D0%BE%D0%B4%D1%83%20%D0%BE%D0%B1%D1%83%D0%B2%D0%B8%20MADIYAR" target="_blank" class="aura" style="flex: 1.2; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: rgba(37, 211, 102, 0.12); border: 1px solid rgba(37, 211, 102, 0.4); color: #25D366; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 10px 14px; border-radius: 2px; text-decoration: none;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.99c-.002 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413"/></svg>
+                WhatsApp
+              </a>
+              <a href="tel:+77757157560" class="aura" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 14px; border-radius: 2px; text-decoration: none;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                Позвонить
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Модальное окно Избранных товаров -->
+  <div class="modal-overlay" id="modal-favorites-list" role="dialog" aria-modal="true">
+    <div class="modal-container" style="max-width: 800px;">
+      <button class="modal-close"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg></button>
+      <div style="padding: 24px;">
+        <h2 style="font-family: var(--font-title); font-size: 22px; margin-bottom: 6px;">Избранные модели</h2>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">Сохраненные модели обуви для быстрого доступа:</p>
+
+        <div class="products-grid" id="favorites-products-grid" style="margin-bottom: 0;">
+          <!-- Карточки избранного выводятся из JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Мобильная нижняя навигационная панель (Bottom Nav) -->
   <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
     <button class="bottom-nav-item active" id="bnav-catalog" title="Каталог">
@@ -936,14 +1148,16 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Подключение скриптов -->
-  <script src="js/db.js?v=23"></script>
-  <script src="js/utils.js?v=23"></script>
-  <script src="js/auth.js?v=23"></script>
-  <script src="js/catalog.js?v=23"></script>
-  <script src="js/orders.js?v=23"></script>
-  <script src="js/admin.js?v=23"></script>
-  <script src="js/sales.js?v=23"></script>
-  <script src="js/app.js?v=23"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js?v=25"></script>
+  <script src="js/utils.js?v=27"></script>
+  <script src="js/db.js?v=25"></script>
+  <script src="js/auth.js?v=25"></script>
+  <script src="js/catalog.js?v=26"></script>
+  <script src="js/orders.js?v=25"></script>
+  <script src="js/admin.js?v=25"></script>
+  <script src="js/sales.js?v=25"></script>
+  <script src="js/app.js?v=26"></script>
 </body>
 
 </html>

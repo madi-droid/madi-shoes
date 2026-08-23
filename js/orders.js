@@ -1,4 +1,4 @@
-// MADIYAR SHOES — модуль заказов, бронирования и оплаты (orders.js)
+// MADIYAR SHOES — модуль заявок клиентов и бронирования (orders.js)
 
 function handleBookingFlow(actionType) {
   if (!currentSelectedProduct || !currentSelectedSize || !currentSelectedLocation) {
@@ -31,7 +31,7 @@ function handleBookingFlow(actionType) {
   }
 }
 
-function executeBooking() {
+async function executeBooking() {
   if (isOrderProcessing) return;
   isOrderProcessing = true;
 
@@ -49,17 +49,12 @@ function executeBooking() {
 
     const realPrice = Math.max(0, parseInt(canonicalProduct.price) || 0);
     const locKey = currentSelectedLocation === "mall" ? "mall" : "bazaar";
-    const availableStock = canonicalProduct.stock?.[locKey]?.[currentSelectedSize] || 0;
 
-    if (availableStock <= 0) {
-      showToast("К сожалению, этот размер только что забрали.", "error");
-      return;
-    }
-
-    const orderId = "ORD-" + Date.now().toString(36).toUpperCase() + "-" + Math.floor(100 + Math.random() * 900);
+    const orderId = "RES-" + Date.now().toString(36).toUpperCase() + "-" + Math.floor(100 + Math.random() * 900);
+    const userPhoneNorm = typeof normalizePhone === "function" ? normalizePhone(currentUser.phone) : currentUser.phone;
     const newOrder = {
       id: orderId,
-      userPhone: currentUser.phone,
+      userPhone: userPhoneNorm,
       userName: safeText(currentUser.name, 100),
       productId: canonicalProduct.id,
       productName: safeText(canonicalProduct.name, 120),
@@ -68,18 +63,46 @@ function executeBooking() {
       location: locKey,
       price: realPrice,
       type: "Бронь",
-      status: "Новый",
+      status: "new",
       date: new Date().toISOString()
     };
 
-    canonicalProduct.stock[locKey][currentSelectedSize]--;
-    window.db.saveProducts(products);
+    // Сервер атомарно создаёт резерв и временно удерживает одну пару.
+    const supabase = window.AppConfig ? window.AppConfig.getSupabaseClient() : null;
+    if (supabase) {
+      try {
+        const { error } = await supabase.rpc('create_reservation', {
+          p_product_id: canonicalProduct.id,
+          p_size: parseInt(currentSelectedSize, 10),
+          p_location: locKey,
+          p_customer_name: currentUser.name,
+          p_customer_phone: currentUser.phone,
+          p_request_type: 'fitting',
+          p_comment: null
+        });
 
+        if (error) {
+          console.warn("Ошибка сохранения заявки в Supabase reservations:", error);
+          showToast("Не удалось подтвердить бронь на сервере", "error");
+          return;
+        }
+      } catch (err) {
+        console.warn("Ошибка соединения с Supabase:", err);
+        showToast("Нет соединения с сервером. Бронь не была создана.", "error");
+        return;
+      }
+    }
+
+    orders = window.db ? window.db.loadOrders() : (orders || []);
     orders.unshift(newOrder);
     window.db.saveOrders(orders);
 
+    if (typeof renderAdminOrdersTable === "function") {
+      try { renderAdminOrdersTable(); } catch (e) {}
+    }
+
     closeAllModals();
-    showToast(`Заказ ${orderId} успешно создан! Ждем вас на примерку.`, "success");
+    showToast(`Заявка ${orderId} создана! Продавец свяжется с вами для уточнения время примерки.`, "success");
 
     currentSelectedProduct = null;
     currentSelectedSize = null;
@@ -112,7 +135,7 @@ function openKaspiPaymentSim() {
   openModal("modal-kaspi-sim");
 }
 
-function processKaspiPaymentConfirm() {
+async function processKaspiPaymentConfirm() {
   if (isOrderProcessing) return;
   isOrderProcessing = true;
 
@@ -130,12 +153,6 @@ function processKaspiPaymentConfirm() {
 
     const realPrice = Math.max(0, parseInt(canonicalProduct.price) || 0);
     const locKey = currentSelectedLocation === "mall" ? "mall" : "bazaar";
-    const availableStock = canonicalProduct.stock?.[locKey]?.[currentSelectedSize] || 0;
-
-    if (availableStock <= 0) {
-      showToast("К сожалению, этот размер закончился.", "error");
-      return;
-    }
 
     const kaspiPhoneInput = document.getElementById("kaspi-phone-input");
     const kaspiPhoneRaw = kaspiPhoneInput ? kaspiPhoneInput.value.trim() : "";
@@ -154,10 +171,11 @@ function processKaspiPaymentConfirm() {
       return;
     }
 
-    const orderId = "ORD-" + Date.now().toString(36).toUpperCase() + "-" + Math.floor(100 + Math.random() * 900);
+    const orderId = "RES-" + Date.now().toString(36).toUpperCase() + "-" + Math.floor(100 + Math.random() * 900);
+    const userPhoneNorm = typeof normalizePhone === "function" ? normalizePhone(currentUser.phone) : currentUser.phone;
     const newOrder = {
       id: orderId,
-      userPhone: currentUser.phone,
+      userPhone: userPhoneNorm,
       userName: safeText(currentUser.name, 100),
       productId: canonicalProduct.id,
       productName: safeText(canonicalProduct.name, 120),
@@ -167,18 +185,46 @@ function processKaspiPaymentConfirm() {
       price: realPrice,
       type: "Kaspi",
       kaspiPhone: kaspiPhone,
-      status: "Новый",
+      status: "new",
       date: new Date().toISOString()
     };
 
-    canonicalProduct.stock[locKey][currentSelectedSize]--;
-    window.db.saveProducts(products);
+    // Сервер атомарно создаёт резерв и временно удерживает одну пару.
+    const supabase = window.AppConfig ? window.AppConfig.getSupabaseClient() : null;
+    if (supabase) {
+      try {
+        const { error } = await supabase.rpc('create_reservation', {
+          p_product_id: canonicalProduct.id,
+          p_size: parseInt(currentSelectedSize, 10),
+          p_location: locKey,
+          p_customer_name: currentUser.name,
+          p_customer_phone: currentUser.phone,
+          p_request_type: 'kaspi_manual_payment',
+          p_comment: kaspiPhone
+        });
 
+        if (error) {
+          console.warn("Ошибка отправки заявки Kaspi в Supabase:", error);
+          showToast("Не удалось подтвердить заявку на сервере", "error");
+          return;
+        }
+      } catch (err) {
+        console.warn("Ошибка сети при отправке в Supabase:", err);
+        showToast("Нет соединения с сервером. Заявка не была создана.", "error");
+        return;
+      }
+    }
+
+    orders = window.db ? window.db.loadOrders() : (orders || []);
     orders.unshift(newOrder);
     window.db.saveOrders(orders);
 
+    if (typeof renderAdminOrdersTable === "function") {
+      try { renderAdminOrdersTable(); } catch (e) {}
+    }
+
     closeAllModals();
-    showToast("✅ Номер отправлен! Продавец свяжется с вами и отправит запрос на оплату (Kaspi).", "success");
+    showToast("Номер отправлен! Продавец свяжется с вами и выставит счет на оплату.", "success");
 
     currentSelectedProduct = null;
     currentSelectedSize = null;
@@ -199,10 +245,16 @@ function renderClientOrders() {
   if (!currentUser) return;
 
   orders = window.db.loadOrders();
-  const myOrders = orders.filter(o => o.userPhone === currentUser.phone);
+  const cPhoneNorm = typeof normalizePhone === "function" ? normalizePhone(currentUser.phone) : currentUser.phone;
+
+  const myOrders = orders.filter(o => {
+    if (!o || !o.userPhone) return false;
+    const oPhoneNorm = typeof normalizePhone === "function" ? normalizePhone(o.userPhone) : o.userPhone;
+    return oPhoneNorm === cPhoneNorm || o.userPhone === currentUser.phone || o.userPhone === cPhoneNorm;
+  });
 
   if (myOrders.length === 0) {
-    const emptyP = createEl("p", "", "У вас пока нет активных заказов.");
+    const emptyP = createEl("p", "", "У вас пока нет активных заявок.");
     emptyP.style.cssText = "color:var(--text-secondary); text-align:center; padding: 20px;";
     container.appendChild(emptyP);
     return;
@@ -214,17 +266,18 @@ function renderClientOrders() {
 
     let statusText = o.status;
     let badgeClass = "badge-new";
-    if (o.status === "Оплачен") badgeClass = "badge-paid";
-    else if (o.status === "Подтвержден") badgeClass = "badge-confirmed";
-    else if (o.status === "Выдан") badgeClass = "badge-completed";
-    else if (o.status === "Отменен") badgeClass = "badge-completed";
+    if (o.status === "paid" || o.status === "Оплачен") { statusText = "Оплачен"; badgeClass = "badge-paid"; }
+    else if (o.status === "contacted" || o.status === "Подтвержден") { statusText = "Подтвержден"; badgeClass = "badge-confirmed"; }
+    else if (o.status === "completed" || o.status === "Выдан") { statusText = "Выполнен"; badgeClass = "badge-completed"; }
+    else if (o.status === "cancelled" || o.status === "Отменен") { statusText = "Отменен"; badgeClass = "badge-completed"; }
+    else { statusText = "Новая заявка"; }
 
     const locText = o.location === "bazaar" ? "Базар Кулпаршин (25 бутик)" : "Гранд Парк (1б, 10б)";
 
     const headerRow = document.createElement("div");
     headerRow.className = "order-header-row";
     const orderLabel = document.createElement("span");
-    orderLabel.textContent = `Заказ: ${safeText(o.id, 30)}`;
+    orderLabel.textContent = `Заявка: ${safeText(o.id, 30)}`;
     const statusBadge = document.createElement("span");
     statusBadge.className = `order-status-badge ${badgeClass}`;
     statusBadge.textContent = statusText;
@@ -274,7 +327,7 @@ function renderClientOrders() {
     footerDiv.style.cssText = "display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--border-color); padding-top:10px; font-size:13px;";
     const dateSpan = document.createElement("span");
     dateSpan.style.color = "var(--text-muted)";
-    
+
     let dateStr = o.date;
     try {
       if (o.date && o.date.includes("T")) {

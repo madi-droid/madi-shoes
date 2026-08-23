@@ -1,65 +1,76 @@
-/* Премиум стили для интернет-магазина обуви (style.css) */
+/* Премиум стили для интернет-магазина обуви MADIYAR SHOES (style.css) */
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Prata&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Цветовая схема Plenkacore (Теплый бежевый / винтажная бумага по умолчанию) */
-  --bg-main: #dfd8c0;
-  --bg-surface: rgba(250, 246, 233, 0.7);
-  --bg-card: #ebe5d0;
-  --bg-modal: #faf7ee;
-  --border-color: rgba(92, 77, 55, 0.18);
-  --border-glow: rgba(162, 136, 96, 0.2);
-  --text-primary: #2a2215;
-  --text-secondary: #5c4d37;
-  --text-muted: #8c7e68;
+  /* Цветовая схема Dark Vintage (Тёмный табачно-золотой фон Figma Make по умолчанию) */
+  --bg-main: #1c1710;
+  --bg-deep: #14100b;
+  --bg-surface: rgba(40, 33, 25, 0.85);
+  --bg-card: #282119;
+  --bg-card-soft: #322a20;
+  --bg-modal: #251e16;
   
-  --primary: #947a54;
-  --primary-hover: #7b623e;
-  --primary-glow: rgba(148, 122, 84, 0.25);
+  --border-color: rgba(194, 163, 112, 0.22);
+  --border-glow: rgba(194, 163, 112, 0.45);
   
-  --accent-cyan: #558791;
-  --accent-green: #678c59;
-  --accent-red: #b95858;
-  --accent-gold: #c29d4f;
+  --text-primary: #f5efdf;
+  --text-secondary: #d8cea9;
+  --text-muted: #a8977c;
+  
+  --primary: #c2a370;
+  --primary-hover: #e0c48f;
+  --primary-glow: rgba(194, 163, 112, 0.4);
+  
+  --accent-cyan: #436e78;
+  --accent-green: #4d7041;
+  --accent-red: #b94242;
+  --accent-gold: #c2a370;
   
   /* Kaspi брендовые цвета */
   --kaspi-red: #e63939;
   --kaspi-red-hover: #c92c2c;
   --kaspi-bg: #fff5f5;
   
-  --font-title: 'Outfit', sans-serif;
-  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-title: 'Prata', Georgia, serif;
+  --font-body: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
   
-  --shadow-sm: 0 2px 8px rgba(42, 34, 21, 0.06);
-  --shadow-md: 0 8px 24px rgba(42, 34, 21, 0.1);
-  --shadow-lg: 0 16px 40px rgba(42, 34, 21, 0.15);
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
   
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Четкие архитектурные квадратные рамки в стиле Figma */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  
+  --transition: all 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Alternative Light Theme (Vintage Dark Mode) */
+/* Plenkacore Light (Теплая винтажная бумага / Светлая тема) */
 [data-theme="light"] {
-  --bg-main: #211c14;
-  --bg-surface: rgba(43, 37, 28, 0.7);
-  --bg-card: #2e261d;
-  --bg-modal: #2b231a;
-  --border-color: rgba(226, 218, 194, 0.14);
-  --border-glow: rgba(162, 136, 96, 0.15);
-  --text-primary: #e5dec9;
-  --text-secondary: #c2b9a3;
-  --text-muted: #8c826e;
+  --bg-main: #ddd0b6;
+  --bg-deep: #cbbb9c;
+  --bg-surface: rgba(239, 230, 209, 0.88);
+  --bg-card: #efe6d1;
+  --bg-card-soft: #e5d9be;
+  --bg-modal: #faf4e8;
   
-  --primary: #a28860;
-  --primary-hover: #bda27a;
-  --primary-glow: rgba(162, 136, 96, 0.3);
+  --border-color: rgba(107, 78, 30, 0.22);
+  --border-glow: rgba(107, 78, 30, 0.45);
   
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.45);
+  --text-primary: #2b2318;
+  --text-secondary: #6d5c44;
+  --text-muted: #8c785d;
+  
+  --primary: #8a6326;
+  --primary-hover: #6f4e1a;
+  --primary-glow: rgba(138, 99, 38, 0.35);
+  
+  --shadow-sm: 0 2px 8px rgba(43, 35, 24, 0.08);
+  --shadow-md: 0 8px 24px rgba(43, 35, 24, 0.12);
+  --shadow-lg: 0 16px 40px rgba(43, 35, 24, 0.18);
 }
 
 /* Сброс стилей */
@@ -77,12 +88,19 @@ body {
   overflow-x: hidden;
   transition: background-color 0.5s ease, color 0.3s ease;
   min-height: 100vh;
+  background-image:
+    radial-gradient(120% 70% at 50% -12%, rgba(194, 163, 112, 0.16), transparent 62%),
+    radial-gradient(60% 45% at 88% 8%, rgba(194, 163, 112, 0.07), transparent 70%),
+    repeating-linear-gradient(58deg, rgba(0, 0, 0, 0.05) 0px, rgba(0, 0, 0, 0.05) 1px, transparent 1px, transparent 4px),
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.14) 0.6px, transparent 1.2px);
+  background-size: 100% 100%, 100% 100%, auto, 7px 7px;
+  background-attachment: fixed;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-title);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 400;
+  letter-spacing: -0.01em;
 }
 
 a {
@@ -197,26 +215,28 @@ header {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .btn-icon {
-  background: transparent;
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
 .btn-icon:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--text-muted);
+  background: var(--bg-card);
+  border-color: var(--accent-gold);
+  color: var(--primary);
   transform: translateY(-2px);
 }
 
@@ -252,24 +272,28 @@ header {
   box-shadow: 0 4px 15px var(--primary-glow);
 }
 
-/* Главный блок поиска и промо */
+/* Главный заголовок в шрифте Prata из Figma */
 .hero-section {
   padding: 60px 0 40px;
   text-align: center;
 }
 
 .hero-title {
-  font-size: 42px;
-  font-weight: 800;
+  font-family: var(--font-title);
+  font-size: 48px;
+  font-weight: 400;
   margin-bottom: 16px;
-  line-height: 1.2;
+  line-height: 1.15;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 .hero-subtitle {
   color: var(--text-secondary);
   max-width: 600px;
   margin: 0 auto 32px;
-  font-size: 16px;
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 .search-bar-container {
@@ -284,15 +308,15 @@ header {
   border: 1px solid var(--border-color);
   color: var(--text-primary);
   padding: 16px 24px 16px 54px;
-  border-radius: var(--radius-lg);
-  font-size: 16px;
-  transition: var(--transition);
+  border-radius: 2px;
+  font-size: 15px;
+  transition: all 0.3s ease;
   box-shadow: var(--shadow-sm);
 }
 
 .search-input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px var(--primary-glow);
+  box-shadow: 0 0 0 1px var(--primary), 0 0 20px -4px rgba(194, 163, 112, 0.45);
 }
 
 .search-icon-inside {
@@ -304,16 +328,218 @@ header {
   pointer-events: none;
 }
 
-/* Блок фильтров (Filters) */
+/* Блок фильтров (Unified Filters Card - Figma Architectural Style) */
 .filters-section {
   margin-bottom: 40px;
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   padding: 24px;
-  border-radius: var(--radius-lg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: var(--shadow-sm);
+  border-radius: 2px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.filters-toggle-bar {
+  display: none;
+}
+
+.btn-filters-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-filters-toggle .chevron-icon {
+  margin-left: auto;
+  transition: transform 0.3s ease;
+}
+
+.btn-filters-toggle[aria-expanded="true"] .chevron-icon {
+  transform: rotate(180deg);
+}
+
+.badge-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--accent-red);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 10px;
+  line-height: 1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.filters-badge {
+  background: var(--primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+/* Единая карта фильтров */
+.unified-filters-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+}
+
+.search-bar-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.search-bar-row .search-bar-container {
+  flex: 1;
+}
+
+.btn-reset-filters {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--accent-red);
+  color: var(--accent-red);
+  background: transparent;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+
+.btn-reset-filters:hover {
+  background: var(--accent-red);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(185, 66, 66, 0.3);
+}
+
+.chips-filters-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.nav-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-filter-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  min-width: 130px;
+}
+
+.nav-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.nav-tab-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  user-select: none;
+}
+
+.nav-tab-btn:hover {
+  border-color: var(--primary-hover);
+  color: var(--text-primary);
+  box-shadow: 0 0 16px -2px rgba(194, 163, 112, 0.45);
+}
+
+/* Активное состояние чипсы с мягким золотистым рассеянным ореолом */
+.nav-tab-btn.active {
+  background: linear-gradient(135deg, rgba(194, 163, 112, 0.28), rgba(163, 125, 34, 0.2));
+  color: #fff !important;
+  border: 1px solid var(--primary);
+  box-shadow: 0 0 20px rgba(194, 163, 112, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  font-weight: 800;
+}
+
+/* Плашка активных тегов фильтрации */
+.active-filter-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.active-filter-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  margin-bottom: 4px;
+}
+
+.active-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  background: rgba(40, 33, 25, 0.7);
+  border: 1px solid rgba(194, 163, 112, 0.4);
+  color: var(--text-primary);
+  border-radius: 2px !important;
+}
+
+.tag-remove-btn {
+  background: none;
+  border: none;
+  color: var(--accent-red);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tag-remove-btn:hover {
+  color: #ff0000;
 }
 
 .filters-grid {
@@ -329,84 +555,283 @@ header {
 }
 
 .filter-label {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .filter-select, .filter-input {
-  background: var(--bg-card);
+  background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
   padding: 12px 16px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
+  padding-right: 38px !important;
+  border-radius: 2px !important;
+  font-size: 13.5px;
   width: 100%;
   cursor: pointer;
   transition: var(--transition);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23c2a370' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 14px center !important;
 }
 
 .filter-select:focus, .filter-input:focus {
   border-color: var(--primary);
+  box-shadow: 0 0 12px -2px rgba(194, 163, 112, 0.35);
 }
 
-/* Каталог товаров */
+/* Прокручиваемый горизонтальный контейнер для множества категорий */
+.categories-scroll-wrapper {
+  display: flex !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  max-width: 100% !important;
+  padding-bottom: 8px !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(194, 163, 112, 0.4) transparent !important;
+}
+
+.categories-scroll-wrapper::-webkit-scrollbar {
+  height: 4px;
+}
+
+.categories-scroll-wrapper::-webkit-scrollbar-track {
+  background: rgba(20, 16, 11, 0.5);
+  border-radius: 2px;
+}
+
+.categories-scroll-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(194, 163, 112, 0.4);
+  border-radius: 2px;
+}
+
+.categories-scroll-wrapper .nav-tab-btn {
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+
+/* Стилизация активных чипсов навигации и фильтрации (Прямоугольный архитектурный стиль Figma) */
+.nav-tab-btn, .btn-filter-pill, .form-group-btn {
+  border-radius: 2px !important;
+  border: 1px solid var(--border-color) !important;
+  background: rgba(40, 33, 25, 0.45) !important;
+  color: rgba(245, 239, 223, 0.7) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  padding: 8px 16px !important;
+  transition: all 0.25s ease !important;
+}
+
+.nav-tab-btn:hover, .btn-filter-pill:hover, .form-group-btn:hover {
+  border-color: rgba(194, 163, 112, 0.45) !important;
+  color: #f5efdf !important;
+}
+
+.nav-tab-btn.active, .btn-filter-pill.active, .form-group-btn.active {
+  background: rgba(194, 163, 112, 0.16) !important;
+  border-color: rgba(194, 163, 112, 0.85) !important;
+  color: #e0c48f !important;
+  box-shadow: 0 0 16px -2px rgba(194, 163, 112, 0.45) !important;
+}
+
+/* Каталог товаров и заголовочная плашка */
 .catalog-title-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
   margin-bottom: 24px;
 }
 
 .catalog-title {
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 800;
+  color: var(--text-primary);
 }
 
 .catalog-count {
   color: var(--text-secondary);
   font-size: 14px;
+  font-weight: 600;
 }
 
+.catalog-sort-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sort-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.catalog-sort-select {
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 200px;
+  border-radius: var(--radius-md);
+}
+
+/* Кнопка ИЗБРАННОЕ на карточке товара (Точно по Figma ProductCard.tsx) */
+.btn-fav-card {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+  border-radius: 2px !important;
+  background: rgba(20, 16, 11, 0.55) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(194, 163, 112, 0.25) !important;
+  color: rgba(245, 239, 223, 0.75) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+.btn-fav-card:hover {
+  border-color: rgba(194, 163, 112, 0.6) !important;
+  color: #e0c48f !important;
+  box-shadow: 0 0 14px -2px rgba(194, 163, 112, 0.4) !important;
+}
+
+.btn-fav-card.active {
+  background: rgba(20, 16, 11, 0.85) !important;
+  border-color: rgba(194, 163, 112, 0.85) !important;
+  color: #c2a370 !important;
+  box-shadow: 0 0 16px -2px rgba(194, 163, 112, 0.45) !important;
+}
+
+/* Уведомления (Toast Notifications) в стиле Figma Dark Vintage */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  border-radius: 2px !important;
+  background: rgba(28, 23, 16, 0.94) !important;
+  border: 1px solid rgba(194, 163, 112, 0.4) !important;
+  color: #f5efdf !important;
+  font-family: var(--font-main) !important;
+  font-size: 13px !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(194, 163, 112, 0.18) !important;
+  opacity: 0;
+  transform: translateY(12px) scale(0.96);
+  transition: all 0.3s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.toast svg {
+  color: #c2a370 !important;
+  flex-shrink: 0;
+}
+
+/* Сетка товаров: 3 карточки в ряд на десктопе */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
   margin-bottom: 60px;
 }
 
-/* Карточка товара */
+/* Карточка товара в четком прямоугольном архитектурном стиле Figma */
 .product-card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
+  border-radius: 2px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: var(--transition);
+  transition: box-shadow 320ms ease, border-color 320ms ease, transform 320ms ease;
   cursor: pointer;
   position: relative;
   padding: 12px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
 .product-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-4px);
   border-color: var(--primary);
-  box-shadow: var(--shadow-md), 0 0 15px var(--border-glow);
+  box-shadow:
+    0 0 0 1px rgba(194, 163, 112, 0.25),
+    0 0 28px -6px rgba(194, 163, 112, 0.48),
+    0 0 64px -16px rgba(194, 163, 112, 0.35);
 }
 
 .product-image-container {
-  height: 300px; /* Увеличено фото товаров */
-  background: rgba(0, 0, 0, 0.03);
+  height: 300px;
+  background: var(--bg-deep);
+  border: 1px solid rgba(194, 163, 112, 0.15);
   overflow: hidden;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border-radius: 2px;
+}
+
+/* Атмосферный плёночный наплыв на фото из Figma (Warm Film Wash) */
+.film-wash-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: 
+    linear-gradient(to top, rgba(28, 23, 16, 0.75), rgba(28, 23, 16, 0.04) 55%),
+    radial-gradient(80% 60% at 50% 10%, rgba(194, 163, 112, 0.14), transparent);
+}
+
+/* Прямоугольный тег категории в стиле Figma */
+.card-category-tag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 5;
+  border: 1px solid rgba(194, 163, 112, 0.35);
+  background: rgba(20, 16, 11, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 3px 8px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
 }
 
 [data-theme="light"] .product-image-container {
@@ -414,14 +839,16 @@ header {
 }
 
 .product-image {
-  max-width: 85%;
-  max-height: 85%;
-  object-fit: contain;
-  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: cover !important;
+  transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1) !important;
 }
 
 .product-card:hover .product-image {
-  transform: scale(1.04);
+  transform: scale(1.06) !important;
 }
 
 .product-card-badge {
@@ -449,13 +876,6 @@ header {
   font-weight: 700;
   margin-bottom: 8px;
   line-height: 1.3;
-}
-
-.product-article {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-bottom: 16px;
-  font-family: monospace;
 }
 
 /* Локации в карточке */
@@ -500,12 +920,21 @@ header {
   justify-content: space-between;
   align-items: center;
   margin-top: auto;
+  gap: 8px;
+  width: 100%;
 }
 
 .product-price {
-  font-size: 20px;
+  font-size: 16px !important;
   font-weight: 800;
   color: var(--text-primary);
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+.btn-card-action {
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .btn-card-action {
@@ -643,13 +1072,6 @@ header {
   margin-bottom: 8px;
 }
 
-.details-article {
-  font-family: monospace;
-  color: var(--text-muted);
-  margin-bottom: 20px;
-  font-size: 14px;
-}
-
 .details-description {
   color: var(--text-secondary);
   font-size: 14px;
@@ -718,27 +1140,30 @@ header {
   border: 1px solid var(--border-color);
   background: var(--bg-card);
   color: var(--text-primary);
-  border-radius: var(--radius-sm);
+  border-radius: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
+  font-family: var(--font-mono);
   font-weight: 600;
   cursor: pointer;
   position: relative;
-  transition: var(--transition);
+  transition: all 0.25s ease;
 }
 
 .size-pill:hover:not(.disabled) {
   border-color: var(--primary);
-  color: var(--primary);
+  color: var(--primary-hover);
+  box-shadow: 0 0 16px -2px rgba(194, 163, 112, 0.45);
 }
 
 .size-pill.selected {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #fff;
-  box-shadow: 0 0 10px var(--primary-glow);
+  background: linear-gradient(135deg, #c2a370, #96753d);
+  border-color: #e0c48f;
+  color: #14100b;
+  font-weight: 800;
+  box-shadow: 0 0 18px rgba(194, 163, 112, 0.55);
 }
 
 .size-pill.disabled {
@@ -1922,11 +2347,6 @@ svg {
     -webkit-box-orient: vertical;
   }
 
-  .product-article {
-    font-size: 11px;
-    margin-bottom: 8px;
-  }
-
   .product-locations-info {
     gap: 4px;
     padding-top: 8px;
@@ -2264,6 +2684,19 @@ svg {
     border-radius: var(--radius-md);
   }
 
+  .filters-toggle-bar {
+    display: block;
+  }
+
+  .filters-grid {
+    display: none;
+  }
+
+  .filters-grid.open {
+    display: grid;
+    margin-top: 12px;
+  }
+
   .filter-label {
     font-size: 11px;
   }
@@ -2366,11 +2799,6 @@ svg {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-  }
-
-  .product-article {
-    font-size: 11px;
-    margin-bottom: 8px;
   }
 
   .product-locations-info {
@@ -2578,5 +3006,1251 @@ svg {
 
   .filters-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   ПАНЕЛЬ СОТРУДНИКОВ CONTROL CENTER (staff.html) — DARK LUXURY STYLE
+   ========================================================================== */
+
+/* ==========================================================================
+   ПАНЕЛЬ СОТРУДНИКОВ CONTROL CENTER (staff.html)
+   ТЕМА: DEEP MIDNIGHT NAVY & ROYAL GOLD (#0a192f / #112240 / #FFD700)
+   ========================================================================== */
+
+/* Изоляция интерфейса админки */
+body.is-admin-portal header,
+body.is-admin-portal footer,
+body.is-admin-portal .mobile-bottom-nav {
+  display: none !important;
+}
+
+body.is-admin-portal {
+  background-color: #0a192f !important;
+  color: #ccd6f6 !important;
+  background-image: 
+    radial-gradient(circle at 10% 10%, rgba(255, 215, 0, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 90% 90%, rgba(100, 255, 218, 0.06) 0%, transparent 45%) !important;
+  background-attachment: fixed !important;
+}
+
+/* 1. Модальное окно Авторизации (#modal-admin-auth) */
+#modal-admin-auth .modal-container {
+  background: #0a192f !important;
+  border: 1px solid rgba(255, 215, 0, 0.4) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 20px 50px rgba(2, 12, 27, 0.9), 0 0 30px rgba(255, 215, 0, 0.15) !important;
+  padding: 32px !important;
+}
+
+#modal-admin-auth .auth-title {
+  color: #FFD700 !important;
+  font-family: var(--font-title);
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  text-shadow: 0 0 12px rgba(255, 215, 0, 0.3) !important;
+  margin-bottom: 8px !important;
+}
+
+#modal-admin-auth .auth-desc {
+  color: #8892b0 !important;
+  font-size: 13px !important;
+  margin-bottom: 20px !important;
+}
+
+#modal-admin-auth .form-label {
+  color: #ccd6f6 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+#modal-admin-auth .form-input {
+  background: #112240 !important;
+  border: 1px solid rgba(255, 215, 0, 0.35) !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  border-radius: 2px !important;
+}
+
+#modal-admin-auth .form-input:focus {
+  border-color: #FFD700 !important;
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.4) !important;
+}
+
+#modal-admin-auth .btn-submit {
+  background: linear-gradient(135deg, #FFD700 0%, #d4af37 100%) !important;
+  color: #0a192f !important;
+  font-weight: 800 !important;
+  border: none !important;
+  font-size: 15px !important;
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4) !important;
+  border-radius: 2px !important;
+  padding: 12px !important;
+  cursor: pointer !important;
+  transition: all 0.25s ease !important;
+  width: 100% !important;
+  margin-top: 10px !important;
+}
+
+#modal-admin-auth .btn-submit:hover {
+  background: linear-gradient(135deg, #ffe033 0%, #c2a370 100%) !important;
+  box-shadow: 0 6px 24px rgba(255, 215, 0, 0.6) !important;
+}
+
+/* 2. Яркий неоновый зелёный цвет выручки и наличия */
+.revenue-highlight,
+.cash-stat-value,
+.status-in-stock,
+.text-green,
+.text-success,
+#kassa-today-revenue {
+  color: #34d399 !important;
+  font-weight: 800 !important;
+  text-shadow: 0 0 14px rgba(52, 211, 153, 0.75), 0 0 4px rgba(52, 211, 153, 0.9) !important;
+}
+
+/* 3. Устранение всех остаточных коричневых и светлых блоков в админке (Резервное копирование, Импорт, Экспорт) */
+body.is-admin-portal .backup-section,
+body.is-admin-portal .backup-card,
+body.is-admin-portal .admin-panel-card,
+body.is-admin-portal .card,
+body.is-admin-portal .sales-form-card,
+body.is-admin-portal .sales-stats-card,
+body.is-admin-portal fieldset {
+  background: #112240 !important;
+  border: 1px solid rgba(255, 215, 0, 0.3) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 10px 30px -15px rgba(2, 12, 27, 0.7) !important;
+  color: #ccd6f6 !important;
+}
+
+body.is-admin-portal .backup-info h4,
+body.is-admin-portal .backup-card h3,
+body.is-admin-portal .admin-panel-card h3,
+body.is-admin-portal .backup-card h2,
+body.is-admin-portal .admin-panel-card h2 {
+  color: #FFD700 !important;
+  font-weight: 700 !important;
+}
+
+body.is-admin-portal .backup-info p {
+  color: #8892b0 !important;
+  font-size: 13px !important;
+}
+
+/* 4. Четкие читаемые кнопки 2-го уровня (Редактировать, Отмена, Выбрать файл) */
+body.is-admin-portal .btn-secondary,
+body.is-admin-portal button.btn-secondary,
+body.is-admin-portal #btn-cancel-edit,
+body.is-admin-portal #btn-trigger-import {
+  background: #112240 !important;
+  border: 1px solid rgba(100, 255, 218, 0.45) !important;
+  color: #64ffda !important;
+  font-weight: 700 !important;
+  border-radius: 2px !important;
+  padding: 8px 16px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+body.is-admin-portal .btn-secondary:hover,
+body.is-admin-portal button.btn-secondary:hover,
+body.is-admin-portal #btn-cancel-edit:hover,
+body.is-admin-portal #btn-trigger-import:hover {
+  background: rgba(100, 255, 218, 0.15) !important;
+  border-color: #64ffda !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 14px rgba(100, 255, 218, 0.4) !important;
+}
+
+/* 5. Четкая яркая кнопка закрытия Х в модальных окнах */
+body.is-admin-portal .modal-close,
+body.is-admin-portal .modal-close-btn {
+  background: #112240 !important;
+  border: 1px solid rgba(255, 215, 0, 0.5) !important;
+  color: #FFD700 !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.25) !important;
+  transition: all 0.25s ease !important;
+}
+
+body.is-admin-portal .modal-close svg {
+  stroke: #FFD700 !important;
+}
+
+body.is-admin-portal .modal-close:hover,
+body.is-admin-portal .modal-close-btn:hover {
+  background: rgba(255, 215, 0, 0.25) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.5) !important;
+  transform: rotate(90deg) scale(1.08) !important;
+}
+
+body.is-admin-portal .modal-close:hover svg {
+  stroke: #ffffff !important;
+}
+
+/* 6. Насыщенная красная кнопка Удалить */
+body.is-admin-portal .btn-delete-product,
+body.is-admin-portal .btn-danger,
+body.is-admin-portal #btn-reset-db {
+  background: rgba(239, 68, 68, 0.2) !important;
+  border: 1px solid rgba(239, 68, 68, 0.65) !important;
+  color: #ef4444 !important;
+  font-weight: 800 !important;
+  border-radius: 2px !important;
+  transition: all 0.2s ease !important;
+}
+
+body.is-admin-portal .btn-delete-product:hover,
+body.is-admin-portal .btn-danger:hover,
+body.is-admin-portal #btn-reset-db:hover {
+  background: rgba(239, 68, 68, 0.4) !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.6) !important;
+}
+
+/* 5. Идеальное симметричное центрирование и отступы модальных окон */
+.modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(2, 12, 27, 0.88) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+}
+
+/* 5. Идеальное центрирование окна на экране и левостороннее симметричное выравнивание полей внутри */
+#modal-admin-product-edit.modal-overlay {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+}
+
+#modal-admin-product-edit .modal-container {
+  margin: 0 auto !important;
+  max-width: 680px !important;
+  width: 92vw !important;
+  max-height: 88vh !important;
+  background: #0a192f !important;
+  border: 1px solid rgba(255, 215, 0, 0.4) !important;
+  border-radius: 4px !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  box-shadow: 0 20px 60px rgba(2, 12, 27, 0.95), 0 0 30px rgba(255, 215, 0, 0.15) !important;
+  transform: none !important;
+}
+
+#modal-admin-product-edit h2,
+#modal-admin-product-edit h4,
+#modal-admin-product-edit strong {
+  text-align: left !important;
+  color: #FFD700 !important;
+}
+
+#modal-admin-product-edit form {
+  padding: 24px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+.edit-form-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 16px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.edit-form-grid .form-full-width {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+}
+
+.edit-form-grid .form-group {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+}
+
+.edit-form-grid .form-label {
+  display: block !important;
+  text-align: left !important;
+  color: #ccd6f6 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  margin-bottom: 6px !important;
+  width: 100% !important;
+}
+
+.edit-form-grid input,
+.edit-form-grid select,
+.edit-form-grid textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+  background: #112240 !important;
+  border: 1px solid rgba(255, 215, 0, 0.35) !important;
+  color: #ffffff !important;
+  border-radius: 2px !important;
+  padding: 10px 14px !important;
+}
+
+.admin-stock-point {
+  text-align: left !important;
+  margin-top: 14px !important;
+  width: 100% !important;
+}
+
+.admin-sizes-inputs {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+  margin-top: 8px !important;
+  width: 100% !important;
+}
+
+.size-input-group {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 52px !important;
+}
+
+.size-input-label {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #8892b0 !important;
+  margin-bottom: 4px !important;
+  text-align: center !important;
+}
+
+.size-field::-webkit-outer-spin-button,
+.size-field::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+.size-field {
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+  width: 100% !important;
+  padding: 6px 0 !important;
+  text-align: center !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  background: #112240 !important;
+  border: 1px solid rgba(255, 215, 0, 0.35) !important;
+  color: #ffffff !important;
+  border-radius: 2px !important;
+  box-sizing: border-box !important;
+}
+
+/* ==========================================================================
+   ПОЛНАЯ ПОВЫШЕННАЯ ВИДИМОСТЬ ВСЕХ ЭЛЕМЕНТОВ В АДМИНКЕ (#0a192f + #FFD700)
+   ========================================================================== */
+
+/* 1. Заголовки разделов и карточек (Касса за сегодня, Записать продажу, История операций) */
+body.is-admin-portal h1,
+body.is-admin-portal h2,
+body.is-admin-portal h3,
+body.is-admin-portal h4,
+body.is-admin-portal .sales-form-card h4,
+body.is-admin-portal .sales-stats-card h4 {
+  color: #FFD700 !important;
+  font-family: var(--font-title);
+  font-weight: 800 !important;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3) !important;
+}
+
+/* Описание разделов под заголовками */
+body.is-admin-portal .admin-panel-content > p {
+  color: #8892b0 !important;
+  font-size: 13.5px !important;
+}
+
+/* 2. Названия полей (Поиск модели по артикулу, Точка продажи, Способ оплаты и т.д.) */
+body.is-admin-portal .form-label,
+body.is-admin-portal label,
+body.is-admin-portal span[style*="text-secondary"] {
+  color: #ccd6f6 !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+}
+
+/* 3. Неактивные переключатели (ТЦ, Каспи Ред, Нал) */
+body.is-admin-portal .form-group-btn {
+  background: #0a192f !important;
+  border: 1px solid rgba(255, 215, 0, 0.35) !important;
+  color: #8892b0 !important;
+  font-weight: 700 !important;
+}
+
+body.is-admin-portal .form-group-btn:hover {
+  background: rgba(255, 215, 0, 0.12) !important;
+  border-color: #FFD700 !important;
+  color: #FFD700 !important;
+}
+
+body.is-admin-portal .form-group-btn.active {
+  background: linear-gradient(135deg, #FFD700 0%, #d4af37 100%) !important;
+  color: #0a192f !important;
+  font-weight: 800 !important;
+  border-color: #FFD700 !important;
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.4) !important;
+}
+
+/* 4. Карточки метрик Кассы («Всего за сегодня», «Выручка за сегодня») */
+body.is-admin-portal .sales-stats-card div[style*="background: rgba(0,0,0,0.02)"],
+body.is-admin-portal .sales-stats-card div[style*="background:rgba(0,0,0,0.02)"] {
+  background: #0a192f !important;
+  border: 1px solid rgba(255, 215, 0, 0.3) !important;
+}
+
+body.is-admin-portal div[style*="text-transform: uppercase"] {
+  color: #8892b0 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+}
+
+#sales-count-total {
+  color: #FFD700 !important;
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  text-shadow: 0 0 12px rgba(255, 215, 0, 0.4) !important;
+}
+
+#sales-sum-total {
+  color: #34d399 !important;
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  text-shadow: 0 0 14px rgba(52, 211, 153, 0.75), 0 0 4px rgba(52, 211, 153, 0.9) !important;
+}
+
+/* Список по способам оплаты (Каспи QR, Каспи Ред, Наличные) */
+body.is-admin-portal #sales-sum-kaspi,
+body.is-admin-portal #sales-sum-red,
+body.is-admin-portal #sales-sum-cash {
+  color: #64ffda !important;
+  font-weight: 800 !important;
+  font-size: 15px !important;
+}
+
+body.is-admin-portal .sales-stats-card span {
+  color: #ccd6f6 !important;
+  font-weight: 600 !important;
+}
+
+/* 5. Селекторы дат («Период с:», «по:», значок календаря 📅) */
+body.is-admin-portal input[type="date"] {
+  background: #0a192f !important;
+  border: 1px solid rgba(255, 215, 0, 0.4) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border-radius: 2px !important;
+}
+
+body.is-admin-portal input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.85) sepia(1) saturate(5) hue-rotate(5deg) !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+}
+
+/* 6. Поля ввода текста в кассе и форме */
+body.is-admin-portal .form-input,
+body.is-admin-portal select.form-input {
+  background: #0a192f !important;
+  border: 1px solid rgba(255, 215, 0, 0.35) !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   7. МОДАЛЬНОЕ ОКНО ДОБАВЛЕНИЯ СОТРУДНИКА (#modal-admin-staff-edit)
+   ========================================================================== */
+#modal-admin-staff-edit.modal-overlay {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+}
+
+#modal-admin-staff-edit .modal-content,
+#modal-admin-staff-edit .modal-container {
+  background: #0a192f !important;
+  border: 1px solid rgba(255, 215, 0, 0.4) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 20px 60px rgba(2, 12, 27, 0.95), 0 0 30px rgba(255, 215, 0, 0.15) !important;
+  width: 92vw !important;
+  max-width: 500px !important;
+  color: #ccd6f6 !important;
+  margin: 0 auto !important;
+}
+
+#modal-admin-staff-edit #staff-modal-title {
+  color: #FFD700 !important;
+  font-family: var(--font-title);
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3) !important;
+}
+
+#modal-admin-staff-edit .form-label {
+  color: #ccd6f6 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  display: block !important;
+  margin-bottom: 6px !important;
+  text-align: left !important;
+}
+
+#modal-admin-staff-edit .form-input {
+  background: #112240 !important;
+  border: 1px solid rgba(255, 215, 0, 0.35) !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  border-radius: 2px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 10px 14px !important;
+}
+
+#modal-admin-staff-edit .form-input:focus {
+  border-color: #FFD700 !important;
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.4) !important;
+}
+
+#modal-admin-staff-edit .form-group-btn {
+  background: #112240 !important;
+  border: 1px solid rgba(255, 215, 0, 0.35) !important;
+  color: #8892b0 !important;
+  font-weight: 700 !important;
+}
+
+#modal-admin-staff-edit .form-group-btn.active {
+  background: linear-gradient(135deg, #FFD700 0%, #d4af37 100%) !important;
+  color: #0a192f !important;
+  font-weight: 800 !important;
+  border-color: #FFD700 !important;
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.4) !important;
+}
+
+#modal-admin-staff-edit #btn-cancel-staff {
+  background: #112240 !important;
+  border: 1px solid rgba(100, 255, 218, 0.45) !important;
+  color: #64ffda !important;
+  font-weight: 700 !important;
+  border-radius: 2px !important;
+  padding: 10px 18px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+#modal-admin-staff-edit #btn-cancel-staff:hover {
+  background: rgba(100, 255, 218, 0.15) !important;
+  border-color: #64ffda !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 14px rgba(100, 255, 218, 0.4) !important;
+}
+
+#modal-admin-staff-edit #btn-save-staff {
+  background: linear-gradient(135deg, #FFD700 0%, #d4af37 100%) !important;
+  color: #0a192f !important;
+  font-weight: 800 !important;
+  border: none !important;
+  font-size: 14px !important;
+  box-shadow: 0 4px 18px rgba(255, 215, 0, 0.4) !important;
+  border-radius: 2px !important;
+  padding: 10px 18px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+#modal-admin-staff-edit #btn-save-staff:hover {
+  background: linear-gradient(135deg, #ffe033 0%, #c2a370 100%) !important;
+  box-shadow: 0 6px 24px rgba(255, 215, 0, 0.6) !important;
+}
+
+#modal-admin-staff-edit .modal-close-btn {
+  position: absolute !important;
+  top: 16px !important;
+  right: 16px !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: #112240 !important;
+  border: 1px solid rgba(255, 215, 0, 0.5) !important;
+  color: #FFD700 !important;
+  font-size: 20px !important;
+  line-height: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.25) !important;
+  transition: all 0.25s ease !important;
+}
+
+#modal-admin-staff-edit .modal-close-btn:hover {
+  background: rgba(255, 215, 0, 0.25) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.5) !important;
+  transform: rotate(90deg) scale(1.08) !important;
+}
+
+/* ==========================================================================
+   8. СТИЛИЗАЦИЯ ВСПЛЫВАЮЩИХ УВЕДОМЛЕНИЙ (TOASTS)
+   ========================================================================== */
+.toast {
+  background: rgba(28, 23, 16, 0.96) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(194, 163, 112, 0.45) !important;
+  border-radius: 4px !important;
+  color: #faf6eb !important;
+  font-weight: 700 !important;
+  font-size: 13.5px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(194, 163, 112, 0.15) !important;
+  padding: 12px 18px !important;
+}
+
+.toast.success {
+  border-left: 4px solid #34d399 !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 24px rgba(52, 211, 153, 0.35) !important;
+}
+
+.toast.success svg {
+  stroke: #34d399 !important;
+  flex-shrink: 0 !important;
+}
+
+.toast.error {
+  border-left: 4px solid #ff4444 !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 24px rgba(255, 68, 68, 0.35) !important;
+}
+
+.toast.error svg {
+  stroke: #ff4444 !important;
+  flex-shrink: 0 !important;
+}
+
+.toast.info {
+  border-left: 4px solid #c2a370 !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 24px rgba(194, 163, 112, 0.35) !important;
+}
+
+.toast.info svg {
+  stroke: #c2a370 !important;
+  flex-shrink: 0 !important;
+}
+
+/* Всплывающие уведомления в админ-панели */
+body.is-admin-portal .toast {
+  background: #112240 !important;
+  border: 1px solid rgba(255, 215, 0, 0.4) !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   9. ЯРКИЕ СТАТУСНЫЕ БЕЙДЖИ ЗАЯВОК (NEW, CONFIRMED, PAID, COMPLETED)
+   ========================================================================== */
+body.is-admin-portal .order-status-badge,
+.order-status-badge {
+  display: inline-block !important;
+  padding: 4px 10px !important;
+  border-radius: 2px !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+}
+
+body.is-admin-portal .order-status-badge.badge-new,
+.order-status-badge.badge-new {
+  background: rgba(255, 215, 0, 0.22) !important;
+  border: 1px solid rgba(255, 215, 0, 0.7) !important;
+  color: #FFD700 !important;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.35) !important;
+}
+
+body.is-admin-portal .order-status-badge.badge-confirmed,
+.order-status-badge.badge-confirmed {
+  background: rgba(100, 255, 218, 0.22) !important;
+  border: 1px solid rgba(100, 255, 218, 0.7) !important;
+  color: #64ffda !important;
+  box-shadow: 0 0 10px rgba(100, 255, 218, 0.35) !important;
+}
+
+body.is-admin-portal .order-status-badge.badge-paid,
+.order-status-badge.badge-paid {
+  background: rgba(52, 211, 153, 0.22) !important;
+  border: 1px solid rgba(52, 211, 153, 0.7) !important;
+  color: #34d399 !important;
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.35) !important;
+}
+
+body.is-admin-portal .order-status-badge.badge-completed,
+.order-status-badge.badge-completed {
+  background: rgba(136, 146, 176, 0.25) !important;
+  border: 1px solid rgba(136, 146, 176, 0.6) !important;
+  color: #8892b0 !important;
+}
+
+.admin-luxury-wrapper {
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+
+/* Топбар Control Center в стиле #0a192f + #FFD700 */
+body.is-admin-portal .admin-luxury-topbar {
+  background: rgba(10, 25, 47, 0.96) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.35) !important;
+  padding: 14px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  box-shadow: 0 8px 32px rgba(2, 12, 27, 0.7) !important;
+}
+
+.admin-logo-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+body.is-admin-portal .gold-crown-icon {
+  font-size: 24px;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8)) !important;
+}
+
+.admin-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+body.is-admin-portal .admin-brand-text .brand-title {
+  font-family: var(--font-title);
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, #ffffff 0%, #FFD700 65%, #ffae00 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.admin-brand-text .brand-subtitle {
+  font-size: 11px;
+  color: #8892b0 !important;
+  letter-spacing: 0.05em;
+  font-family: monospace;
+}
+
+.admin-topbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+body.is-admin-portal .admin-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #112240 !important;
+  border: 1px solid rgba(255, 215, 0, 0.3) !important;
+  padding: 6px 14px;
+  border-radius: 4px !important;
+  font-size: 13px;
+  color: #e6f1ff !important;
+}
+
+.user-status-dot.online {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #64ffda;
+  box-shadow: 0 0 10px #64ffda;
+}
+
+body.is-admin-portal .user-role-tag {
+  background: linear-gradient(135deg, #FFD700, #d4af37) !important;
+  color: #0a192f !important;
+  font-weight: 800;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 2px !important;
+  text-transform: uppercase;
+}
+
+.admin-action-btns {
+  display: flex;
+  gap: 8px;
+}
+
+body.is-admin-portal .btn-admin-action {
+  background: #112240 !important;
+  border: 1px solid rgba(255, 215, 0, 0.3) !important;
+  color: #e6f1ff !important;
+  padding: 8px 14px;
+  border-radius: 2px !important;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+body.is-admin-portal .btn-admin-action:hover {
+  background: rgba(255, 215, 0, 0.15) !important;
+  border-color: #FFD700 !important;
+  color: #FFD700 !important;
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.3) !important;
+}
+
+.btn-admin-logout {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  padding: 8px 14px;
+  border-radius: 2px !important;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-admin-logout:hover {
+  background: rgba(239, 68, 68, 0.3);
+  color: #fff;
+}
+
+/* Контейнер панели */
+.admin-container {
+  margin-top: 28px;
+}
+
+/* Карточки метрик KPI (Deep Navy #112240 & Gold #FFD700) */
+.admin-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+body.is-admin-portal .dash-card.luxury-card {
+  background: #112240 !important;
+  border: 1px solid rgba(255, 215, 0, 0.28) !important;
+  border-radius: 4px !important;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 10px 30px -15px rgba(2, 12, 27, 0.7), 0 0 20px rgba(255, 215, 0, 0.04) !important;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+body.is-admin-portal .dash-card.luxury-card:hover {
+  transform: translateY(-2px);
+  border-color: #FFD700 !important;
+  box-shadow: 0 12px 32px -10px rgba(255, 215, 0, 0.25) !important;
+}
+
+body.is-admin-portal .dash-icon-glow {
+  font-size: 24px;
+  background: rgba(255, 215, 0, 0.12) !important;
+  width: 52px;
+  height: 52px;
+  border-radius: 2px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 215, 0, 0.4) !important;
+  color: #FFD700 !important;
+}
+
+body.is-admin-portal .dash-card .dash-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: #FFD700 !important;
+  font-family: var(--font-title);
+  line-height: 1.1;
+  text-shadow: 0 0 14px rgba(255, 215, 0, 0.3);
+}
+
+body.is-admin-portal .dash-card .dash-label {
+  font-size: 12px;
+  color: #8892b0 !important;
+  margin-top: 4px;
+}
+
+/* Вкладки управления разделами в админке (#0a192f + #FFD700) */
+body.is-admin-portal .admin-tabs.luxury-tabs {
+  display: flex;
+  gap: 8px;
+  background: #0a192f !important;
+  padding: 6px;
+  border-radius: 4px !important;
+  border: 1px solid rgba(255, 215, 0, 0.3) !important;
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+body.is-admin-portal .admin-tabs.luxury-tabs .admin-tab {
+  background: transparent !important;
+  border: none !important;
+  color: #8892b0 !important;
+  padding: 10px 18px;
+  border-radius: 2px !important;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+body.is-admin-portal .admin-tabs.luxury-tabs .admin-tab:hover {
+  color: #FFD700 !important;
+  background: rgba(255, 215, 0, 0.12) !important;
+}
+
+body.is-admin-portal .admin-tabs.luxury-tabs .admin-tab.active {
+  background: linear-gradient(135deg, #FFD700 0%, #d4af37 100%) !important;
+  color: #0a192f !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.45) !important;
+}
+
+/* Формы, Кассовый карточки и Таблицы */
+body.is-admin-portal .sales-form-card,
+body.is-admin-portal .sales-stats-card,
+body.is-admin-portal .admin-panel-card {
+  background: #112240 !important;
+  border: 1px solid rgba(255, 215, 0, 0.28) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 10px 30px -15px rgba(2, 12, 27, 0.7) !important;
+}
+
+body.is-admin-portal input,
+body.is-admin-portal select {
+  background: #0a192f !important;
+  border: 1px solid rgba(255, 215, 0, 0.35) !important;
+  color: #ffffff !important;
+  border-radius: 2px !important;
+}
+
+body.is-admin-portal input:focus,
+body.is-admin-portal select:focus {
+  border-color: #FFD700 !important;
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.4) !important;
+}
+
+/* Главная яркая золотая кнопка кассы/действия */
+body.is-admin-portal .btn-primary,
+body.is-admin-portal button[type="submit"] {
+  background: linear-gradient(135deg, #FFD700 0%, #d4af37 100%) !important;
+  border: none !important;
+  color: #0a192f !important;
+  font-weight: 800 !important;
+  border-radius: 2px !important;
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4) !important;
+  transition: all 0.25s ease !important;
+}
+
+body.is-admin-portal .btn-primary:hover,
+body.is-admin-portal button[type="submit"]:hover {
+  background: linear-gradient(135deg, #ffe033 0%, #c2a370 100%) !important;
+  box-shadow: 0 6px 24px rgba(255, 215, 0, 0.6) !important;
+}
+
+body.is-admin-portal .form-group-btn {
+  background: #0a192f !important;
+  border: 1px solid rgba(255, 215, 0, 0.3) !important;
+  color: #8892b0 !important;
+  border-radius: 2px !important;
+}
+
+body.is-admin-portal .form-group-btn.active {
+  background: #FFD700 !important;
+  color: #0a192f !important;
+  border-color: #FFD700 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.45) !important;
+}
+
+/* Таблицы бэк-офиса */
+body.is-admin-portal .admin-table {
+  background: #112240 !important;
+  border-color: rgba(255, 215, 0, 0.25) !important;
+}
+
+body.is-admin-portal .admin-table th {
+  background: #0a192f !important;
+  color: #FFD700 !important;
+  border-bottom: 2px solid rgba(255, 215, 0, 0.4) !important;
+  font-size: 11.5px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  font-family: var(--font-mono) !important;
+}
+
+body.is-admin-portal .admin-table td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+  color: #e6f1ff !important;
+}
+
+body.is-admin-portal .admin-table tr:hover {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* ==========================================================================
+   ТОЧНЫЕ CSS УТИЛИТЫ СТИЛЕЙ ИЗ FIGMA MAKE (100% FIGMA COMPATIBILITY)
+   ========================================================================== */
+
+.border-line {
+  border-color: rgba(194, 163, 112, 0.18) !important;
+}
+
+.border-line-strong {
+  border-color: rgba(194, 163, 112, 0.38) !important;
+}
+
+.text-gold {
+  color: #c2a370 !important;
+}
+
+.text-gold-bright {
+  color: #e0c48f !important;
+}
+
+.text-cream {
+  color: #f5efdf !important;
+}
+
+.text-muted {
+  color: #a8977c !important;
+}
+
+.bg-card\/55 {
+  background-color: rgba(40, 33, 25, 0.55) !important;
+}
+
+.bg-bg-deep {
+  background-color: #14100b !important;
+}
+
+.font-display {
+  font-family: 'Prata', Georgia, serif !important;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+.aspect-\[4\/5\] {
+  aspect-ratio: 4 / 5 !important;
+  width: 100%;
+}
+
+.tracked {
+  letter-spacing: 0.24em !important;
+  text-transform: uppercase !important;
+}
+
+/* Ambient Gold Aura — точный эффект подсвечивания из Figma */
+.aura {
+  transition: box-shadow 320ms ease, border-color 320ms ease, color 200ms ease,
+    background-color 200ms ease, transform 320ms ease !important;
+}
+.aura:hover {
+  border-color: rgba(194, 163, 112, 0.38) !important;
+  box-shadow:
+    0 0 0 1px rgba(194, 163, 112, 0.16),
+    0 0 26px -6px rgba(194, 163, 112, 0.42),
+    0 0 62px -18px rgba(194, 163, 112, 0.34) !important;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-rise {
+  animation: rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both !important;
+}
+
+/* Финальная полировка витрины: семантические кнопки и компактная мобильная шапка. */
+.logo {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.nav-link {
+  border: 0;
+  background: transparent;
+  font: inherit;
+}
+
+/* Светлая тема: активные фильтры и подписи поверх фото должны оставаться читаемыми. */
+[data-theme="light"] .nav-tab-btn {
+  background: #f5eddd;
+  color: #44331e;
+  border-color: rgba(107, 78, 30, 0.34);
+}
+
+[data-theme="light"] .nav-tab-btn:hover {
+  background: #e7d8b9;
+  color: #2b2318;
+}
+
+[data-theme="light"] .nav-tab-btn.active {
+  background: #805a22 !important;
+  color: #fffaf0 !important;
+  border-color: #684715 !important;
+  box-shadow: 0 3px 10px rgba(107, 78, 30, 0.32) !important;
+}
+
+[data-theme="light"] .active-tag {
+  gap: 5px;
+  padding: 5px 9px;
+  background: #f7efdf;
+  color: #5b4324;
+  border-color: #d1bd97;
+  border-radius: 3px !important;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  box-shadow: none;
+}
+
+[data-theme="light"] .tag-remove-btn {
+  color: #a75a43;
+  font-size: 15px;
+}
+
+/* На витрине статус наличия должен быть спокойным и читаемым, без неонового свечения. */
+#modal-product-details .status-in-stock {
+  color: #8fbf78 !important;
+  font-weight: 700 !important;
+  text-shadow: none !important;
+}
+
+[data-theme="light"] #modal-product-details .status-in-stock {
+  color: #2f6b4f !important;
+  font-weight: 700 !important;
+  text-shadow: none !important;
+}
+
+[data-theme="light"] .card-category-tag {
+  background: rgba(43, 35, 24, 0.84);
+  color: #fff4df;
+  border-color: rgba(255, 244, 223, 0.5);
+}
+
+:focus-visible {
+  outline: 3px solid var(--primary-hover);
+  outline-offset: 3px;
+}
+
+/* Затемнение клиентских окон — тёплый глубокий оттенок в палитре витрины. */
+.modal-overlay {
+  background: rgba(27, 20, 13, 0.9) !important;
+}
+
+/* В служебной панели сохраняется отдельная холодная палитра. */
+body.is-admin-portal .modal-overlay {
+  background: rgba(2, 12, 27, 0.88) !important;
+}
+
+@media (max-width: 768px) {
+  .search-bar-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .search-bar-row .search-bar-container,
+  .search-bar-row .btn-reset-filters {
+    width: 100%;
+  }
+
+  .search-bar-row .btn-reset-filters {
+    justify-content: center;
+    padding: 10px 12px;
+  }
+
+  .header-wrapper {
+    gap: 6px;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .logo {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .logo > div:nth-child(2) {
+    display: none;
+  }
+
+  .header-actions {
+    flex: 0 0 auto;
+    gap: 5px;
+  }
+
+  .header-actions .btn-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .mobile-filter-options {
+    display: none;
+  }
+
+  .mobile-filter-options.open {
+    display: flex;
+    margin-top: 12px;
   }
 }

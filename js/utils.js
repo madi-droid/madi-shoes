@@ -4,68 +4,80 @@ const FALLBACK_PRODUCT_IMAGE = "https://images.unsplash.com/photo-1542291026-7ee
 const MAX_IMAGE_FILE_SIZE = 1024 * 1024;
 const MAX_DATA_IMAGE_LENGTH = MAX_IMAGE_FILE_SIZE * 1.4;
 
-const ADMIN_PIN_SALT = "MadiyarShoes_SecretSalt_2026_v2";
-const ALLOWED_PIN_HASHES = [
-  "9f2fc960c4bf1781d34d2957565f971bcf34d6865aa62063f8a93f9a9e91e7be", // ПИН 7777 + Salt
-  "2d543e804dd1f047e111e6f93aea19ac71d666835a2a98d2fabe767ca833f797", // ПИН 1234 + Salt
-  "5dde649a08dcddc19cd591a72f8921e0fd0a3c85cca7dac24e9713da5ac5296c"  // ПИН 7775 + Salt
-];
+// Модальные окна (Modal Controllers)
+function openModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  modal._lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  modal.classList.add("open");
+  document.body.style.overflow = "hidden";
+  requestAnimationFrame(() => modal.querySelector(".modal-close, .modal-close-btn, [autofocus]")?.focus());
+}
 
-const ADMIN_ACCOUNTS = [
-  { phone: "+7 (775) 756-51-98", name: "Главный Админ" },
-  { phone: "+7 (702) 757-01-09", name: "Рыскул" },
-  { phone: "+7 (775) 715-75-60", name: "Жидебай" },
-  { phone: "+7 (771) 384-74-81", name: "Администратор 4" }
-];
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  modal.classList.remove("open");
+  const anyOpen = document.querySelector(".modal-overlay.open");
+  if (!anyOpen) {
+    document.body.style.overflow = "";
+    const opener = modal._lastFocusedElement;
+    if (opener instanceof HTMLElement && document.contains(opener)) opener.focus();
+  }
+}
 
-const ADMIN_MAX_ATTEMPTS = 5;
-const ADMIN_BLOCK_SECONDS = 60;
+function closeAllModals() {
+  document.querySelectorAll(".modal-overlay").forEach(m => m.classList.remove("open"));
+  document.body.style.overflow = "";
+}
+
+// Безопасные обертки для работы с localStorage (SafeStorage)
+function safeSetJSON(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (e) {
+    console.error(`[Storage Error] Не удалось сохранить ${key}:`, e);
+    if (typeof showToast === "function") {
+      showToast("Ошибка: Хранилище браузера переполнено!", "error");
+    }
+    return false;
+  }
+}
+
+function safeGetJSON(key, fallback = null) {
+  try {
+    const data = localStorage.getItem(key);
+    if (!data) return fallback;
+    return JSON.parse(data) ?? fallback;
+  } catch (e) {
+    console.warn(`[Storage Warning] Ошибка чтения ${key}:`, e);
+    return fallback;
+  }
+}
+
+// Единый модуль поиска товаров (DRY)
+function normalizeSearchText(val) {
+  return String(val ?? "").toLowerCase().trim();
+}
+
+function productMatchesQuery(product, query) {
+  if (!product || typeof product !== "object") return false;
+  const q = normalizeSearchText(query);
+  if (!q) return true;
+  const brand = normalizeSearchText(product.brand);
+  const name = normalizeSearchText(product.name);
+  return brand.includes(q) || name.includes(q);
+}
+
 const ADMIN_SESSION_TTL_MS = 2 * 60 * 60 * 1000;
 
 const AVAILABLE_SIZES = ["35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"];
 
-// Синхронный хэш для подписи сессий
-function secureHashSync(str) {
-  let h1 = 0xdeadbeef ^ 0, h2 = 0x41c6ce57 ^ 0;
-  const salted = str + ADMIN_PIN_SALT;
-  for (let i = 0; i < salted.length; i++) {
-    const ch = salted.charCodeAt(i);
-    h1 = Math.imul(h1 ^ ch, 2654435761);
-    h2 = Math.imul(h2 ^ ch, 1597334677);
-  }
-  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
-}
-
-// Асинхронный криптографический SHA-256 через Web Crypto API
-async function sha256Async(str) {
-  try {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(str + ADMIN_PIN_SALT);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-  } catch (e) {
-    return secureHashSync(str);
-  }
-}
-
-// Генерация математической подписи сессии
-function generateSessionSig(token, phone, timeStr) {
-  return secureHashSync(`SES_${token}_${phone}_${timeStr}`);
-}
-
-// Персистентная защита от подбора (localStorage сохраняется при F5)
-function getAdminLockoutInfo() {
-  const attempts = Number(localStorage.getItem("shoe_store_admin_attempts") || 0);
-  const lockoutUntil = Number(localStorage.getItem("shoe_store_admin_lockout_until") || 0);
-  return { attempts, lockoutUntil };
-}
-
-function setAdminLockoutInfo(attempts, lockoutUntil) {
-  localStorage.setItem("shoe_store_admin_attempts", String(attempts));
-  localStorage.setItem("shoe_store_admin_lockout_until", String(lockoutUntil));
+// Полномочия сотрудников проверяет Supabase; браузер хранит только
+// краткоживущий серверный токен и никогда не вычисляет роль самостоятельно.
+function getStaffSessionToken() {
+  return sessionStorage.getItem("shoe_store_staff_session_token") || "";
 }
 
 function escapeHtml(value) {
@@ -85,10 +97,10 @@ function safeImageSrc(value) {
   const src = String(value ?? "").trim();
   if (!src) return FALLBACK_PRODUCT_IMAGE;
   if (/^data:image\/(png|jpeg|jpg|webp|gif);base64,[a-z0-9+/=\s]+$/i.test(src) && src.length <= MAX_DATA_IMAGE_LENGTH) return src;
-  if (/^assets\/images\/[a-z0-9._-]+\.(png|jpe?g|webp|gif)$/i.test(src)) return src;
+  if (/^(assets\/images\/|\/assets\/images\/)[a-z0-9._-]+\.(png|jpe?g|webp|gif)(\?.*)?$/i.test(src)) return src;
   try {
     const url = new URL(src, window.location.href);
-    if (url.protocol === "https:" && url.hostname === "images.unsplash.com") {
+    if (url.protocol === "https:") {
       return url.href;
     }
   } catch (e) {}
@@ -96,10 +108,9 @@ function safeImageSrc(value) {
 }
 
 function getSafeOrderStatus(status) {
-  return ["Новый", "Оплачен", "Подтвержден", "Выдан", "Отменен"].includes(status) ? status : "Новый";
+  return ["Новый", "Оплачен", "Подтвержден", "Выдан", "Отменен", "new", "contacted", "paid", "completed", "cancelled"].includes(status) ? status : "Новый";
 }
 
-// Вспомогательная функция задержки вызова (Debounce) для оптимизации поиска
 function debounce(fn, delay = 150) {
   let timer;
   return (...args) => {
@@ -119,29 +130,31 @@ function createEl(tag, className, text) {
   return el;
 }
 
-// Нормализация телефонного номера
 function normalizePhone(phoneStr) {
   if (!phoneStr) return "";
   let digits = phoneStr.replace(/\D/g, "");
-
   if (digits.length === 11 && digits.startsWith("8")) {
     digits = "7" + digits.substring(1);
   }
-
   if (digits.length === 10) {
     digits = "7" + digits;
   }
-
   return digits;
 }
 
-// Валидация мобильных номеров РК (+7 7XX XXX XX XX)
+function formatPhoneDisplay(phoneStr) {
+  const norm = normalizePhone(phoneStr);
+  if (norm.length === 11) {
+    return `+7 (${norm.slice(1, 4)}) ${norm.slice(4, 7)}-${norm.slice(7, 9)}-${norm.slice(9, 11)}`;
+  }
+  return phoneStr || "";
+}
+
 function isValidKazakhstanPhone(phoneStr) {
   const norm = normalizePhone(phoneStr);
   return /^7(7[0-8]|74|70|77)\d{8}$/.test(norm);
 }
 
-// Форматирование ФИО (Каждое слово с заглавной буквы)
 function formatFullName(str) {
   if (!str) return "";
   const parts = str.trim().split(/\s+/);
@@ -151,18 +164,15 @@ function formatFullName(str) {
   }).join(" ");
 }
 
-// Валидация Имени и Фамилии (Минимум 2 слова: Имя и Фамилия, только буквы)
 function isValidFullName(nameStr) {
   if (!nameStr) return false;
   const clean = nameStr.trim();
   const parts = clean.split(/\s+/);
   if (parts.length < 2) return false;
-
   const nameRegex = /^[a-zA-Zа-яА-ЯёЁәғқңөұүһӘҒҚҢӨҰҮҺ'-]{2,30}$/u;
   return parts.every(part => nameRegex.test(part));
 }
 
-// Валидация пароля (минимум 6 символов, хотя бы одна буква и цифра)
 function isValidPassword(pwd) {
   if (!pwd || pwd.length < 6) return false;
   const hasLetter = /[a-zA-Zа-яА-ЯёЁәғқңөұүһӘҒҚҢӨҰҮҺ]/u.test(pwd);
@@ -170,39 +180,42 @@ function isValidPassword(pwd) {
   return hasLetter && hasDigit;
 }
 
-// Сжатие и масштабирование загружаемых изображений через HTML5 Canvas
-function compressAndPreviewImage(file, callback) {
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      const maxDim = 600;
-      let width = img.width;
-      let height = img.height;
+function scrollToSection(elementId) {
+  const el = document.getElementById(elementId);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' });
+  }
+}
 
-      if (width > maxDim || height > maxDim) {
-        if (width > height) {
-          height = Math.round((height * maxDim) / width);
-          width = maxDim;
-        } else {
-          width = Math.round((width * maxDim) / height);
-          height = maxDim;
-        }
-      }
+// Кнопки-переключатели групп (Radio-like button groups)
+function initFormBtnGroups() {
+  document.querySelectorAll(".form-btn-group").forEach(group => {
+    group.querySelectorAll(".form-group-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        group.querySelectorAll(".form-group-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    });
+  });
+}
 
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, width, height);
+function setFormBtnGroupValue(groupId, value) {
+  const group = document.getElementById(groupId);
+  if (!group) return;
+  group.querySelectorAll(".form-group-btn").forEach(btn => {
+    if (btn.getAttribute("data-value") === value) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
+}
 
-      const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.75);
-      callback(compressedDataUrl);
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
+function getFormBtnGroupValue(groupId) {
+  const group = document.getElementById(groupId);
+  if (!group) return null;
+  const activeBtn = group.querySelector(".form-group-btn.active");
+  return activeBtn ? activeBtn.getAttribute("data-value") : null;
 }
 
 // Уведомления (Toasts)
@@ -227,4 +240,61 @@ function showToast(message, type = "success") {
     toast.classList.remove("show");
     setTimeout(() => toast.remove(), 300);
   }, 3500);
+}
+
+// Склонение числительного для грамматической корректности ("1 модель", "2 модели", "5 моделей")
+function getModelsPluralWord(count) {
+  const abs = Math.abs(Number(count) || 0) % 100;
+  const num = abs % 10;
+  if (abs > 10 && abs < 20) return "моделей";
+  if (num > 1 && num < 5) return "модели";
+  if (num === 1) return "модель";
+  return "моделей";
+}
+
+function formatCatalogCount(count) {
+  return `Найдено: ${count} ${getModelsPluralWord(count)}`;
+}
+
+// Избранные товары (Favorites Storage)
+const DB_FAVORITES_KEY = "shoe_store_favorites";
+
+function loadFavorites() {
+  return safeGetJSON(DB_FAVORITES_KEY, []);
+}
+
+function saveFavorites(favIds) {
+  safeSetJSON(DB_FAVORITES_KEY, favIds);
+  updateFavoritesBadges();
+}
+
+function isFavorite(productId) {
+  const favs = loadFavorites();
+  return favs.includes(productId);
+}
+
+function toggleFavorite(productId) {
+  let favs = loadFavorites();
+  let added = false;
+  if (favs.includes(productId)) {
+    favs = favs.filter(id => id !== productId);
+  } else {
+    favs.push(productId);
+    added = true;
+  }
+  saveFavorites(favs);
+  return added;
+}
+
+function updateFavoritesBadges() {
+  const favs = loadFavorites();
+  const badge = document.getElementById("fav-badge");
+  if (badge) {
+    badge.textContent = favs.length;
+    if (favs.length > 0) {
+      badge.classList.remove("d-none");
+    } else {
+      badge.classList.add("d-none");
+    }
+  }
 }

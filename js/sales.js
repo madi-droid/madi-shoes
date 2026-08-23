@@ -1,4 +1,24 @@
-// MADIYAR SHOES — модуль оффлайн-продаж и кассового учета (sales.js)
+// MADIYAR SHOES — модуль кассы, продаж и оффлайн-очереди (sales.js)
+
+const OFFLINE_QUEUE_KEY = "shoe_store_offline_sales_queue";
+
+function generateUUID() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+function getOfflineQueue() {
+  return safeGetJSON(OFFLINE_QUEUE_KEY, []);
+}
+
+function saveOfflineQueue(queue) {
+  safeSetJSON(OFFLINE_QUEUE_KEY, queue);
+}
 
 function populateSaleProductsSelect() {
   if (!requireAdminAccess()) return;
@@ -7,15 +27,12 @@ function populateSaleProductsSelect() {
   const dropdown = document.getElementById("sale-product-autocomplete-dropdown");
   if (!searchInput || !dropdown) return;
 
+  if (searchInput.dataset.autocompleteInitialized === "true") return;
+  searchInput.dataset.autocompleteInitialized = "true";
+
   function renderSuggestions(query) {
     dropdown.innerHTML = "";
-
-    const filtered = products.filter(p => {
-      if (!query) return true;
-      return p.article.toLowerCase().includes(query.toLowerCase()) ||
-             p.brand.toLowerCase().includes(query.toLowerCase()) ||
-             p.name.toLowerCase().includes(query.toLowerCase());
-    });
+    const filtered = products.filter(p => productMatchesQuery(p, query));
 
     if (filtered.length === 0) {
       dropdown.classList.add("d-none");
@@ -60,16 +77,8 @@ function populateSaleProductsSelect() {
 
   const bazaarBtn = document.querySelector("#sale-point-group button[data-value='bazaar']");
   const mallBtn = document.querySelector("#sale-point-group button[data-value='mall']");
-  if (bazaarBtn) {
-    bazaarBtn.addEventListener("click", () => {
-      setTimeout(updateSaleSizesSelect, 50);
-    });
-  }
-  if (mallBtn) {
-    mallBtn.addEventListener("click", () => {
-      setTimeout(updateSaleSizesSelect, 50);
-    });
-  }
+  if (bazaarBtn) bazaarBtn.addEventListener("click", () => setTimeout(updateSaleSizesSelect, 50));
+  if (mallBtn) mallBtn.addEventListener("click", () => setTimeout(updateSaleSizesSelect, 50));
 
   updateSaleSizesSelect();
 }
@@ -106,11 +115,14 @@ function updateSaleSizesSelect() {
     }
   });
 
+  // Оффлайн-перерасход: позволяем выбрать размер даже если 0
   if (!hasStock) {
-    const opt = document.createElement("option");
-    opt.value = "";
-    opt.textContent = "Нет в наличии на этой точке";
-    sizeSelect.appendChild(opt);
+    AVAILABLE_SIZES.forEach(size => {
+      const opt = document.createElement("option");
+      opt.value = size;
+      opt.textContent = `${size} размер (⚠ Нет в наличии — оффлайн-перерасход)`;
+      sizeSelect.appendChild(opt);
+    });
   }
 }
 
@@ -134,8 +146,8 @@ function renderAdminSalesTable() {
       todayCount++;
       const sum = Number(s.price) || 0;
       todaySum += sum;
-      if (s.payment === "kaspi") sumKaspi += sum;
-      else if (s.payment === "red") sumRed += sum;
+      if (s.payment === "kaspi" || s.payment === "kaspi_qr") sumKaspi += sum;
+      else if (s.payment === "red" || s.payment === "kaspi_red") sumRed += sum;
       else if (s.payment === "cash") sumCash += sum;
     }
   });
@@ -164,7 +176,7 @@ function renderAdminSalesTable() {
 
     const pointLabel = s.point === "bazaar" ? "Базар" : "ТЦ";
     let payLabel = "Каспи QR";
-    if (s.payment === "red") payLabel = "Каспи Ред";
+    if (s.payment === "red" || s.payment === "kaspi_red") payLabel = "Каспи Ред";
     else if (s.payment === "cash") payLabel = "Наличные";
 
     const tr = document.createElement("tr");
@@ -181,6 +193,15 @@ function renderAdminSalesTable() {
     nameDiv.textContent = `${safeText(s.brand, 50)} ${safeText(s.name, 80)}`;
     tdProduct.appendChild(artStrong);
     tdProduct.appendChild(nameDiv);
+
+    // Добавляем плашку оффлайн-перерасхода
+    if (s.overdraft_warning) {
+      const overdraftBadge = document.createElement("span");
+      overdraftBadge.style.cssText = "display:inline-block; margin-top:4px; padding:2px 6px; font-size:11px; background:#fff3cd; color:#856404; border:1px solid #ffeeba; border-radius:4px; font-weight:bold;";
+      overdraftBadge.textContent = "⚠ Оффлайн-перерасход";
+      tdProduct.appendChild(overdraftBadge);
+    }
+
     tr.appendChild(tdProduct);
 
     const tdPoint = document.createElement("td");
@@ -225,30 +246,116 @@ function renderAdminSalesTable() {
   if (elCash) elCash.textContent = `${sumCash.toLocaleString()} ₸`;
 }
 
-window.handleOfflineSaleSubmit = function() {
+// Проведение продажи через Supabase RPC sell_product_item с fallback на Offline Queue
+window.handleOfflineSaleSubmit = async function() {
   if (!requireAdminAccess()) return;
   const productId = document.getElementById("sale-product-id").value;
   const size = document.getElementById("sale-size-select").value;
   const point = getFormBtnGroupValue("sale-point-group") || "bazaar";
-  const payment = getFormBtnGroupValue("sale-payment-group") || "kaspi";
+  const rawPayment = getFormBtnGroupValue("sale-payment-group") || "kaspi";
 
   if (!productId || !size) {
-    showToast("Пожалуйста, выберите корректный товар по артикулу и выберите доступный размер", "error");
+    showToast("Пожалуйста, выберите корректный товар по артикулу и доступный размер", "error");
     return;
   }
 
   const product = getProductById(productId);
   if (!product) return;
 
-  if (product.stock?.[point] && product.stock[point][size] > 0) {
-    product.stock[point][size]--;
-  } else {
-    showToast("Этого размера уже нет в наличии на выбранной точке!", "error");
-    return;
+  const clientSaleId = generateUUID();
+  let paymentMethod = "kaspi_qr";
+  if (rawPayment === "red") paymentMethod = "kaspi_red";
+  else if (rawPayment === "cash") paymentMethod = "cash";
+
+  const supabase = window.AppConfig ? window.AppConfig.getSupabaseClient() : null;
+  const isOnline = navigator.onLine && supabase;
+
+  if (isOnline) {
+    try {
+      const { data, error } = await supabase.rpc('sell_product_item', {
+        p_client_sale_id: clientSaleId,
+        p_product_id: productId,
+        p_location: point,
+        p_size: parseInt(size, 10),
+        p_payment_method: paymentMethod,
+        p_is_offline: false,
+        p_session_token: getStaffSessionToken()
+      });
+
+      if (error) {
+        showToast(`Ошибка продажи: ${error.message}`, "error");
+        return;
+      }
+
+      if (data && data.success) {
+        // Обновляем локальный остаток
+        if (!product.stock[point]) product.stock[point] = {};
+        product.stock[point][size] = data.new_quantity;
+
+        const newSale = {
+          id: data.sale_id || clientSaleId,
+          client_sale_id: clientSaleId,
+          productId: product.id,
+          article: product.article,
+          brand: product.brand,
+          name: product.name,
+          price: product.price,
+          point: point,
+          size: size,
+          payment: rawPayment,
+          seller_name: sessionStorage.getItem("shoe_store_admin_name") || "Продавец",
+          date: new Date().toISOString(),
+          is_offline_synced: true,
+          overdraft_warning: !!data.overdraft_warning
+        };
+
+        sales.unshift(newSale);
+        window.db.saveSales(sales);
+        window.db.saveProducts(products);
+        window.db.logStockMovement(product.id, product.article, size, point, -1, "Кассовая продажа (RPC)", newSale.id);
+
+        if (data.overdraft_warning) {
+          showToast("⚠ Внимание: Оффлайн-перерасход! Данного размера не было на складе.", "warning");
+        } else {
+          showToast("Продажа успешно проведена!", "success");
+        }
+
+        resetSaleForm();
+        return;
+      }
+    } catch (rpcErr) {
+      console.warn("Ошибка подключения к RPC, переход на оффлайн-очередь:", rpcErr);
+    }
   }
 
-  const newSale = {
-    id: Date.now().toString(),
+  // Оффлайн-режим: Сохраняем в OfflineSalesQueue
+  const currentStock = product.stock?.[point]?.[size] || 0;
+  const isOverdraft = currentStock <= 0;
+
+  if (!product.stock[point]) product.stock[point] = {};
+  product.stock[point][size] = currentStock - 1;
+
+  const queueItem = {
+    client_sale_id: clientSaleId,
+    product_id: product.id,
+    location: point,
+    size: parseInt(size, 10),
+    payment_method: paymentMethod,
+    article: product.article,
+    brand: product.brand,
+    name: product.name,
+    price: product.price,
+    overdraft_warning: isOverdraft,
+    created_at: new Date().toISOString()
+  };
+
+  const queue = getOfflineQueue();
+  queue.push(queueItem);
+  saveOfflineQueue(queue);
+
+  const newOfflineSale = {
+    id: clientSaleId,
+    client_sale_id: clientSaleId,
     productId: product.id,
     article: product.article,
     brand: product.brand,
@@ -256,16 +363,28 @@ window.handleOfflineSaleSubmit = function() {
     price: product.price,
     point: point,
     size: size,
-    payment: payment,
-    date: new Date().toISOString()
+    payment: rawPayment,
+    seller_name: sessionStorage.getItem("shoe_store_admin_name") || "Продавец",
+    date: new Date().toISOString(),
+    is_offline_synced: false,
+    overdraft_warning: isOverdraft
   };
 
-  sales.push(newSale);
+  sales.unshift(newOfflineSale);
   window.db.saveSales(sales);
   window.db.saveProducts(products);
+  window.db.logStockMovement(product.id, product.article, size, point, -1, isOverdraft ? "Оффлайн-перерасход" : "Оффлайн-продажа", clientSaleId);
 
-  showToast("Продажа успешно записана, остаток списан со склада!", "success");
+  if (isOverdraft) {
+    showToast("⚠ Оффлайн-перерасход! Продажа сохранена оффлайн с предупреждением.", "warning");
+  } else {
+    showToast("Продажа сохранена в оффлайн-очередь. Синхронизируется при появлении сети.", "info");
+  }
 
+  resetSaleForm();
+};
+
+function resetSaleForm() {
   const searchInput = document.getElementById("sale-product-search");
   if (searchInput) searchInput.value = "";
   const hiddenInput = document.getElementById("sale-product-id");
@@ -276,7 +395,63 @@ window.handleOfflineSaleSubmit = function() {
   renderAdminProductsTable();
   renderAdminDashboard();
   renderCatalog();
-};
+}
+
+let isSyncingQueue = false;
+
+// Автоматическая синхронизация оффлайн-очереди
+async function syncOfflineSalesQueue() {
+  if (isSyncingQueue) return;
+  const supabase = window.AppConfig ? window.AppConfig.getSupabaseClient() : null;
+  if (!navigator.onLine || !supabase) return;
+
+  const queue = getOfflineQueue();
+  if (queue.length === 0) return;
+
+  isSyncingQueue = true;
+  console.log(`[OfflineQueue] Синхронизация ${queue.length} оффлайн-продаж...`);
+  const remainingQueue = [];
+
+  try {
+    for (const item of queue) {
+      try {
+        const { data, error } = await supabase.rpc('sell_product_item', {
+          p_client_sale_id: item.client_sale_id,
+          p_product_id: item.product_id,
+          p_location: item.location,
+          p_size: item.size,
+          p_payment_method: item.payment_method,
+          p_is_offline: true,
+          p_session_token: getStaffSessionToken()
+        });
+
+        if (error) {
+          console.error(`[OfflineQueue] Ошибка синхронизации ${item.client_sale_id}:`, error);
+          remainingQueue.push(item);
+        } else {
+          console.log(`[OfflineQueue] Продажа ${item.client_sale_id} успешно синхронизирована.`);
+        }
+      } catch (e) {
+        remainingQueue.push(item);
+      }
+    }
+
+    saveOfflineQueue(remainingQueue);
+    if (queue.length > remainingQueue.length) {
+      showToast(`Успешно синхронизировано оффлайн-продаж: ${queue.length - remainingQueue.length}`, "success");
+      window.db.fetchProductsFromSupabase().then(() => {
+        renderCatalog();
+        renderAdminProductsTable();
+        renderAdminSalesTable();
+      });
+    }
+  } finally {
+    isSyncingQueue = false;
+  }
+}
+
+// Слушатель восстановившегося соединения
+window.addEventListener("online", syncOfflineSalesQueue);
 
 window.deleteOfflineSaleById = function(saleId) {
   if (!requireAdminAccess()) return;
@@ -295,6 +470,7 @@ window.deleteOfflineSaleById = function(saleId) {
   sales = sales.filter(s => s.id !== saleId);
   window.db.saveSales(sales);
   window.db.saveProducts(products);
+  window.db.logStockMovement(sale.productId, sale.article, sale.size, sale.point, 1, "Отмена продажи", sale.id);
 
   showToast("Продажа отменена, остаток возвращен на склад", "info");
 
@@ -302,5 +478,5 @@ window.deleteOfflineSaleById = function(saleId) {
   renderAdminProductsTable();
   renderAdminDashboard();
   renderCatalog();
-  populateSaleProductsSelect();
+  updateSaleSizesSelect();
 };

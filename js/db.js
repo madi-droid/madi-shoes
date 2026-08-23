@@ -1,696 +1,811 @@
-// Инициализация базы данных и вспомогательные функции для работы с ней (db.js)
+// Инициализация базы данных и синхронизация с Supabase (db.js)
 
-
-
+const DB_PRODUCTS_KEY = "shoe_store_products_v4";
+const DB_ORDERS_KEY = "shoe_store_orders";
+const DB_SALES_KEY = "shoe_store_sales";
+const DB_USERS_KEY = "shoe_store_users";
+const DB_CURRENT_USER_KEY = "shoe_store_current_user";
+const DB_STOCK_MOVEMENTS_KEY = "shoe_store_stock_movements";
 
 const DEFAULT_PRODUCTS = [
   {
-    id: "1",
-    article: "ET-204-W",
-    brand: "Etor",
-    name: "Белые кожаные кроссовки",
-    description: "Стильные повседневные кроссовки из натуральной кожи от бренда Etor. Мягкая подошва обеспечивает комфорт при длительной ходьбе, а классический дизайн подходит под любой гардероб.",
-    price: 28000,
-    image: "assets/images/etor_white_sneaker.png",
+    id: "p-1",
+    article: "ET-2481",
+    brand: "ETOR",
+    name: "Челси Ferro",
+    description: "Натуральная кожа, классическая колодка челси, осенняя коллекция.",
+    price: 42900,
+    image: "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=900&h=1100&fit=crop&auto=format",
     gender: "мужской",
+    season: "осень",
+    category: "ботинки",
+    is_active: true,
+    stock: {
+      bazaar: { "40": 2, "41": 3, "42": 4, "43": 2 },
+      mall: { "41": 1, "42": 2, "44": 1 }
+    }
+  },
+  {
+    id: "p-2",
+    article: "NK-0071",
+    brand: "NIKE",
+    name: "Air Force 1 Low",
+    description: "Культовые кроссовки белого цвета, натуральная кожа.",
+    price: 58500,
+    image: "https://images.unsplash.com/photo-1623788975845-7d3e0adbae7c?w=900&h=1100&fit=crop&auto=format",
+    gender: "унисекс",
     season: "весна",
     category: "кроссовки",
+    is_active: true,
     stock: {
-      bazaar: { "40": 3, "42": 5, "44": 2 },
-      mall: { "41": 4, "45": 3 }
+      bazaar: { "39": 2, "40": 3, "41": 3, "42": 2, "43": 1, "44": 1 },
+      mall: {}
     }
   },
   {
-    id: "2",
-    article: "NK-RUN-77",
-    brand: "SportPro",
-    name: "Черные спортивные кроссовки",
-    description: "Легкие беговые кроссовки с амортизирующей подошвой. Отличная вентиляция благодаря сетчатому верху. Идеальны как для тренировок, так и для активного отдыха.",
-    price: 32000,
-    image: "assets/images/sport_black_sneaker.png",
-    gender: "унисекс",
-    season: "лето",
-    category: "кроссовки",
-    stock: {
-      bazaar: { "39": 2, "40": 4, "41": 5, "42": 3 },
-      mall: { "42": 4, "43": 6, "44": 3, "45": 2 }
-    }
-  },
-  {
-    id: "3",
-    article: "CL-DERBY-09",
-    brand: "Classic Style",
-    name: "Кожаные туфли Дерби",
-    description: "Элегантные классические туфли дерби из премиальной коричневой кожи. Идеально дополнят деловой костюм или образ в стиле smart-casual.",
-    price: 45000,
-    image: "assets/images/classic_brown_shoe.png",
-    gender: "мужской",
-    season: "осень",
-    category: "туфли",
-    stock: {
-      bazaar: { "42": 2, "43": 1 },
-      mall: { "40": 3, "41": 4, "42": 3, "43": 3, "44": 2 }
-    }
-  },
-  {
-    id: "4",
-    article: "WT-BOOTS-02",
-    brand: "Nordic",
-    name: "Зимние кожаные сапоги",
-    description: "Теплые высокие сапоги из натуральной кожи с подкладкой из натурального меха. Надежная подошва защитит от скольжения и любых холодов.",
-    price: 38000,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
-    gender: "женский",
-    season: "зима",
-    category: "сапоги",
-    stock: {
-      bazaar: { "37": 2, "38": 4, "39": 2 },
-      mall: { "38": 3, "40": 1 }
-    }
-  },
-  {
-    id: "5",
-    article: "CR-CLASSIC-01",
-    brand: "Crocs",
-    name: "Летние сабо Кроксы",
-    description: "Легкие и практичные кроксы для отдыха, бассейна или пляжа. Мягкий полимер Croslite обеспечивает непревзойденный комфорт на весь день.",
-    price: 15000,
-    image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&q=80",
-    gender: "унисекс",
-    season: "лето",
-    category: "кроксы",
-    stock: {
-      bazaar: { "40": 5, "41": 3, "42": 4 },
-      mall: { "41": 3, "43": 2 }
-    }
-  },
-  {
-    id: "6",
-    article: "NK-AIR-90",
-    brand: "Nike",
-    name: "Кроссовки Nike Air Max 90",
-    description: "Культовые кроссовки Nike Air Max с видимой амортизирующей вставкой. Идеальное сочетание комфорта, стиля и спортивного наследия.",
-    price: 42000,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
-    gender: "мужской",
-    season: "весна, осень",
-    category: "кроссовки",
-    stock: {
-      bazaar: { "40": 4, "41": 5, "42": 4, "43": 2 },
-      mall: { "42": 3, "43": 4, "44": 2 }
-    }
-  },
-  {
-    id: "7",
-    article: "AD-ST-05",
-    brand: "Adidas",
-    name: "Кроссовки Adidas Stan Smith",
-    description: "Легендарные теннисные кеды Adidas с минималистичным силуэтом. Натуральная мягкая кожа и фирменный логотип на язычке.",
-    price: 35000,
-    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&q=80",
-    gender: "унисекс",
-    season: "весна, лето",
-    category: "кроссовки",
-    stock: {
-      bazaar: { "38": 2, "39": 3, "40": 4, "41": 3 },
-      mall: { "39": 3, "40": 5, "41": 4, "42": 2 }
-    }
-  },
-  {
-    id: "8",
-    article: "FS-SLIP-12",
-    brand: "Fast Step",
-    name: "Кожаные шлепанцы Fast Step",
-    description: "Удобные мужские шлепанцы из натуральной мягкой кожи. Отличный выбор для жарких летних дней и повседневной носки.",
-    price: 18000,
-    image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&q=80",
+    id: "p-3",
+    article: "BS-1140",
+    brand: "BASCONI",
+    name: "Лофер Velluto",
+    description: "Летняя замша, мягкая стелька, итальянский фасон.",
+    price: 36700,
+    image: "https://images.unsplash.com/photo-1576792741377-eb0f4f6d1a47?w=900&h=1100&fit=crop&auto=format",
     gender: "мужской",
     season: "лето",
-    category: "шлепанцы",
-    stock: {
-      bazaar: { "40": 5, "41": 6, "42": 4, "43": 3 },
-      mall: { "41": 4, "42": 5, "43": 4 }
-    }
-  },
-  {
-    id: "9",
-    article: "PU-RSX-02",
-    brand: "Puma",
-    name: "Спортивные кроссовки Puma RS-X",
-    description: "Массивные и стильные кроссовки Puma с ярким футуристичным дизайном. Амортизирующая стелька обеспечивает легкий и пружинистый шаг.",
-    price: 39000,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
-    gender: "мужской",
-    season: "весна, осень",
-    category: "кроссовки",
-    stock: {
-      bazaar: { "41": 2, "42": 4, "43": 3 },
-      mall: { "42": 3, "43": 5, "44": 2 }
-    }
-  },
-  {
-    id: "10",
-    article: "CL-LOAF-22",
-    brand: "Classic Style",
-    name: "Замшевые лоферы",
-    description: "Стильные лоферы из натуральной итальянской замши. Легкие, мягкие и дышащие, подходят для прохладных летних вечеров и осени.",
-    price: 31000,
-    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&q=80",
-    gender: "мужской",
-    season: "весна, лето",
     category: "лоферы",
+    is_active: true,
     stock: {
-      bazaar: { "40": 2, "41": 3, "42": 4 },
-      mall: { "41": 3, "42": 3, "43": 2 }
+      bazaar: { "41": 1, "42": 2 },
+      mall: { "40": 2, "41": 2, "42": 3, "43": 1, "44": 1 }
     }
   },
   {
-    id: "11",
-    article: "WT-BOOTS-08",
-    brand: "Nordic",
-    name: "Женские полусапожки на меху",
-    description: "Комфортные женские полусапожки с толстой нескользящей подошвой. Внутри теплая шерстяная подкладка для сильных морозов.",
-    price: 34000,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
+    id: "p-4",
+    article: "RK-3309",
+    brand: "RIEKER",
+    name: "Сандалии Sole",
+    description: "Женские легкие сандалии из мягкой кожи для летних прогулок.",
+    price: 24300,
+    image: "https://images.unsplash.com/photo-1613662632164-7f2b081a5b46?w=900&h=1100&fit=crop&auto=format",
     gender: "женский",
-    season: "зима",
-    category: "сапоги",
-    stock: {
-      bazaar: { "36": 2, "37": 3, "38": 4, "39": 2 },
-      mall: { "37": 3, "38": 3, "39": 4 }
-    }
-  },
-  {
-    id: "12",
-    article: "ET-MOCC-15",
-    brand: "Etor",
-    name: "Кожаные мокасины Etor",
-    description: "Мягкие классические мокасины из тонкой натуральной кожи. Перфорация обеспечивает отличную вентиляцию летом.",
-    price: 26000,
-    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&q=80",
-    gender: "мужской",
     season: "лето",
-    category: "мокасины",
+    category: "сандалии",
+    is_active: true,
     stock: {
-      bazaar: { "40": 4, "41": 5, "42": 3 },
-      mall: { "41": 3, "42": 4, "43": 2 }
+      bazaar: { "36": 3, "37": 4, "38": 3, "39": 2 },
+      mall: { "36": 2, "38": 2 }
     }
   },
   {
-    id: "13",
-    article: "AD-YZ-350",
-    brand: "Adidas",
-    name: "Летние кроссовки Yeezy Boost",
-    description: "Трендовые легкие кроссовки из дышащего текстиля Primeknit. Подошва Boost создает максимальный уровень комфорта при ходьбе.",
-    price: 55000,
-    image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&q=80",
-    gender: "унисекс",
-    season: "лето",
-    category: "кроссовки",
-    stock: {
-      bazaar: { "38": 2, "39": 4, "40": 5, "41": 3 },
-      mall: { "40": 4, "41": 5, "42": 3, "43": 2 }
-    }
-  },
-  {
-    id: "14",
-    article: "FS-SLIP-14",
-    brand: "Fast Step",
-    name: "Шлепки Fast Step (Серые)",
-    description: "Удобные пляжные шлепанцы серого цвета от бренда Fast Step. Водостойкие материалы и ортопедическая стелька.",
-    price: 18000,
-    image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&q=80",
-    gender: "мужской",
-    season: "лето",
-    category: "шлепанцы",
-    stock: {
-      bazaar: { "40": 3, "41": 4, "42": 4 },
-      mall: { "41": 3, "42": 4, "43": 3 }
-    }
-  },
-  {
-    id: "15",
-    article: "ET-OXF-88",
-    brand: "Etor",
-    name: "Классические оксфорды Etor",
-    description: "Официальные мужские оксфорды из полированной черной кожи. Прекрасно сочетаются со строгими костюмами и вечерней одеждой.",
-    price: 48000,
-    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&q=80",
-    gender: "мужской",
-    season: "весна, осень",
+    id: "p-5",
+    article: "SL-7724",
+    brand: "SALAMANDER",
+    name: "Туфли Notte",
+    description: "Элегантные классические туфли, натуральная гладкая кожа.",
+    price: 51200,
+    image: "https://images.unsplash.com/photo-1553545985-1e0d8781d5db?w=900&h=1100&fit=crop&auto=format",
+    gender: "женский",
+    season: "осень",
     category: "туфли",
+    is_active: true,
     stock: {
-      bazaar: { "41": 2, "42": 3, "43": 1 },
-      mall: { "40": 2, "41": 4, "42": 4, "43": 2 }
+      bazaar: {},
+      mall: { "36": 1, "37": 3, "38": 3, "39": 2, "40": 1 }
     }
   },
   {
-    id: "16",
-    article: "NK-AF1-01",
-    brand: "Nike",
-    name: "Кроссовки Nike Air Force 1",
-    description: "Классические белые кроссовки Air Force 1. Прочная резиновая подошва со скрытой воздушной подушкой Air.",
-    price: 38000,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
+    id: "p-6",
+    article: "ET-2502",
+    brand: "ETOR",
+    name: "Оксфорд Bruno",
+    description: "Классические оксфорды с закрытой шнуровкой, зимняя подкладка.",
+    price: 47800,
+    image: "https://images.unsplash.com/photo-1760616172899-0681b97a2de3?w=900&h=1100&fit=crop&auto=format",
+    gender: "мужской",
+    season: "зима",
+    category: "туфли",
+    is_active: true,
+    stock: {
+      bazaar: { "40": 2, "41": 2, "42": 3, "43": 1 },
+      mall: { "42": 2, "43": 2, "44": 3, "45": 1 }
+    }
+  },
+  {
+    id: "p-7",
+    article: "CR-0118",
+    brand: "CROCS",
+    name: "Classic Clog",
+    description: "Классические сабо Crocs с амортизацией Croslite.",
+    price: 18900,
+    image: "https://images.unsplash.com/photo-1614634717465-eb3d6bc8d930?w=900&h=1100&fit=crop&auto=format",
     gender: "унисекс",
-    season: "весна, осень",
-    category: "кроссовки",
+    season: "лето",
+    category: "кроксы",
+    is_active: true,
     stock: {
-      bazaar: { "37": 3, "38": 4, "39": 5, "40": 4 },
-      mall: { "39": 4, "40": 6, "41": 5, "42": 3 }
+      bazaar: { "36": 4, "37": 5, "38": 4, "39": 3, "40": 2 },
+      mall: { "37": 2, "38": 3 }
     }
   },
   {
-    id: "17",
-    article: "PU-SUEDE-04",
-    brand: "Puma",
-    name: "Кеды Puma Suede",
-    description: "Знаменитые замшевые кеды Puma с контрастной боковой полосой. Икона уличного стиля и хип-хоп культуры.",
-    price: 29000,
-    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&q=80",
-    gender: "унисекс",
-    season: "весна, лето",
-    category: "кеды",
+    id: "p-8",
+    article: "MS-6613",
+    brand: "MASCOTTE",
+    name: "Мокасины Suede",
+    description: "Мужские мокасины из натуральной замши премиум выделки.",
+    price: 33400,
+    image: "https://images.unsplash.com/photo-1616406432452-07bc5938759d?w=900&h=1100&fit=crop&auto=format",
+    gender: "мужской",
+    season: "весна",
+    category: "мокасины",
+    is_active: true,
     stock: {
-      bazaar: { "38": 2, "39": 3, "40": 4, "41": 3 },
-      mall: { "39": 3, "40": 4, "41": 3, "42": 2 }
+      bazaar: { "41": 2, "42": 3, "43": 2, "44": 1 },
+      mall: { "40": 1, "44": 2, "45": 1 }
     }
   },
   {
-    id: "18",
-    article: "WT-BOOTS-09",
-    brand: "Nordic",
-    name: "Зимние ботинки Timber",
-    description: "Водонепроницаемые нубуковые ботинки рыжего цвета. Идеально защищают от грязи, слякоти, снега и мороза.",
-    price: 41000,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
+    id: "p-9",
+    article: "TB-4400",
+    brand: "TIMBERLAND",
+    name: "Premium 6-Inch",
+    description: "Легендарные жёлтые ботинки Timberland с водонепроницаемой мембраной.",
+    price: 89600,
+    image: "https://images.unsplash.com/photo-1706587161985-abec97ad6af8?w=900&h=1100&fit=crop&auto=format",
     gender: "мужской",
     season: "зима",
     category: "ботинки",
+    is_active: true,
     stock: {
-      bazaar: { "41": 3, "42": 4, "43": 2 },
-      mall: { "42": 4, "43": 3, "44": 2 }
+      bazaar: { "42": 1, "43": 2, "44": 1 },
+      mall: { "40": 1, "41": 2, "42": 3, "43": 3, "44": 2, "45": 1 }
     }
   },
   {
-    id: "19",
-    article: "CL-CHEL-03",
-    brand: "Classic Style",
-    name: "Осенние ботинки Челси",
-    description: "Элегантные ботинки челси с эластичными боковыми вставками. Изготовлены из высококачественной черной кожи.",
-    price: 37000,
-    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&q=80",
+    id: "p-10",
+    article: "AD-0982",
+    brand: "ADIDAS",
+    name: "Samba OG",
+    description: "Ретро-кроссовки из замши и кожи, классика городского стиля.",
+    price: 62400,
+    image: "https://images.unsplash.com/photo-1727705723856-b44b14612e93?w=900&h=1100&fit=crop&auto=format",
+    gender: "женский",
+    season: "весна",
+    category: "кроссовки",
+    is_active: true,
+    stock: {
+      bazaar: { "36": 2, "37": 3, "38": 2 },
+      mall: { "36": 1, "37": 4, "38": 4, "39": 2, "40": 1 }
+    }
+  },
+  {
+    id: "p-11",
+    article: "BD-5217",
+    brand: "BADEN",
+    name: "Лофер Cardo",
+    description: "Женские лоферы из текстурной кожи с золотистой пряжкой.",
+    price: 29800,
+    image: "https://images.unsplash.com/photo-1777987601447-266e128de448?w=900&h=1100&fit=crop&auto=format",
+    gender: "женский",
+    season: "осень",
+    category: "лоферы",
+    is_active: true,
+    stock: {
+      bazaar: { "37": 2, "38": 3, "39": 2, "40": 1 },
+      mall: {}
+    }
+  },
+  {
+    id: "p-12",
+    article: "EC-8830",
+    brand: "ECCO",
+    name: "Ботинок Nordfjord",
+    description: "Утепленные зимние ботинки ECCO с анатомической подошвой FLUIDFORM.",
+    price: 74100,
+    image: "https://images.unsplash.com/photo-1520718458542-6208153eb61a?w=900&h=1100&fit=crop&auto=format",
+    gender: "мужской",
+    season: "зима",
+    category: "ботинки",
+    is_active: true,
+    stock: {
+      bazaar: { "41": 1, "42": 2, "43": 2, "45": 1 },
+      mall: { "42": 1, "44": 2, "45": 2 }
+    }
+  },
+  {
+    id: "p-13",
+    article: "ET-2560",
+    brand: "ETOR",
+    name: "Дерби Corso",
+    description: "Мужские туфли дерби из вощеной кожи от турецкого бренда Etor.",
+    price: 39900,
+    image: "https://images.unsplash.com/photo-1708515792135-09a95d8e9119?w=900&h=1100&fit=crop&auto=format",
     gender: "мужской",
     season: "осень",
-    category: "ботинки",
+    category: "туфли",
+    is_active: true,
     stock: {
-      bazaar: { "40": 2, "41": 3, "42": 3 },
-      mall: { "41": 4, "42": 4, "43": 2 }
+      bazaar: { "40": 1, "41": 3, "42": 2 },
+      mall: { "41": 2, "42": 2, "43": 2, "44": 1 }
     }
   },
   {
-    id: "20",
-    article: "CR-CLASSIC-02",
-    brand: "Crocs",
-    name: "Утепленные сабо Кроксы",
-    description: "Кроксы с мягкой пушистой флисовой подкладкой для прохладной погоды. Невероятно мягкие и уютные.",
-    price: 19000,
-    image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&q=80",
+    id: "p-14",
+    article: "GS-2077",
+    brand: "GUESS",
+    name: "Босоножки Perla",
+    description: "Женские летние босоножки на изящном каблуке.",
+    price: 55300,
+    image: "https://images.unsplash.com/photo-1554238113-6d3dbed5cf55?w=900&h=1100&fit=crop&auto=format",
+    gender: "женский",
+    season: "лето",
+    category: "сандалии",
+    is_active: true,
+    stock: {
+      bazaar: { "36": 2, "37": 2 },
+      mall: { "36": 3, "37": 3, "38": 2, "39": 1 }
+    }
+  },
+  {
+    id: "p-15",
+    article: "NB-9060",
+    brand: "NEW BALANCE",
+    name: "9060 Sea Salt",
+    description: "Футуристичные кроссовки New Balance с амортизацией ABZORB.",
+    price: 71800,
+    image: "https://images.unsplash.com/photo-1672920800748-a5fb6dfd0c2b?w=900&h=1100&fit=crop&auto=format",
     gender: "унисекс",
-    season: "осень, зима",
-    category: "кроксы",
+    season: "весна",
+    category: "кроссовки",
+    is_active: true,
     stock: {
-      bazaar: { "39": 2, "40": 4, "41": 3 },
-      mall: { "40": 3, "41": 5, "42": 2 }
+      bazaar: { "37": 2, "38": 2, "39": 3 },
+      mall: { "36": 1, "37": 2, "38": 3, "39": 2, "40": 2, "41": 1 }
     }
   },
   {
-    id: "21",
-    article: "FS-SLIP-16",
-    brand: "Fast Step",
-    name: "Шлепки Fast Step (Коричневые)",
-    description: "Удобные летние шлепанцы из натуральной кожи коричневого цвета. Анатомическая стелька снижает нагрузку на суставы.",
-    price: 18000,
-    image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&q=80",
+    id: "p-16",
+    article: "NK-0164",
+    brand: "NIKE",
+    name: "Air Max Plus",
+    description: "Мужские спортивные кроссовки с системой Tuned Air.",
+    price: 79400,
+    image: "https://images.unsplash.com/photo-1727705723856-b44b14612e93?w=900&h=1100&fit=crop&auto=format",
     gender: "мужской",
     season: "лето",
-    category: "шлепанцы",
+    category: "кроссовки",
+    is_active: true,
     stock: {
-      bazaar: { "40": 4, "41": 5, "42": 3 },
-      mall: { "41": 3, "42": 5, "43": 4 }
+      bazaar: { "41": 2, "42": 3, "43": 2, "44": 2 },
+      mall: { "40": 1, "41": 1, "42": 2 }
     }
   },
   {
-    id: "22",
-    article: "WT-BOOTS-10",
-    brand: "Nordic",
-    name: "Зимние спортивные дутики",
-    description: "Легкие женские дутики на прочной теплой подошве. Непромокаемый верх из нейлона защитит от мокрого снега.",
-    price: 27000,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
+    id: "p-17",
+    article: "ET-2610",
+    brand: "ETOR",
+    name: "Челси Montana",
+    description: "Утепленные мужские ботинки из натуральной кожи, зимняя коллекция Etor.",
+    price: 49500,
+    image: "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=900&h=1100&fit=crop&auto=format",
+    gender: "мужской",
+    season: "зима",
+    category: "ботинки",
+    is_active: true,
+    stock: {
+      bazaar: { "40": 3, "41": 4, "42": 3 },
+      mall: { "41": 2, "42": 3, "43": 1 }
+    }
+  },
+  {
+    id: "p-18",
+    article: "PM-1020",
+    brand: "PUMA",
+    name: "Palermo Special",
+    description: "Ретро-кеды из замши премиум выделки с золотистым логотипом Puma.",
+    price: 38900,
+    image: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=900&h=1100&fit=crop&auto=format",
+    gender: "унисекс",
+    season: "весна",
+    category: "кеды",
+    is_active: true,
+    stock: {
+      bazaar: { "37": 3, "38": 4, "39": 2 },
+      mall: { "36": 2, "37": 3, "38": 3, "39": 1 }
+    }
+  },
+  {
+    id: "p-19",
+    article: "CN-7080",
+    brand: "CONVERSE",
+    name: "Chuck 70 Vintage",
+    description: "Культовые кеды Converse из плотного канваса с амортизирующей стелькой OrthoLite.",
+    price: 32500,
+    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=900&h=1100&fit=crop&auto=format",
+    gender: "унисекс",
+    season: "лето",
+    category: "кеды",
+    is_active: true,
+    stock: {
+      bazaar: { "38": 2, "39": 3, "40": 4, "41": 2 },
+      mall: { "37": 2, "38": 3, "40": 2 }
+    }
+  },
+  {
+    id: "p-20",
+    article: "SL-9910",
+    brand: "SALAMANDER",
+    name: "Сапоги Вены",
+    description: "Женские зимние сапоги из натуральной гладкой кожи на меху.",
+    price: 68400,
+    image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=900&h=1100&fit=crop&auto=format",
     gender: "женский",
     season: "зима",
     category: "сапоги",
+    is_active: true,
+    stock: {
+      bazaar: { "36": 2, "37": 3, "38": 2 },
+      mall: { "37": 2, "38": 3, "39": 1 }
+    }
+  },
+  {
+    id: "p-21",
+    article: "VG-4030",
+    brand: "VAGABOND",
+    name: "Лофер Cosmo",
+    description: "Шведские массивные лоферы на подметке из полиуретана.",
+    price: 44000,
+    image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=900&h=1100&fit=crop&auto=format",
+    gender: "женский",
+    season: "весна",
+    category: "лоферы",
+    is_active: true,
     stock: {
       bazaar: { "36": 2, "37": 4, "38": 3 },
-      mall: { "37": 3, "38": 5, "39": 2 }
+      mall: { "37": 2, "38": 2, "39": 2 }
     }
   },
   {
-    id: "23",
-    article: "NK-PEG-39",
-    brand: "Nike",
-    name: "Беговые кроссовки Nike Pegasus",
-    description: "Универсальные беговые кроссовки с пеной React и вставкой Zoom Air для упругого и отзывчивого бега.",
-    price: 45000,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
+    id: "p-22",
+    article: "AS-1400",
+    brand: "ASICS",
+    name: "GEL-Kayano 14",
+    description: "Беговые ретро-кроссовки ASICS с гелевой амортизацией GEL.",
+    price: 69900,
+    image: "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=900&h=1100&fit=crop&auto=format",
     gender: "унисекс",
-    season: "лето, весна",
+    season: "весна",
     category: "кроссовки",
+    is_active: true,
     stock: {
-      bazaar: { "39": 3, "40": 4, "41": 5 },
-      mall: { "40": 4, "41": 5, "42": 3 }
+      bazaar: { "40": 2, "41": 3, "42": 4 },
+      mall: { "41": 2, "42": 3, "43": 2 }
     }
   },
   {
-    id: "24",
-    article: "ET-SLIP-07",
-    brand: "Etor",
-    name: "Кожаные слипоны Etor",
-    description: "Мужские слипоны из гладкой кожи на гибкой резиновой подошве. Идеальная обувь на каждый день для теплого сезона.",
-    price: 23000,
-    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&q=80",
+    id: "p-23",
+    article: "ET-3100",
+    brand: "ETOR",
+    name: "Броги Oxford Elite",
+    description: "Элитная мужская обувь из телячьей кожи с перфорацией брогирования.",
+    price: 52000,
+    image: "https://images.unsplash.com/photo-1614252369475-531eba835eb1?w=900&h=1100&fit=crop&auto=format",
     gender: "мужской",
-    season: "лето",
-    category: "слипоны",
-    stock: {
-      bazaar: { "40": 3, "41": 4, "42": 2 },
-      mall: { "41": 3, "42": 4, "43": 1 }
-    }
-  },
-  {
-    id: "25",
-    article: "CL-BROG-11",
-    brand: "Classic Style",
-    name: "Кожаные броги",
-    description: "Классические броги с декоративной перфорацией вдоль швов. Выполнены из премиальной кожи коньячного цвета.",
-    price: 43000,
-    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&q=80",
-    gender: "мужской",
-    season: "весна, осень",
+    season: "осень",
     category: "туфли",
+    is_active: true,
     stock: {
-      bazaar: { "41": 2, "42": 4, "43": 3 },
-      mall: { "41": 3, "42": 4, "43": 2 }
+      bazaar: { "40": 1, "41": 3, "42": 3 },
+      mall: { "41": 2, "42": 4, "43": 2 }
+    }
+  },
+  {
+    id: "p-24",
+    article: "RK-8812",
+    brand: "RIEKER",
+    name: "Ботинки Anti-Stress",
+    description: "Немецкие легкие ботинки с гибкой подошвой и комфортной колодкой.",
+    price: 37600,
+    image: "https://images.unsplash.com/photo-1520718458542-6208153eb61a?w=900&h=1100&fit=crop&auto=format",
+    gender: "женский",
+    season: "осень",
+    category: "ботинки",
+    is_active: true,
+    stock: {
+      bazaar: { "36": 3, "37": 3, "38": 2 },
+      mall: { "37": 2, "38": 4, "39": 2 }
+    }
+  },
+  {
+    id: "p-25",
+    article: "DM-1460",
+    brand: "DR. MARTENS",
+    name: "1460 Smooth",
+    description: "Культовые 8-дырочные ботинки Dr. Martens с желтой прошивкой ранта.",
+    price: 84500,
+    image: "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=900&h=1100&fit=crop&auto=format",
+    gender: "унисекс",
+    season: "осень",
+    category: "ботинки",
+    is_active: true,
+    stock: {
+      bazaar: { "38": 2, "39": 3, "40": 3 },
+      mall: { "39": 1, "40": 2, "41": 3 }
+    }
+  },
+  {
+    id: "p-26",
+    article: "BS-2040",
+    brand: "BIRKENSTOCK",
+    name: "Arizona Oiled",
+    description: "Ортопедические сандалии Birkenstock из натуральной промасленной кожи.",
+    price: 41200,
+    image: "https://images.unsplash.com/photo-1613662632164-7f2b081a5b46?w=900&h=1100&fit=crop&auto=format",
+    gender: "унисекс",
+    season: "лето",
+    category: "сандалии",
+    is_active: true,
+    stock: {
+      bazaar: { "37": 2, "38": 3, "39": 3 },
+      mall: { "38": 2, "39": 4, "40": 2 }
+    }
+  },
+  {
+    id: "p-27",
+    article: "UG-2022",
+    brand: "UGG",
+    name: "Classic Short II",
+    description: "Австралийские угги из натуральной овчины с обработкой от воды и грязи.",
+    price: 65000,
+    image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=900&h=1100&fit=crop&auto=format",
+    gender: "женский",
+    season: "зима",
+    category: "сапоги",
+    is_active: true,
+    stock: {
+      bazaar: { "36": 2, "37": 4, "38": 3 },
+      mall: { "36": 1, "37": 3, "38": 2 }
+    }
+  },
+  {
+    id: "p-28",
+    article: "BL-9940",
+    brand: "BALDININI",
+    name: "Туфли Royale",
+    description: "Премиальные итальянские лодочки из замши с ювелирной фурнитурой.",
+    price: 115000,
+    image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=900&h=1100&fit=crop&auto=format",
+    gender: "женский",
+    season: "лето",
+    category: "туфли",
+    is_active: true,
+    stock: {
+      bazaar: { "36": 1, "37": 2 },
+      mall: { "37": 2, "38": 2 }
+    }
+  },
+  {
+    id: "p-29",
+    article: "GX-3050",
+    brand: "GEOX",
+    name: "Слипоны Respira",
+    description: "Дышащая мембранная обувь Geox из мягкой перфорированной кожи.",
+    price: 35800,
+    image: "https://images.unsplash.com/photo-1616406432452-07bc5938759d?w=900&h=1100&fit=crop&auto=format",
+    gender: "мужской",
+    season: "весна",
+    category: "мокасины",
+    is_active: true,
+    stock: {
+      bazaar: { "40": 2, "41": 3, "42": 4 },
+      mall: { "41": 2, "42": 2, "43": 3 }
+    }
+  },
+  {
+    id: "p-30",
+    article: "NK-5500",
+    brand: "NIKE",
+    name: "Dunk Low Retro",
+    description: "Баскетбольные ретро-кроссовки Nike из контрастной кожи.",
+    price: 56000,
+    image: "https://images.unsplash.com/photo-1623788975845-7d3e0adbae7c?w=900&h=1100&fit=crop&auto=format",
+    gender: "унисекс",
+    season: "лето",
+    category: "кроссовки",
+    is_active: true,
+    stock: {
+      bazaar: { "38": 2, "39": 3, "40": 4 },
+      mall: { "39": 2, "40": 3, "41": 2 }
+    }
+  },
+  {
+    id: "p-31",
+    article: "CL-1950",
+    brand: "CLARKS",
+    name: "Desert Boot",
+    description: "Английские культовые ботинки дезерты из замши на креповой подошве.",
+    price: 48500,
+    image: "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=900&h=1100&fit=crop&auto=format",
+    gender: "мужской",
+    season: "осень",
+    category: "ботинки",
+    is_active: true,
+    stock: {
+      bazaar: { "40": 2, "41": 3, "42": 3 },
+      mall: { "41": 2, "42": 2, "43": 1 }
+    }
+  },
+  {
+    id: "p-32",
+    article: "LC-2010",
+    brand: "LACOSTE",
+    name: "Кеды Carnaby",
+    description: "Белые минималистичные кеды Lacoste с фирменной вышивкой крокодила.",
+    price: 43700,
+    image: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=900&h=1100&fit=crop&auto=format",
+    gender: "мужской",
+    season: "весна",
+    category: "кеды",
+    is_active: true,
+    stock: {
+      bazaar: { "40": 2, "41": 4, "42": 3 },
+      mall: { "41": 2, "42": 3, "43": 2 }
     }
   }
 ];
 
-const DB_PRODUCTS_KEY = "shoe_store_products";
-const DB_ORDERS_KEY = "shoe_store_orders";
-const DB_USERS_KEY = "shoe_store_users";
-const DB_CURRENT_USER_KEY = "shoe_store_current_user";
-const DB_SALES_KEY = "shoe_store_sales";
-
-// Загрузка товаров
+// --- Чтение и сохранение товаров ---
 function loadProducts() {
-  const data = localStorage.getItem(DB_PRODUCTS_KEY);
-  if (!data) {
-    localStorage.setItem(DB_PRODUCTS_KEY, JSON.stringify(DEFAULT_PRODUCTS));
-    return DEFAULT_PRODUCTS;
+  const cached = safeGetJSON(DB_PRODUCTS_KEY);
+  if (cached && Array.isArray(cached) && cached.length >= 16 && cached.some(p => p.article === "ET-2481" && p.brand === "ETOR")) {
+    return cached;
   }
-
-  // Миграция: автоматически добавляем новые дефолтные товары и дополняем отсутствующие свойства (пол, сезон, категория)
-  let loaded;
-  try {
-    loaded = JSON.parse(data);
-    if (!Array.isArray(loaded)) throw new Error("Данные товаров не массив");
-  } catch (e) {
-    console.warn("Ошибка при чтении товаров, сбрасываем к defaults:", e);
-    localStorage.setItem(DB_PRODUCTS_KEY, JSON.stringify(DEFAULT_PRODUCTS));
-    return DEFAULT_PRODUCTS;
-  }
-  let updated = false;
-
-  // 1. Нормализация и очистка свойств всех товаров из localStorage
-  loaded = loaded.map(p => {
-    if (!p || typeof p !== "object") return null;
-
-    p.id = cleanString(p.id, 50);
-    p.brand = cleanString(p.brand, 80);
-    p.name = cleanString(p.name, 120);
-    p.article = cleanString(p.article, 60);
-    p.category = cleanString(p.category, 60);
-    p.price = Math.max(0, parseInt(p.price) || 0);
-
-    // Гарантируем структуру складов
-    if (!p.stock || typeof p.stock !== "object") {
-      p.stock = { bazaar: {}, mall: {} };
-      updated = true;
-    }
-    if (!p.stock.bazaar || typeof p.stock.bazaar !== "object") {
-      p.stock.bazaar = {};
-      updated = true;
-    }
-    if (!p.stock.mall || typeof p.stock.mall !== "object") {
-      p.stock.mall = {};
-      updated = true;
-    }
-
-    const def = DEFAULT_PRODUCTS.find(d => d.id === p.id);
-    if (def) {
-      if (!p.gender || !p.season || !p.category) {
-        p.gender = p.gender || def.gender;
-        p.season = p.season || def.season;
-        p.category = p.category || def.category;
-        updated = true;
-      }
-    }
-    return p;
-  }).filter(Boolean);
-
-  // 2. Добавляем новые товары (например, кроксы, зимние сапоги), если их вообще не было
-  DEFAULT_PRODUCTS.forEach(defProd => {
-    if (!loaded.some(p => p.id === defProd.id)) {
-      loaded.push(defProd);
-      updated = true;
-    }
-  });
-
-  if (updated) {
-    localStorage.setItem(DB_PRODUCTS_KEY, JSON.stringify(loaded));
-  }
-
-  return loaded;
-}
-
-// Сохранение товаров
-function saveProducts(products) {
-  localStorage.setItem(DB_PRODUCTS_KEY, JSON.stringify(products));
-}
-
-// Загрузка заказов/броней (ИСПРАВЛЕНО: защита от повреждённого localStorage)
-function loadOrders() {
-  const data = localStorage.getItem(DB_ORDERS_KEY);
-  if (!data) return [];
-  try {
-    const parsed = JSON.parse(data);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (e) {
-    console.warn("Ошибка при чтении заказов, возвращаем пустой список:", e);
-    return [];
-  }
-}
-
-// Сохранение заказов/броней
-function saveOrders(orders) {
-  localStorage.setItem(DB_ORDERS_KEY, JSON.stringify(orders));
-}
-
-// Загрузка пользователей (ИСПРАВЛЕНО: защита от повреждённого localStorage)
-function loadUsers() {
-  const data = localStorage.getItem(DB_USERS_KEY);
-  if (!data) return [];
-  try {
-    const parsed = JSON.parse(data);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (e) {
-    console.warn("Ошибка при чтении пользователей, возвращаем пустой список:", e);
-    return [];
-  }
-}
-
-// Сохранение пользователей
-function saveUsers(users) {
-  localStorage.setItem(DB_USERS_KEY, JSON.stringify(users));
-}
-
-// Получить текущего авторизованного пользователя (ИСПРАВЛЕНО: защита от повреждённого localStorage)
-function getCurrentUser() {
-  const data = localStorage.getItem(DB_CURRENT_USER_KEY);
-  if (!data) return null;
-  try {
-    const parsed = JSON.parse(data);
-    return parsed && typeof parsed === "object" ? parsed : null;
-  } catch (e) {
-    console.warn("Ошибка при чтении текущего пользователя, сбрасываем:", e);
-    localStorage.removeItem(DB_CURRENT_USER_KEY);
-    return null;
-  }
-}
-
-// Установить текущего пользователя
-function setCurrentUser(user) {
-  if (user) {
-    localStorage.setItem(DB_CURRENT_USER_KEY, JSON.stringify(user));
-  } else {
-    localStorage.removeItem(DB_CURRENT_USER_KEY);
-  }
-}
-
-// Загрузка оффлайн продаж (ИСПРАВЛЕНО: защита от повреждённого localStorage)
-function loadSales() {
-  const data = localStorage.getItem(DB_SALES_KEY);
-  if (!data) return [];
-  try {
-    const parsed = JSON.parse(data);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (e) {
-    console.warn("Ошибка при чтении продаж, возвращаем пустой список:", e);
-    return [];
-  }
-}
-
-// Сохранение оффлайн продаж
-function saveSales(sales) {
-  localStorage.setItem(DB_SALES_KEY, JSON.stringify(sales));
-}
-
-// Сброс базы к начальным настройкам
-function resetDatabase() {
-  localStorage.setItem(DB_PRODUCTS_KEY, JSON.stringify(DEFAULT_PRODUCTS));
-  localStorage.removeItem(DB_ORDERS_KEY);
-  localStorage.removeItem(DB_USERS_KEY);
-  localStorage.removeItem(DB_CURRENT_USER_KEY);
-  localStorage.removeItem(DB_SALES_KEY);
+  
+  safeSetJSON(DB_PRODUCTS_KEY, DEFAULT_PRODUCTS);
   return DEFAULT_PRODUCTS;
 }
 
-// Экспорт базы в JSON файл
+function saveProducts(productsList) {
+  safeSetJSON(DB_PRODUCTS_KEY, productsList);
+  if (typeof updateProductMap === "function") {
+    updateProductMap();
+  }
+  if (typeof window.notifyStateChanged === "function") {
+    window.notifyStateChanged("STOCK_UPDATED", { count: productsList ? productsList.length : 0 });
+  }
+}
+
+// Загрузка товаров из Supabase с фоновым обновлением localCache
+async function fetchProductsFromSupabase() {
+  const supabase = window.AppConfig ? window.AppConfig.getSupabaseClient() : null;
+  if (!supabase) return loadProducts();
+
+  try {
+    const { data: prodRows, error: prodErr } = await supabase
+      .from('products')
+      .select('*, product_stock(*)')
+      .eq('is_active', true);
+
+    if (prodErr || !prodRows || prodRows.length === 0) {
+      return loadProducts();
+    }
+
+    const transformedProducts = prodRows.map(p => {
+      const stock = { bazaar: {}, mall: {} };
+      if (Array.isArray(p.product_stock)) {
+        p.product_stock.forEach(st => {
+          const loc = st.location === 'mall' ? 'mall' : 'bazaar';
+          stock[loc][String(st.size)] = st.quantity;
+        });
+      }
+
+      return {
+        id: p.id,
+        article: p.article,
+        brand: p.brand,
+        name: p.name,
+        description: p.description || "",
+        price: p.price,
+        image: p.image_url || FALLBACK_PRODUCT_IMAGE,
+        gender: p.gender,
+        season: p.season,
+        category: p.category,
+        is_active: p.is_active,
+        stock: stock
+      };
+    });
+
+    saveProducts(transformedProducts);
+    return transformedProducts;
+  } catch (err) {
+    console.error("Ошибка сети при запросе к Supabase:", err);
+    return loadProducts();
+  }
+}
+
+// --- Чтение и сохранение заказов / бронирований ---
+function loadOrders() {
+  return safeGetJSON(DB_ORDERS_KEY, []);
+}
+
+function saveOrders(ordersList) {
+  safeSetJSON(DB_ORDERS_KEY, ordersList);
+}
+
+// Загрузка заявок из Supabase `reservations`
+async function fetchOrdersFromSupabase() {
+  const localOrders = loadOrders();
+  const supabase = window.AppConfig ? window.AppConfig.getSupabaseClient() : null;
+  if (!supabase) return localOrders;
+
+  try {
+    const sessionToken = typeof getStaffSessionToken === "function" ? getStaffSessionToken() : "";
+    if (!sessionToken) return localOrders;
+    const { data: resRows, error: resErr } = await supabase.rpc('list_staff_reservations', {
+      p_session_token: sessionToken
+    });
+
+    if (resErr || !resRows) {
+      return localOrders;
+    }
+
+    const sbOrders = resRows.map(r => ({
+      id: r.id || ("RES-" + r.created_at),
+      userPhone: r.customer_phone || "",
+      userName: r.customer_name || "Покупатель",
+      productId: r.product_id || "",
+      productName: r.name || "Модель",
+      productArticle: r.article || "—",
+      size: String(r.size || ""),
+      location: r.preferred_location || "bazaar",
+      price: 0,
+      type: r.request_type === 'kaspi_manual_payment' ? 'Kaspi' : 'Бронь',
+      kaspiPhone: r.comment || '',
+      status: r.status || "new",
+      date: r.created_at || new Date().toISOString()
+    }));
+
+    // Объединение без затирания локальных заявок
+    const mergedMap = new Map();
+    localOrders.forEach(o => { if (o && o.id) mergedMap.set(o.id, o); });
+    sbOrders.forEach(o => { if (o && o.id) mergedMap.set(o.id, o); });
+
+    const mergedOrders = Array.from(mergedMap.values());
+    mergedOrders.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+    saveOrders(mergedOrders);
+    return mergedOrders;
+  } catch (err) {
+    console.warn("Ошибка загрузки заявок из Supabase:", err);
+    return localOrders;
+  }
+}
+
+// --- Чтение и сохранение кассовых продаж ---
+function loadSales() {
+  return safeGetJSON(DB_SALES_KEY, []);
+}
+
+function saveSales(salesList) {
+  safeSetJSON(DB_SALES_KEY, salesList);
+}
+
+async function fetchSalesFromSupabase() {
+  const supabase = window.AppConfig ? window.AppConfig.getSupabaseClient() : null;
+  if (!supabase) return loadSales();
+
+  try {
+    const sessionToken = typeof getStaffSessionToken === "function" ? getStaffSessionToken() : "";
+    if (!sessionToken) return loadSales();
+    const { data: salesRows, error: salesErr } = await supabase.rpc('list_staff_sales', {
+      p_session_token: sessionToken
+    });
+
+    if (salesErr || !salesRows) {
+      return loadSales();
+    }
+
+    const transformedSales = salesRows.map(s => ({
+      id: s.id,
+      client_sale_id: s.client_sale_id,
+      productId: s.product_id,
+      article: s.article,
+      brand: s.brand,
+      name: s.name,
+      price: s.price,
+      point: s.location,
+      size: String(s.size),
+      payment: s.payment_method === 'kaspi_qr' ? 'kaspi' : (s.payment_method === 'kaspi_red' ? 'red' : 'cash'),
+      seller_name: s.seller_name,
+      date: s.created_at,
+      overdraft_warning: s.overdraft_warning,
+      is_offline_synced: s.is_offline_synced
+    }));
+
+    saveSales(transformedSales);
+    return transformedSales;
+  } catch (err) {
+    console.warn("Ошибка загрузки продаж из Supabase:", err);
+    return loadSales();
+  }
+}
+
+// --- Управление пользователями и сессией ---
+function loadUsers() {
+  return safeGetJSON(DB_USERS_KEY, []);
+}
+
+function saveUsers(usersList) {
+  safeSetJSON(DB_USERS_KEY, usersList);
+}
+
+function getCurrentUser() {
+  return safeGetJSON(DB_CURRENT_USER_KEY, null);
+}
+
+function setCurrentUser(userObj) {
+  if (!userObj) {
+    localStorage.removeItem(DB_CURRENT_USER_KEY);
+  } else {
+    safeSetJSON(DB_CURRENT_USER_KEY, userObj);
+  }
+}
+
+// --- Лог движений остатков ---
+function loadStockMovements() {
+  return safeGetJSON(DB_STOCK_MOVEMENTS_KEY, []);
+}
+
+function logStockMovement(productId, article, size, location, change, reason, relatedId = null) {
+  const movements = loadStockMovements();
+  const newLog = {
+    id: "SM-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+    productId,
+    article,
+    size: String(size),
+    location,
+    delta: Number(change),
+    reason,
+    relatedId,
+    date: new Date().toISOString()
+  };
+  movements.unshift(newLog);
+  safeSetJSON(DB_STOCK_MOVEMENTS_KEY, movements.slice(0, 500));
+}
+
+// --- Сброс / Экспорт / Импорт ---
+function resetDatabase() {
+  localStorage.removeItem(DB_PRODUCTS_KEY);
+  localStorage.removeItem(DB_ORDERS_KEY);
+  localStorage.removeItem(DB_SALES_KEY);
+  localStorage.removeItem(DB_STOCK_MOVEMENTS_KEY);
+  return loadProducts();
+}
+
 function exportDatabase() {
-  const dbData = {
+  return JSON.stringify({
     products: loadProducts(),
     orders: loadOrders(),
+    sales: loadSales(),
     users: loadUsers(),
-    sales: loadSales()
-  };
-  return JSON.stringify(dbData, null, 2);
+    stockMovements: loadStockMovements(),
+    version: "2.0",
+    exportedAt: new Date().toISOString()
+  }, null, 2);
 }
 
-// Санитизация строк
-function cleanString(val, maxLen = 500) {
-  if (typeof val !== "string") return "";
-  return val.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, maxLen);
-}
-
-// Импорт базы из JSON строки
 function importDatabase(jsonString) {
   try {
     const dbData = JSON.parse(jsonString);
-    if (!dbData || typeof dbData !== "object") return false;
-
-    // Валидация и очистка товаров
-    if (dbData.products !== undefined) {
-      if (!Array.isArray(dbData.products)) return false;
-      const cleanedProducts = dbData.products.map(p => {
-        if (!p || (typeof p.id !== "string" && typeof p.id !== "number")) return null;
-        const stock = {};
-        const cleanStock = (stockObj) => {
-          const result = {};
-          if (stockObj && typeof stockObj === "object") {
-            for (const [size, qty] of Object.entries(stockObj)) {
-              const s = cleanString(size, 4);
-              const n = Math.max(0, parseInt(qty) || 0);
-              if (s && n >= 0) result[s] = n;
-            }
-          }
-          return result;
-        };
-        stock.bazaar = cleanStock(p.stock?.bazaar);
-        stock.mall = cleanStock(p.stock?.mall);
-
-        const imageStr = cleanString(p.image, 1000);
-        let image = imageStr;
-        if (image && !image.startsWith("data:image/") && !image.startsWith("assets/images/") && !image.startsWith("https://images.unsplash.com/")) {
-          image = "";
-        }
-
-        return {
-          id: String(p.id).slice(0, 50),
-          article: cleanString(p.article, 60).toUpperCase(),
-          brand: cleanString(p.brand, 80),
-          name: cleanString(p.name, 120),
-          description: cleanString(p.description, 500),
-          price: Math.max(0, parseInt(p.price) || 0),
-          image,
-          gender: cleanString(p.gender, 30) || "мужской",
-          season: cleanString(p.season, 60) || "весна",
-          category: cleanString(p.category, 100) || "кроссовки",
-          stock
-        };
-      }).filter(Boolean);
-      saveProducts(cleanedProducts);
+    if (dbData.products && Array.isArray(dbData.products)) {
+      saveProducts(dbData.products);
     }
-
-    // Валидация и очистка заказов
-    if (dbData.orders !== undefined) {
-      if (!Array.isArray(dbData.orders)) return false;
-      const cleanedOrders = dbData.orders.map(o => ({
-        id: cleanString(o?.id, 50),
-        userPhone: cleanString(o?.userPhone, 20),
-        userName: cleanString(o?.userName, 100),
-        productId: cleanString(o?.productId, 50),
-        productName: cleanString(o?.productName, 120),
-        productArticle: cleanString(o?.productArticle, 60),
-        size: cleanString(o?.size, 5),
-        location: o?.location === "mall" ? "mall" : "bazaar",
-        price: Math.max(0, parseInt(o?.price) || 0),
-        type: cleanString(o?.type, 60),
-        kaspiPhone: cleanString(o?.kaspiPhone, 20),
-        status: ["Новый", "Оплачен", "Подтвержден", "Выдан", "Отменен"].includes(o?.status) ? o.status : "Новый",
-        date: cleanString(o?.date, 100)
-      })).filter(o => o.id && o.userPhone);
-      saveOrders(cleanedOrders);
+    if (dbData.orders && Array.isArray(dbData.orders)) {
+      saveOrders(dbData.orders);
     }
-
-    // Валидация и очистка пользователей
-    if (dbData.users !== undefined) {
-      if (!Array.isArray(dbData.users)) return false;
-      const cleanedUsers = dbData.users.map(u => ({
-        name: cleanString(u?.name, 100),
-        phone: cleanString(u?.phone, 20)
-      })).filter(u => u.phone);
-      saveUsers(cleanedUsers);
+    if (dbData.sales && Array.isArray(dbData.sales)) {
+      saveSales(dbData.sales);
     }
-
-    // Валидация и очистка продаж
-    if (dbData.sales !== undefined) {
-      if (!Array.isArray(dbData.sales)) return false;
-      const cleanedSales = dbData.sales.map(s => ({
-        id: cleanString(s?.id, 50),
-        productId: cleanString(s?.productId, 50),
-        article: cleanString(s?.article, 60),
-        brand: cleanString(s?.brand, 80),
-        name: cleanString(s?.name, 120),
-        price: Math.max(0, parseInt(s?.price) || 0),
-        point: s?.point === "mall" ? "mall" : "bazaar",
-        size: cleanString(s?.size, 5),
-        payment: ["kaspi", "red", "cash"].includes(s?.payment) ? s.payment : "kaspi",
-        date: cleanString(s?.date, 100)
-      })).filter(s => s.id);
-      saveSales(cleanedSales);
-    }
-
     return true;
   } catch (e) {
     console.error("Ошибка при импорте базы данных:", e);
@@ -698,12 +813,13 @@ function importDatabase(jsonString) {
   }
 }
 
-// Инициализация при подключении скрипта
 window.db = {
   loadProducts,
   saveProducts,
+  fetchProductsFromSupabase,
   loadOrders,
   saveOrders,
+  fetchOrdersFromSupabase,
   loadUsers,
   saveUsers,
   getCurrentUser,
@@ -712,5 +828,8 @@ window.db = {
   exportDatabase,
   importDatabase,
   loadSales,
-  saveSales
+  saveSales,
+  fetchSalesFromSupabase,
+  logStockMovement,
+  loadStockMovements
 };

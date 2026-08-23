@@ -1,3 +1,7 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
 # OS generated files
 .DS_Store
 .DS_Store?
@@ -7,13 +11,23 @@
 ehthumbs.db
 Thumbs.db
 
-# Editor directories and files
+# Editor & Tooling
 .vscode/
 .idea/
 *.swp
 *.swo
+.mise.toml
 
-# Temporary and log files
+# Logs & Temporary files
 *.log
 _*.txt
 *.tmp
+*.bak
+
+# Environment & Build output
+.env
+.env.local
+.env.*.local
+dist/
+build/
+supabase/.temp/

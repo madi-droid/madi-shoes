@@ -1,4 +1,4 @@
-// MADIYAR SHOES — точка входа и управление состоянием (app.js)
+// MADIYAR SHOES — точка входа, управление состоянием и Supabase Realtime (app.js)
 
 let products = [];
 let orders = [];
@@ -25,8 +25,51 @@ function getProductById(id) {
   return productMap.get(id) || products.find(p => p.id === id);
 }
 
+// Создание канала межвкладочной синхронизации Shared State
+const stateChannel = new BroadcastChannel("madiyar_shoes_state_channel");
+
+stateChannel.onmessage = (event) => {
+  if (event.data && (event.data.type === "STOCK_UPDATED" || event.data.type === "DATA_MUTATED")) {
+    console.log("[SharedState] Получен сигнал об изменении данных из другой вкладки:", event.data);
+    syncSharedStateFromStore();
+  }
+};
+
+window.notifyStateChanged = function(actionType = "DATA_MUTATED", payload = {}) {
+  syncSharedStateFromStore();
+  try {
+    stateChannel.postMessage({ type: actionType, payload, timestamp: Date.now() });
+  } catch (e) {
+    console.warn("BroadcastChannel error:", e);
+  }
+  window.dispatchEvent(new CustomEvent("madiyar:state-changed", { detail: { actionType, payload } }));
+};
+
+function syncSharedStateFromStore() {
+  products = window.db.loadProducts();
+  updateProductMap();
+  orders = window.db.loadOrders();
+  sales = window.db.loadSales();
+
+  if (document.body.classList.contains("is-admin-portal")) {
+    if (typeof renderAdminDashboard === "function") renderAdminDashboard();
+    if (typeof renderAdminProductsTable === "function") renderAdminProductsTable();
+    if (typeof renderAdminOrdersTable === "function") renderAdminOrdersTable();
+    if (typeof renderAdminSalesTable === "function") renderAdminSalesTable();
+  } else {
+    if (typeof renderCatalog === "function") renderCatalog();
+  }
+}
+
+// Слушатель локального хранилища (для вкладок без поддержки BroadcastChannel)
+window.addEventListener("storage", (e) => {
+  if (e.key && e.key.startsWith("shoe_store_")) {
+    syncSharedStateFromStore();
+  }
+});
+
 // Инициализация при загрузке страницы
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   products = window.db.loadProducts();
   updateProductMap();
   orders = window.db.loadOrders();
@@ -38,14 +81,93 @@ document.addEventListener("DOMContentLoaded", () => {
   initFormBtnGroups();
   initCategoryAutocomplete();
   initClientAuthListeners();
+  updateFavoritesBadges();
 
-  showClientPage("page-catalog");
+  handleRouteInit();
   setupEventListeners();
 
-  if (window.location.hash === "#admin") {
-    checkAdminAccess();
-  }
+  window.addEventListener("hashchange", handleRouteInit);
+  window.addEventListener("popstate", handleRouteInit);
+
+  // Фоновая загрузка актуальных данных из Supabase
+  initSupabaseDataSync();
+
+  // Подписка на Supabase Realtime изменение остатков product_stock
+  initRealtimeSubscriptions();
 });
+
+// Панель сотрудников открывается только со служебной страницы staff.html.
+function handleRouteInit() {
+  const hash = window.location.hash;
+  const isAdminRoute = hash === "#staff";
+
+  if (isAdminRoute) {
+    document.body.classList.add("is-admin-portal");
+    if (typeof switchToAdminView === "function") {
+      switchToAdminView();
+    }
+  } else {
+    document.body.classList.remove("is-admin-portal");
+    if (typeof switchToClientView === "function") {
+      switchToClientView();
+    }
+  }
+}
+
+async function initSupabaseDataSync() {
+  const fetchedProducts = await window.db.fetchProductsFromSupabase();
+  if (fetchedProducts && Array.isArray(fetchedProducts) && fetchedProducts.length >= 16) {
+    products = fetchedProducts;
+    updateProductMap();
+    renderCatalog();
+  }
+
+  const fetchedOrders = await window.db.fetchOrdersFromSupabase();
+  if (fetchedOrders) {
+    orders = fetchedOrders;
+  }
+
+  const fetchedSales = await window.db.fetchSalesFromSupabase();
+  if (fetchedSales) {
+    sales = fetchedSales;
+  }
+}
+
+let realtimeChannel = null;
+
+// Supabase Realtime: Точечное (гранулярное) обновление размеров в режиме реального времени
+function initRealtimeSubscriptions() {
+  if (realtimeChannel) return;
+  const supabase = window.AppConfig ? window.AppConfig.getSupabaseClient() : null;
+  if (!supabase) return;
+
+  try {
+    realtimeChannel = supabase
+      .channel('public:product_stock_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'product_stock' }, payload => {
+        const record = payload.new || payload.old;
+        if (!record || !record.product_id) return;
+
+        const productId = record.product_id;
+        const location = record.location;
+        const size = record.size;
+        const quantity = record.quantity !== undefined ? record.quantity : 0;
+
+        console.log(`[Realtime Update] Товар: ${productId}, Точка: ${location}, Размер: ${size}, Остаток: ${quantity}`);
+
+        // Гранулярное обновление карточки и модального окна без перезагрузки всей страницы
+        if (typeof window.updateProductCardStockGranular === "function") {
+          window.updateProductCardStockGranular(productId, location, size, quantity);
+        }
+        if (typeof window.updateProductModalStockGranular === "function") {
+          window.updateProductModalStockGranular(productId, location, size, quantity);
+        }
+      })
+      .subscribe();
+  } catch (err) {
+    console.warn("Realtime subscription initialization error:", err);
+  }
+}
 
 function initTheme() {
   const savedTheme = localStorage.getItem("shoe_store_theme") || "dark";
@@ -76,11 +198,21 @@ function setupEventListeners() {
   const sizeFilter = document.getElementById("filter-size");
   if (sizeFilter) sizeFilter.addEventListener("change", () => renderCatalog(true));
 
-  const sortFilter = document.getElementById("filter-sort");
-  if (sortFilter) sortFilter.addEventListener("change", () => renderCatalog(true));
-
   const statusFilter = document.getElementById("filter-status");
   if (statusFilter) statusFilter.addEventListener("change", () => renderCatalog(true));
+
+  // Мобильная шторка фильтров
+  const btnToggleFilters = document.getElementById("btn-toggle-filters");
+  const filtersGridContainer = document.getElementById("filters-grid-container");
+  if (btnToggleFilters && filtersGridContainer) {
+    btnToggleFilters.addEventListener("click", () => {
+      const isExpanded = btnToggleFilters.getAttribute("aria-expanded") === "true";
+      btnToggleFilters.setAttribute("aria-expanded", !isExpanded);
+      filtersGridContainer.classList.toggle("open");
+      document.getElementById("mobile-filter-options")?.classList.toggle("open");
+      btnToggleFilters.classList.toggle("is-active", !isExpanded);
+    });
+  }
 
   const adminSearch = document.getElementById("admin-product-search");
   if (adminSearch) adminSearch.addEventListener("input", debouncedRenderAdminProducts);
@@ -94,6 +226,9 @@ function setupEventListeners() {
   const navAbout = document.getElementById("nav-about");
   if (navAbout) navAbout.addEventListener("click", () => showClientPage("page-about"));
 
+  const navAdmin = document.getElementById("nav-admin");
+  if (navAdmin) navAdmin.addEventListener("click", checkAdminAccess);
+
   const btnMobileMenu = document.getElementById("btn-mobile-menu");
   const navMenu = document.getElementById("nav-menu");
   if (btnMobileMenu && navMenu) {
@@ -102,7 +237,6 @@ function setupEventListeners() {
       navMenu.classList.toggle("active");
       btnMobileMenu.classList.toggle("active");
     });
-
     document.addEventListener("click", (e) => {
       if (!navMenu.contains(e.target) && !btnMobileMenu.contains(e.target)) {
         navMenu.classList.remove("active");
@@ -114,157 +248,29 @@ function setupEventListeners() {
   const btnProfile = document.getElementById("btn-profile");
   if (btnProfile) btnProfile.addEventListener("click", openProfileModal);
 
-  const navProfile = document.getElementById("nav-profile");
-  if (navProfile) navProfile.addEventListener("click", openProfileModal);
+  const btnFavorites = document.getElementById("btn-favorites");
+  if (btnFavorites) btnFavorites.addEventListener("click", openFavoritesModal);
 
-  const btnThemeToggle = () => {
-    const currentTheme = document.documentElement.getAttribute("data-theme");
-    const newTheme = currentTheme === "light" ? "dark" : "light";
-    document.documentElement.setAttribute("data-theme", newTheme);
-    localStorage.setItem("shoe_store_theme", newTheme);
-    updateThemeIcon(newTheme);
-    showToast("Тема успешно изменена", "info");
-  };
+  const btnContactQuick = document.getElementById("btn-contact-quick");
+  if (btnContactQuick) btnContactQuick.addEventListener("click", () => openModal("modal-quick-contact"));
 
-  const btnTheme = document.getElementById("btn-theme-toggle");
-  if (btnTheme) btnTheme.addEventListener("click", btnThemeToggle);
+  const btnResetFilters = document.getElementById("btn-reset-filters");
+  if (btnResetFilters) btnResetFilters.addEventListener("click", resetAllFilters);
 
-  // Мобильная нижняя навигация (Bottom Nav)
   const bnavCatalog = document.getElementById("bnav-catalog");
-  if (bnavCatalog) {
-    bnavCatalog.addEventListener("click", () => {
-      showClientPage("page-catalog");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  }
+  if (bnavCatalog) bnavCatalog.addEventListener("click", () => showClientPage("page-catalog"));
 
   const bnavAbout = document.getElementById("bnav-about");
-  if (bnavAbout) {
-    bnavAbout.addEventListener("click", () => {
-      showClientPage("page-about");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  }
+  if (bnavAbout) bnavAbout.addEventListener("click", () => showClientPage("page-about"));
 
   const bnavProfile = document.getElementById("bnav-profile");
-  if (bnavProfile) {
-    bnavProfile.addEventListener("click", openProfileModal);
-  }
+  if (bnavProfile) bnavProfile.addEventListener("click", openProfileModal);
 
   const bnavTheme = document.getElementById("bnav-theme");
-  if (bnavTheme) {
-    bnavTheme.addEventListener("click", btnThemeToggle);
-  }
+  if (bnavTheme) bnavTheme.addEventListener("click", toggleTheme);
 
-  // Кнопка сворачивания фильтров на мобильных
-  const btnToggleFilters = document.getElementById("btn-toggle-filters");
-  const filtersGridContainer = document.getElementById("filters-grid-container");
-  if (btnToggleFilters && filtersGridContainer) {
-    btnToggleFilters.addEventListener("click", () => {
-      const isOpen = filtersGridContainer.classList.toggle("is-open");
-      btnToggleFilters.classList.toggle("is-active", isOpen);
-      btnToggleFilters.setAttribute("aria-expanded", isOpen ? "true" : "false");
-    });
-  }
-
-  // Обновление бейджа фильтров при изменении селекторов
-  const filterInputs = ["filter-location", "filter-size", "filter-sort", "filter-status"];
-  filterInputs.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener("change", updateActiveFiltersBadge);
-    }
-  });
-
-  const btnExport = document.getElementById("btn-export-backup");
-  if (btnExport) btnExport.addEventListener("click", exportDatabaseToFile);
-
-  const btnImport = document.getElementById("btn-import-backup");
-  if (btnImport) {
-    btnImport.addEventListener("click", () => {
-      if (!requireAdminAccess()) return;
-      const fileInput = document.getElementById("import-file-input");
-      if (fileInput) fileInput.click();
-    });
-  }
-
-  // Интерактивная карта и переключение точек на странице «О нас»
-  const mapIframe = document.getElementById("map-iframe");
-  const mapPlaceholder = document.getElementById("map-placeholder-text");
-  const btnMapBazaar = document.getElementById("btn-map-bazaar");
-  const btnMapMall = document.getElementById("btn-map-mall");
-  const infoMapBazaar = document.getElementById("info-map-bazaar");
-  const infoMapMall = document.getElementById("info-map-mall");
-  const btnShowMap = document.getElementById("btn-show-map-action");
-
-  let currentMapPoint = "bazaar";
-
-  function getMapUrl(point) {
-    if (point === "mall") {
-      return "map.html?lat=40.766395&lon=68.312624&title=" + encodeURIComponent("Гранд Парк (1 блок, 10 бутик)");
-    }
-    return "map.html?lat=40.774518&lon=68.322906&title=" + encodeURIComponent("Базар Кулпаршын (25 бутик)");
-  }
-
-  function displayMap() {
-    if (mapIframe) {
-      mapIframe.src = getMapUrl(currentMapPoint);
-      mapIframe.style.display = "block";
-    }
-    if (mapPlaceholder) {
-      mapPlaceholder.style.display = "none";
-    }
-  }
-
-  if (btnMapBazaar) {
-    btnMapBazaar.addEventListener("click", () => {
-      btnMapBazaar.classList.add("active");
-      if (btnMapMall) btnMapMall.classList.remove("active");
-      if (infoMapBazaar) infoMapBazaar.classList.remove("d-none");
-      if (infoMapMall) infoMapMall.classList.add("d-none");
-
-      currentMapPoint = "bazaar";
-      if (mapIframe && mapIframe.style.display === "block") {
-        mapIframe.src = getMapUrl("bazaar");
-      }
-    });
-  }
-
-  if (btnMapMall) {
-    btnMapMall.addEventListener("click", () => {
-      btnMapMall.classList.add("active");
-      if (btnMapBazaar) btnMapBazaar.classList.remove("active");
-      if (infoMapMall) infoMapMall.classList.remove("d-none");
-      if (infoMapBazaar) infoMapBazaar.classList.add("d-none");
-
-      currentMapPoint = "mall";
-      if (mapIframe && mapIframe.style.display === "block") {
-        mapIframe.src = getMapUrl("mall");
-      }
-    });
-  }
-
-  if (btnShowMap) {
-    btnShowMap.addEventListener("click", displayMap);
-  }
-
-  const btnExitAdmin = document.getElementById("btn-exit-admin");
-  if (btnExitAdmin) {
-    btnExitAdmin.addEventListener("click", () => {
-      purgeAdminSession();
-      switchToClientView();
-      showClientPage("page-catalog");
-    });
-  }
-
-  const secretKey = document.getElementById("secret-admin-key");
-  if (secretKey) secretKey.addEventListener("click", checkAdminAccess);
-
-  window.addEventListener("hashchange", () => {
-    if (window.location.hash === "#admin") {
-      checkAdminAccess();
-    }
-  });
+  const btnThemeToggle = document.getElementById("btn-theme-toggle");
+  if (btnThemeToggle) btnThemeToggle.addEventListener("click", toggleTheme);
 
   const authForm = document.getElementById("auth-form");
   if (authForm) authForm.addEventListener("submit", handleClientAuthSubmit);
@@ -272,7 +278,8 @@ function setupEventListeners() {
   const btnLogout = document.getElementById("btn-logout");
   if (btnLogout) btnLogout.addEventListener("click", handleClientLogout);
 
-  const adminLoginForm = document.getElementById("admin-login-form");
+  // Исправлено: ID формы авторизации сотрудника в index.html — admin-login-form
+  const adminLoginForm = document.getElementById("admin-login-form") || document.getElementById("admin-auth-form");
   if (adminLoginForm) adminLoginForm.addEventListener("submit", handleAdminLoginSubmit);
 
   const btnBookAction = document.getElementById("btn-book-action");
@@ -281,209 +288,221 @@ function setupEventListeners() {
   const btnBuyAction = document.getElementById("btn-buy-action");
   if (btnBuyAction) btnBuyAction.addEventListener("click", () => handleBookingFlow("kaspi"));
 
+  // Подтверждение оплаты Kaspi
   const btnKaspiConfirm = document.getElementById("btn-kaspi-confirm");
-  if (btnKaspiConfirm) btnKaspiConfirm.addEventListener("click", processKaspiPaymentConfirm);
-
-  document.querySelectorAll(".modal-close, .modal-overlay").forEach(element => {
-    element.addEventListener("click", (e) => {
-      if (e.target.classList.contains("modal-overlay") || e.target.closest(".modal-close")) {
-        closeAllModals();
-      }
+  if (btnKaspiConfirm) {
+    btnKaspiConfirm.addEventListener("click", (e) => {
+      e.preventDefault();
+      processKaspiPaymentConfirm();
     });
-  });
+  }
 
-  const btnAddProduct = document.getElementById("btn-add-product-modal");
+  // Форма записи оффлайн-продаж
+  const offlineSaleForm = document.getElementById("offline-sale-form");
+  if (offlineSaleForm) {
+    offlineSaleForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      window.handleOfflineSaleSubmit();
+    });
+  }
+
+  const btnAddProduct = document.getElementById("btn-add-product");
   if (btnAddProduct) btnAddProduct.addEventListener("click", () => openProductEditModal(null));
 
-  const btnCancelEdit = document.getElementById("btn-cancel-edit");
-  if (btnCancelEdit) btnCancelEdit.addEventListener("click", () => closeModal("modal-admin-product-edit"));
+  const btnAddProductModal = document.getElementById("btn-add-product-modal");
+  if (btnAddProductModal) btnAddProductModal.addEventListener("click", () => openProductEditModal(null));
 
   const productEditForm = document.getElementById("product-edit-form");
   if (productEditForm) productEditForm.addEventListener("submit", handleProductSaveSubmit);
 
-  const editProductFile = document.getElementById("edit-product-file");
-  if (editProductFile) {
-    editProductFile.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        if (!file.type.startsWith("image/")) {
-          e.target.value = "";
-          showToast("Выберите графический файл формата изображения", "error");
-          return;
-        }
-        compressAndPreviewImage(file, (compressedDataUrl) => {
-          document.getElementById("edit-product-image").value = compressedDataUrl;
-          document.getElementById("preview-img-tag").src = compressedDataUrl;
-          document.getElementById("product-image-preview").style.display = "flex";
-          showToast("Фото сжато и загружено", "info");
-        });
+  const btnCancelEdit = document.getElementById("btn-cancel-edit");
+  if (btnCancelEdit) btnCancelEdit.addEventListener("click", () => closeModal("modal-admin-product-edit"));
+
+  // Управление продавцами
+  const tabStaff = document.getElementById("tab-staff");
+  if (tabStaff) tabStaff.addEventListener("click", () => switchAdminTab("staff"));
+
+  const btnAddStaff = document.getElementById("btn-add-staff-modal");
+  if (btnAddStaff) btnAddStaff.addEventListener("click", () => openStaffModal(null));
+
+  const staffForm = document.getElementById("staff-edit-form");
+  if (staffForm) staffForm.addEventListener("submit", handleStaffSaveSubmit);
+
+  const btnCancelStaff = document.getElementById("btn-cancel-staff");
+  if (btnCancelStaff) btnCancelStaff.addEventListener("click", () => closeModal("modal-admin-staff-edit"));
+
+  // Закрытие модальных окон
+  document.querySelectorAll(".modal-overlay").forEach(overlay => {
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        closeModal(overlay.id);
       }
     });
-  }
+  });
 
-  const btnExportDb = document.getElementById("btn-export-db");
-  if (btnExportDb) btnExportDb.addEventListener("click", exportDatabaseToFile);
+  document.querySelectorAll(".modal-close, .modal-close-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const modal = btn.closest(".modal-overlay");
+      if (modal) closeModal(modal.id);
+    });
+  });
 
-  const btnTriggerImport = document.getElementById("btn-trigger-import");
-  if (btnTriggerImport) {
-    btnTriggerImport.addEventListener("click", () => {
-      const fileInput = document.getElementById("import-file-input");
-      if (fileInput) fileInput.click();
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    const modal = document.querySelector(".modal-overlay.open");
+    if (modal) closeModal(modal.id);
+  });
+
+  // Вкладки в админке
+  const tabProd = document.getElementById("tab-products");
+  if (tabProd) tabProd.addEventListener("click", () => switchAdminTab("products"));
+
+  const tabOrd = document.getElementById("tab-orders");
+  if (tabOrd) tabOrd.addEventListener("click", () => switchAdminTab("orders"));
+
+  const tabSal = document.getElementById("tab-sales");
+  if (tabSal) tabSal.addEventListener("click", () => switchAdminTab("sales"));
+
+  const tabBack = document.getElementById("tab-backup");
+  if (tabBack) tabBack.addEventListener("click", () => switchAdminTab("backup"));
+
+  const btnClientView = document.getElementById("btn-switch-client-view");
+  if (btnClientView) btnClientView.addEventListener("click", switchToClientView);
+
+  // Кнопки выхода и бэкапа в верхушке админки
+  const btnExitAdmin = document.getElementById("btn-exit-admin");
+  if (btnExitAdmin) {
+    btnExitAdmin.addEventListener("click", () => {
+      purgeAdminSession();
+      switchToClientView();
+      showToast("Вы вышли из панели управления", "info");
     });
   }
 
-  const importFileInput = document.getElementById("import-file-input");
-  if (importFileInput) importFileInput.addEventListener("change", importDatabaseFromFile);
+  const btnExportBackupHeader = document.getElementById("btn-export-backup");
+  if (btnExportBackupHeader) btnExportBackupHeader.addEventListener("click", exportDatabaseToFile);
 
-  const btnResetDb = document.getElementById("btn-reset-db");
-  if (btnResetDb) {
-    btnResetDb.addEventListener("click", () => {
-      if (confirm("Вы действительно хотите сбросить базу к исходному состоянию? Все новые товары, заказы и остатки будут безвозвратно удалены.")) {
+  const btnImportBackupHeader = document.getElementById("btn-import-backup");
+  if (btnImportBackupHeader) {
+    btnImportBackupHeader.addEventListener("click", () => {
+      switchAdminTab("backup");
+      triggerImportFileSelect();
+    });
+  }
+
+  // Бэкап вкладка
+  const btnExport = document.getElementById("btn-export-db");
+  if (btnExport) btnExport.addEventListener("click", exportDatabaseToFile);
+
+  const btnTriggerImport = document.getElementById("btn-trigger-import");
+  const fileInputImport = document.getElementById("import-file-input") || document.getElementById("input-import-db");
+
+  function triggerImportFileSelect() {
+    if (fileInputImport) fileInputImport.click();
+  }
+
+  if (btnTriggerImport) btnTriggerImport.addEventListener("click", triggerImportFileSelect);
+  if (fileInputImport) fileInputImport.addEventListener("change", importDatabaseFromFile);
+
+  const btnReset = document.getElementById("btn-reset-db");
+  if (btnReset) {
+    btnReset.addEventListener("click", () => {
+      if (confirm("Вы действительно хотите сбросить базу данных до демо-состояния?")) {
         products = window.db.resetDatabase();
         updateProductMap();
         orders = [];
         sales = [];
-        currentUser = null;
-        window.db.setCurrentUser(null);
-        showToast("База данных успешно сброшена", "success");
+        showToast("База данных сброшена до начального демо-состояния", "info");
+        renderAdminDashboard();
+        renderAdminProductsTable();
+        renderAdminOrdersTable();
+        renderAdminSalesTable();
+        renderAdminStaffTable();
         renderCatalog();
-        if (isAdminLoggedIn()) {
-          renderAdminDashboard();
-        }
       }
     });
   }
 
-  const tabProducts = document.getElementById("tab-products");
-  if (tabProducts) tabProducts.addEventListener("click", () => switchAdminTab("products"));
+  // Фильтры истории продаж по датам
+  const historyStart = document.getElementById("history-date-start");
+  const historyEnd = document.getElementById("history-date-end");
+  const btnClearDates = document.getElementById("btn-clear-history-dates");
 
-  const tabOrders = document.getElementById("tab-orders");
-  if (tabOrders) tabOrders.addEventListener("click", () => switchAdminTab("orders"));
+  if (historyStart) historyStart.addEventListener("change", () => renderAdminSalesTable());
+  if (historyEnd) historyEnd.addEventListener("change", () => renderAdminSalesTable());
 
-  const tabSales = document.getElementById("tab-sales");
-  if (tabSales) tabSales.addEventListener("click", () => switchAdminTab("sales"));
-
-  const tabBackup = document.getElementById("tab-backup");
-  if (tabBackup) tabBackup.addEventListener("click", () => switchAdminTab("backup"));
-
-  const startPicker = document.getElementById("history-date-start");
-  const endPicker = document.getElementById("history-date-end");
-  const clearDatesBtn = document.getElementById("btn-clear-history-dates");
-
-  if (startPicker) startPicker.addEventListener("change", renderAdminSalesTable);
-  if (endPicker) endPicker.addEventListener("change", renderAdminSalesTable);
-  if (clearDatesBtn) {
-    clearDatesBtn.addEventListener("click", () => {
-      if (startPicker) startPicker.value = "";
-      if (endPicker) endPicker.value = "";
+  if (btnClearDates) {
+    btnClearDates.addEventListener("click", () => {
+      if (historyStart) historyStart.value = "";
+      if (historyEnd) historyEnd.value = "";
       renderAdminSalesTable();
     });
   }
 
-  document.querySelectorAll("#tabs-gender .nav-tab-btn, #tabs-season .nav-tab-btn").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      const parent = e.target.parentElement;
-      parent.querySelectorAll(".nav-tab-btn").forEach(b => b.classList.remove("active"));
-      e.target.classList.add("active");
-      renderCatalog(true);
+  // Интерактивная карта на странице "О нас"
+  initAboutPageMap();
+}
+
+// Карта Leaflet на странице "О нас"
+function initAboutPageMap() {
+  const btnBazaar = document.getElementById("btn-map-bazaar");
+  const btnMall = document.getElementById("btn-map-mall");
+  const infoBazaar = document.getElementById("info-map-bazaar");
+  const infoMall = document.getElementById("info-map-mall");
+  const btnShowMap = document.getElementById("btn-show-map-action");
+  const mapIframe = document.getElementById("map-iframe");
+  const mapPlaceholder = document.getElementById("map-placeholder-text");
+
+  let activeStore = "bazaar";
+
+  const storeCoords = {
+    bazaar: { lat: 40.774518, lon: 68.322906, title: "Базар «Кулпаршын» (25 бутик)" },
+    mall: { lat: 40.766811, lon: 68.315188, title: "Гранд Парк (1 блок, 10 бутик)" }
+  };
+
+  function updateMapIframeSrc() {
+    if (!mapIframe || mapIframe.style.display === "none") return;
+    const store = storeCoords[activeStore];
+    mapIframe.src = `map.html?lat=${store.lat}&lon=${store.lon}&title=${encodeURIComponent(store.title)}`;
+  }
+
+  if (btnBazaar) {
+    btnBazaar.addEventListener("click", () => {
+      activeStore = "bazaar";
+      btnBazaar.classList.add("active");
+      if (btnMall) btnMall.classList.remove("active");
+      if (infoBazaar) infoBazaar.classList.remove("d-none");
+      if (infoMall) infoMall.classList.add("d-none");
+      updateMapIframeSrc();
     });
-  });
+  }
 
-  const saleForm = document.getElementById("offline-sale-form");
-  if (saleForm) {
-    saleForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      handleOfflineSaleSubmit();
+  if (btnMall) {
+    btnMall.addEventListener("click", () => {
+      activeStore = "mall";
+      btnMall.classList.add("active");
+      if (btnBazaar) btnBazaar.classList.remove("active");
+      if (infoMall) infoMall.classList.remove("d-none");
+      if (infoBazaar) infoBazaar.classList.add("d-none");
+      updateMapIframeSrc();
+    });
+  }
+
+  if (btnShowMap) {
+    btnShowMap.addEventListener("click", () => {
+      if (mapPlaceholder) mapPlaceholder.style.display = "none";
+      if (mapIframe) {
+        mapIframe.style.display = "block";
+        updateMapIframeSrc();
+      }
     });
   }
 }
 
-function initFormBtnGroups() {
-  document.querySelectorAll(".form-btn-group").forEach(group => {
-    group.querySelectorAll(".form-group-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const isMulti = group.classList.contains("multi-select");
-        if (isMulti) {
-          btn.classList.toggle("active");
-        } else {
-          group.querySelectorAll(".form-group-btn").forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
-        }
-      });
-    });
-  });
-}
-
-function setFormBtnGroupValue(groupId, value) {
-  const group = document.getElementById(groupId);
-  if (!group) return;
-  const vals = (value || "").split(",").map(v => v.trim().toLowerCase());
-  group.querySelectorAll(".form-group-btn").forEach(btn => {
-    const btnVal = btn.getAttribute("data-value");
-    if (vals.includes(btnVal)) {
-      btn.classList.add("active");
-    } else {
-      btn.classList.remove("active");
-    }
-  });
-}
-
-function getFormBtnGroupValue(groupId) {
-  const activeBtns = document.querySelectorAll(`#${groupId} .form-group-btn.active`);
-  return Array.from(activeBtns).map(btn => btn.getAttribute("data-value")).join(",");
-}
-
-function scrollToSection(id) {
-  const el = document.getElementById(id);
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth" });
-  }
-}
-
-function openModal(id) {
-  const modal = document.getElementById(id);
-  if (modal) {
-    modal.classList.add("open");
-    document.body.style.overflow = "hidden";
-  }
-}
-
-function closeModal(id) {
-  const modal = document.getElementById(id);
-  if (modal) {
-    modal.classList.remove("open");
-    if (!document.querySelectorAll(".modal-overlay.open").length) {
-      document.body.style.overflow = "";
-    }
-  }
-}
-
-function closeAllModals() {
-  document.querySelectorAll(".modal-overlay").forEach(modal => {
-    modal.classList.remove("open");
-  });
-  document.body.style.overflow = "";
-}
-
-function updateActiveFiltersBadge() {
-  const badge = document.getElementById("filters-active-badge");
-  if (!badge) return;
-
-  const loc = document.getElementById("filter-location")?.value || "all";
-  const size = document.getElementById("filter-size")?.value || "all";
-  const sort = document.getElementById("filter-sort")?.value || "default";
-  const status = document.getElementById("filter-status")?.value || "all";
-
-  let count = 0;
-  if (loc !== "all") count++;
-  if (size !== "all") count++;
-  if (sort !== "default") count++;
-  if (status !== "all") count++;
-
-  if (count > 0) {
-    badge.textContent = count;
-    badge.classList.remove("d-none");
-  } else {
-    badge.classList.add("d-none");
-  }
+function toggleTheme() {
+  const current = document.documentElement.getAttribute("data-theme") || "dark";
+  const next = current === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem("shoe_store_theme", next);
+  updateThemeIcon(next);
 }
