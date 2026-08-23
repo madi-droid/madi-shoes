@@ -5009,6 +5009,25 @@ body {
   animation: none !important;
 }
 
+/* Утилиты и компоненты ниже имеют более высокую специфичность, чем селектор `*`. */
+html .animate-rise,
+html .aura,
+html .product-card,
+html .product-image,
+html .modal-container,
+html .toast,
+html .btn-icon,
+html .btn-fav-card,
+html .btn-primary,
+html .btn-secondary,
+html .admin-tab,
+html .form-group-btn,
+html .bottom-nav-item,
+html .header-actions button {
+  transition: none !important;
+  animation: none !important;
+}
+
 @media (max-width: 768px) {
   header,
   .modal-overlay,
