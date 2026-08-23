@@ -7,7 +7,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://*.supabase.co; img-src 'self' data: https://images.unsplash.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' https://cdn.jsdelivr.net; frame-src 'self'; base-uri 'self'; form-action 'self'">
 
   <title>MADIYAR SHOES — Премиум каталог и Учет остатков</title>
-  <link rel="stylesheet" href="css/style.css?v=1015">
+  <link rel="stylesheet" href="css/style.css?v=1016">
 </head>
 
 <body>
@@ -103,7 +103,7 @@
                 <path d="m21 21-4.3-4.3" />
               </svg>
               <input type="text" class="search-input" id="search-input"
-                placeholder="Поиск по бренду или названию обуви (например: Etor)...">
+                placeholder="Поиск по бренду и модели">
             </div>
             
             <button type="button" class="btn-secondary btn-reset-filters d-none" id="btn-reset-filters" title="Сбросить все фильтры">
@@ -112,19 +112,35 @@
             </button>
           </div>
 
-          <!-- Кнопка разворачивания на мобильных -->
-          <div class="filters-toggle-bar">
-            <button type="button" class="btn-filters-toggle" id="btn-toggle-filters" aria-expanded="false" aria-controls="filters-grid-container mobile-filter-options">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-              <span>Параметры и фильтры</span>
-              <span class="filters-badge d-none" id="filters-active-badge">0</span>
-              <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          <!-- Быстрые фильтры: компактная мобильная логика каталога -->
+          <div class="mobile-quick-filters" aria-label="Быстрые фильтры">
+            <button type="button" class="mobile-filter-chip mobile-filter-chip-icon" id="mobile-sort-trigger" aria-label="Сортировка">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7h12M4 7h.01M12 12h8M4 12h4M16 17h4M4 17h8"/></svg>
+              <span>Сортировка</span>
             </button>
+            <div class="filters-toggle-bar">
+            <button type="button" class="btn-filters-toggle" id="btn-toggle-filters" aria-expanded="false" aria-controls="filters-grid-container mobile-filter-options">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 12h2M10 12h10M4 17h7M15 17h5"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="13" cy="17" r="2"/></svg>
+              <span>Фильтры</span>
+              <span class="filters-badge d-none" id="filters-active-badge">0</span>
+            </button>
+            </div>
+            <button type="button" class="mobile-filter-chip" id="mobile-size-trigger">Размер <span aria-hidden="true">⌄</span></button>
+            <button type="button" class="mobile-filter-chip" id="mobile-category-trigger">Категория <span aria-hidden="true">⌄</span></button>
           </div>
 
+          <div class="catalog-filter-sheet" id="catalog-filter-sheet" role="dialog" aria-modal="true" aria-labelledby="catalog-filter-title">
+            <div class="catalog-filter-sheet-header">
+              <button type="button" class="catalog-filter-back" id="btn-close-catalog-filters" aria-label="Закрыть фильтры">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m15 18-6-6 6-6"/></svg>
+              </button>
+              <h2 id="catalog-filter-title">Фильтры</h2>
+              <button type="button" class="catalog-filter-reset" id="mobile-reset-filters">Сбросить</button>
+            </div>
+            <div class="catalog-filter-sheet-scroll">
           <div class="filters-grid" id="filters-grid-container">
             <!-- Выпадающие селекторы (Точка, Размер, Наличие, Цена, Сортировка) -->
-            <div class="filter-group">
+            <div class="filter-group filter-sheet-section" id="filter-section-location">
               <label class="filter-label">Точка продаж</label>
               <select class="filter-select" id="filter-location">
                 <option value="all">Все точки</option>
@@ -133,15 +149,16 @@
               </select>
             </div>
 
-            <div class="filter-group">
+            <div class="filter-group filter-sheet-section" id="filter-section-size">
               <label class="filter-label">Размер</label>
               <select class="filter-select" id="filter-size">
                 <option value="all">Все размеры</option>
                 <!-- Размеры добавятся динамически из JS -->
               </select>
+              <div class="mobile-size-options" id="mobile-size-options" aria-label="Размеры обуви"></div>
             </div>
 
-            <div class="filter-group">
+            <div class="filter-group filter-sheet-section" id="filter-section-price">
               <label class="filter-label">Цена (₸)</label>
               <div style="display: flex; gap: 8px; align-items: center;">
                 <input type="number" id="filter-price-min" min="0" placeholder="От ₸" class="filter-select filter-price-input" style="padding-right: 8px !important; padding-left: 10px !important; background-image: none; font-size: 13px;">
@@ -150,7 +167,7 @@
               </div>
             </div>
 
-            <div class="filter-group">
+            <div class="filter-group filter-sheet-section" id="filter-section-status">
               <label class="filter-label">Наличие</label>
               <select class="filter-select" id="filter-status">
                 <option value="all">Любой статус</option>
@@ -162,7 +179,7 @@
           <!-- Чипсы мультивыбора Категорий, Пола, Сезона -->
           <div class="chips-filters-wrapper mobile-filter-options" id="mobile-filter-options">
             <!-- Пол -->
-            <div class="nav-filter-group">
+            <div class="nav-filter-group filter-sheet-section">
               <span class="nav-filter-label">Пол:</span>
               <div class="nav-tabs" id="tabs-gender">
                 <button class="nav-tab-btn active" data-gender="all">Все</button>
@@ -172,7 +189,7 @@
             </div>
 
             <!-- Сезон -->
-            <div class="nav-filter-group">
+            <div class="nav-filter-group filter-sheet-section">
               <span class="nav-filter-label">Сезон:</span>
               <div class="nav-tabs" id="tabs-season">
                 <button class="nav-tab-btn active" data-season="all">Все сезоны</button>
@@ -184,11 +201,16 @@
             </div>
 
             <!-- Горизонтально прокручиваемые Категории -->
-            <div class="nav-filter-group" style="align-items: flex-start;">
+            <div class="nav-filter-group filter-sheet-section" id="filter-section-category" style="align-items: flex-start;">
               <span class="nav-filter-label" style="margin-top: 6px;">Категории:</span>
               <div class="categories-scroll-wrapper nav-tabs" id="tabs-category">
                 <button class="nav-tab-btn active" data-category="all">Все</button>
               </div>
+            </div>
+          </div>
+            </div>
+            <div class="catalog-filter-sheet-footer">
+              <button type="button" class="catalog-filter-apply" id="btn-apply-catalog-filters">Показать товары</button>
             </div>
           </div>
 
@@ -1156,11 +1178,11 @@
   <script src="js/utils.js?v=27"></script>
   <script src="js/db.js?v=25"></script>
   <script src="js/auth.js?v=25"></script>
-  <script src="js/catalog.js?v=27"></script>
+  <script src="js/catalog.js?v=28"></script>
   <script src="js/orders.js?v=25"></script>
   <script src="js/admin.js?v=26"></script>
   <script src="js/sales.js?v=26"></script>
-  <script src="js/app.js?v=29"></script>
+  <script src="js/app.js?v=30"></script>
 </body>
 
 </html>

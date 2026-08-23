@@ -4,15 +4,13 @@ function initFilters() {
   const sizeSelect = document.getElementById("filter-size");
   if (sizeSelect) {
     sizeSelect.innerHTML = '<option value="all">Все размеры</option>';
-    const allProds = (typeof products !== "undefined" && Array.isArray(products) && products.length > 0) ? products : (window.db ? window.db.loadProducts() : []);
     AVAILABLE_SIZES.forEach(size => {
-      const hasStock = allProds.some(p => (p.stock?.bazaar?.[size] || 0) + (p.stock?.mall?.[size] || 0) > 0);
-      if (hasStock) {
-        const opt = document.createElement("option");
-        opt.value = size;
-        opt.textContent = size;
-        sizeSelect.appendChild(opt);
-      }
+      const numericSize = Number(size);
+      if (numericSize < 35 || numericSize > 46) return;
+      const opt = document.createElement("option");
+      opt.value = size;
+      opt.textContent = size;
+      sizeSelect.appendChild(opt);
     });
   }
 
@@ -33,6 +31,47 @@ function initFilters() {
   }
 
   renderCategoryTabs();
+  renderMobileSizeOptions();
+}
+
+function renderMobileSizeOptions() {
+  const select = document.getElementById("filter-size");
+  const container = document.getElementById("mobile-size-options");
+  if (!select || !container) return;
+
+  container.innerHTML = "";
+  Array.from(select.options).forEach(option => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `mobile-size-option ${select.value === option.value ? "active" : ""}`;
+    button.textContent = option.value === "all" ? "Все" : option.textContent;
+    button.dataset.value = option.value;
+    button.addEventListener("click", () => {
+      select.value = option.value;
+      container.querySelectorAll(".mobile-size-option").forEach(item => item.classList.remove("active"));
+      button.classList.add("active");
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    container.appendChild(button);
+  });
+}
+
+function updateMobileFilterSummary(sizeFilter, selectedCategories, totalCount) {
+  const sizeTrigger = document.getElementById("mobile-size-trigger");
+  const categoryTrigger = document.getElementById("mobile-category-trigger");
+  const applyButton = document.getElementById("btn-apply-catalog-filters");
+
+  if (sizeTrigger) {
+    sizeTrigger.firstChild.textContent = sizeFilter === "all" ? "Размер " : `Размер ${sizeFilter} `;
+  }
+  if (categoryTrigger) {
+    const categoryText = selectedCategories.includes("all") ? "Категория" : selectedCategories[0];
+    categoryTrigger.firstChild.textContent = `${categoryText.charAt(0).toUpperCase()}${categoryText.slice(1)} `;
+  }
+  if (applyButton) {
+    const word = getModelsPluralWord(totalCount);
+    applyButton.textContent = `Показать ${totalCount} ${word}`;
+  }
 }
 
 // Универсальный обработчик мультивыбора для чипсов
@@ -181,6 +220,7 @@ function renderCatalog(resetPage = false) {
 
     const bazaarSum = Object.values(item.stock?.bazaar || {}).reduce((a, b) => a + b, 0);
     const mallSum = Object.values(item.stock?.mall || {}).reduce((a, b) => a + b, 0);
+    const totalStock = bazaarSum + mallSum;
 
     if (statusFilter === "in-stock" && totalStock <= 0) {
       return false;
@@ -216,6 +256,7 @@ function renderCatalog(resetPage = false) {
 
   const countEl = document.getElementById("catalog-count");
   if (countEl) countEl.textContent = formatCatalogCount(filtered.length);
+  updateMobileFilterSummary(sizeFilter, selectedCategories, filtered.length);
 
   if (filtered.length === 0) {
     if (grid) {
@@ -492,6 +533,7 @@ function resetAllFilters() {
   });
 
   renderCatalog(true);
+  renderMobileSizeOptions();
 }
 
 // Отрисовка модального окна Избранных товаров
