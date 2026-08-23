@@ -5072,6 +5072,20 @@ html .modal-content.is-swiping {
   transition: none !important;
 }
 
+/* Детали товара: затемнение появляется сразу, поэтому фон витрины не вспыхивает при открытии. */
+#modal-product-details {
+  background: rgba(20, 15, 10, 0.96) !important;
+  transition: none !important;
+}
+
+#modal-product-details .modal-container {
+  background: var(--bg-modal) !important;
+}
+
+#modal-product-details .details-image-box {
+  background: var(--bg-deep) !important;
+}
+
 @media (max-width: 768px) {
   html body .modal-overlay,
   html body #modal-admin-product-edit.modal-overlay,
