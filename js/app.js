@@ -234,15 +234,30 @@ function setupEventListeners() {
   });
   document.getElementById("mobile-size-trigger")?.addEventListener("click", () => openFilterSheet("filter-section-size"));
   document.getElementById("mobile-category-trigger")?.addEventListener("click", () => openFilterSheet("filter-section-category"));
+  const catalogSortSelect = document.getElementById("catalog-sort-select");
+  const sortOptions = Array.from(document.querySelectorAll(".sort-option"));
+  const syncSortOptions = () => {
+    const selectedValue = catalogSortSelect?.value || "default";
+    sortOptions.forEach(option => {
+      const isSelected = option.dataset.sortValue === selectedValue;
+      option.classList.toggle("active", isSelected);
+      option.setAttribute("aria-checked", String(isSelected));
+    });
+  };
+
   document.getElementById("mobile-sort-trigger")?.addEventListener("click", () => {
-    const sort = document.getElementById("catalog-sort-select");
-    if (!sort) return;
-    try {
-      if (typeof sort.showPicker === "function") sort.showPicker();
-      else sort.click();
-    } catch (_error) {
-      sort.focus();
-    }
+    syncSortOptions();
+    openModal("modal-sort-options");
+  });
+
+  sortOptions.forEach(option => {
+    option.addEventListener("click", () => {
+      if (!catalogSortSelect) return;
+      catalogSortSelect.value = option.dataset.sortValue;
+      catalogSortSelect.dispatchEvent(new Event("change", { bubbles: true }));
+      syncSortOptions();
+      closeModal("modal-sort-options");
+    });
   });
 
   const adminSearch = document.getElementById("admin-product-search");
@@ -409,32 +424,78 @@ function setupEventListeners() {
     if (!sheet) return;
     let startY = null;
     let offset = 0;
+    let lastY = 0;
+    let lastTime = 0;
+    let velocity = 0;
+
+    const resetSwipeStyles = () => {
+      sheet.classList.remove("is-swiping");
+      sheet.style.transform = "";
+      sheet.style.transition = "";
+      sheet.style.willChange = "";
+      overlay.style.opacity = "";
+      overlay.style.transition = "";
+    };
+
+    const finishSwipeClose = () => {
+      resetSwipeStyles();
+      if (overlay.id === "modal-admin-auth" && !isAdminLoggedIn()) leaveStaffSignIn();
+      else closeModal(overlay.id);
+    };
 
     sheet.addEventListener("touchstart", (event) => {
       if (!overlay.classList.contains("open")) return;
       if (event.target.closest("button, a, input, textarea, select, label")) return;
-      if (event.touches[0].clientY - sheet.getBoundingClientRect().top > 76) return;
+      if (event.touches[0].clientY - sheet.getBoundingClientRect().top > 88) return;
       startY = event.touches[0].clientY;
+      lastY = startY;
+      lastTime = performance.now();
       offset = 0;
+      velocity = 0;
       sheet.classList.add("is-swiping");
+      sheet.style.willChange = "transform";
     }, { passive: true });
 
     sheet.addEventListener("touchmove", (event) => {
       if (startY === null) return;
-      offset = Math.max(0, event.touches[0].clientY - startY);
+      const currentY = event.touches[0].clientY;
+      const now = performance.now();
+      const elapsed = Math.max(1, now - lastTime);
+      velocity = (currentY - lastY) / elapsed;
+      lastY = currentY;
+      lastTime = now;
+      offset = Math.max(0, currentY - startY);
       if (!offset) return;
-      sheet.style.transform = `translateY(${Math.min(offset, 180)}px)`;
-      overlay.style.opacity = String(Math.max(0.45, 1 - offset / 420));
-    }, { passive: true });
+      event.preventDefault();
+      const softenedOffset = offset < 180 ? offset : 180 + (offset - 180) * 0.45;
+      sheet.style.transform = `translate3d(0, ${softenedOffset}px, 0)`;
+    }, { passive: false });
 
     sheet.addEventListener("touchend", () => {
       if (startY === null) return;
       sheet.classList.remove("is-swiping");
-      sheet.style.transform = "";
-      overlay.style.opacity = "";
-      if (offset > 90) closeModal(overlay.id);
+      const shouldClose = offset > 110 || (offset > 44 && velocity > 0.55);
+      if (shouldClose) {
+        sheet.style.transition = "transform 210ms cubic-bezier(0.32, 0.72, 0, 1)";
+        overlay.style.transition = "opacity 190ms ease";
+        sheet.style.transform = "translate3d(0, 105dvh, 0)";
+        overlay.style.opacity = "0";
+        window.setTimeout(finishSwipeClose, 215);
+      } else {
+        sheet.style.transition = "transform 240ms cubic-bezier(0.22, 1, 0.36, 1)";
+        sheet.style.transform = "translate3d(0, 0, 0)";
+        window.setTimeout(resetSwipeStyles, 245);
+      }
       startY = null;
       offset = 0;
+      velocity = 0;
+    });
+
+    sheet.addEventListener("touchcancel", () => {
+      startY = null;
+      offset = 0;
+      velocity = 0;
+      resetSwipeStyles();
     });
   });
 
