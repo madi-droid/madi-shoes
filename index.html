@@ -7,7 +7,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://*.supabase.co; img-src 'self' data: https://images.unsplash.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' https://cdn.jsdelivr.net; frame-src 'self'; base-uri 'self'; form-action 'self'">
 
   <title>MADIYAR SHOES — Премиум каталог и Учет остатков</title>
-  <link rel="stylesheet" href="css/style.css?v=1016">
+  <link rel="stylesheet" href="css/style.css?v=1017">
 </head>
 
 <body>
@@ -125,8 +125,8 @@
               <span class="filters-badge d-none" id="filters-active-badge">0</span>
             </button>
             </div>
-            <button type="button" class="mobile-filter-chip" id="mobile-size-trigger">Размер <span aria-hidden="true">⌄</span></button>
-            <button type="button" class="mobile-filter-chip" id="mobile-category-trigger">Категория <span aria-hidden="true">⌄</span></button>
+            <button type="button" class="mobile-filter-chip" id="mobile-size-trigger"><span class="mobile-chip-label">Размер</span><svg class="mobile-chip-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 10 5 5 5-5"/></svg></button>
+            <button type="button" class="mobile-filter-chip" id="mobile-category-trigger"><span class="mobile-chip-label">Категория</span><svg class="mobile-chip-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 10 5 5 5-5"/></svg></button>
           </div>
 
           <div class="catalog-filter-sheet" id="catalog-filter-sheet" role="dialog" aria-modal="true" aria-labelledby="catalog-filter-title">
@@ -729,13 +729,18 @@
   <!-- ==================== МОДАЛЬНЫЕ ОКНА ==================== -->
 
   <!-- 1. Модальное окно деталей товара (Client View) -->
-  <div class="modal-overlay" id="modal-product-details" role="dialog" aria-modal="true" aria-labelledby="details-name">
+  <div class="modal-overlay product-page-view" id="modal-product-details" role="dialog" aria-modal="true" aria-labelledby="details-name">
     <div class="modal-container">
-      <button class="modal-close"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg></button>
+      <div class="product-page-topbar">
+        <button class="modal-close product-page-back" aria-label="Вернуться в каталог"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"></path>
+          </svg></button>
+        <div class="product-page-topbar-title">MADIYAR</div>
+        <button type="button" class="product-page-share" id="btn-share-product" aria-label="Поделиться товаром">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"/></svg>
+        </button>
+      </div>
       <div class="product-details">
         <div class="details-image-box">
           <img class="details-image" id="details-image" src="" alt="Обувь">
@@ -743,9 +748,9 @@
         <div class="details-info">
           <div class="details-brand" id="details-brand"></div>
           <h2 class="details-name" id="details-name"></h2>
+          <div class="details-price" id="details-price"></div>
           <p class="details-description" id="details-description"></p>
           <span class="details-help-text">При бронировании вы сможете примерить обувь на выбранной точке. При оплате Kaspi продавец свяжется с вами для доставки.</span>
-          <div class="details-price" id="details-price"></div>
 
           <!-- Выбор размера по точкам -->
           <div class="size-picker-section">
@@ -1178,11 +1183,11 @@
   <script src="js/utils.js?v=27"></script>
   <script src="js/db.js?v=25"></script>
   <script src="js/auth.js?v=25"></script>
-  <script src="js/catalog.js?v=28"></script>
+  <script src="js/catalog.js?v=29"></script>
   <script src="js/orders.js?v=25"></script>
   <script src="js/admin.js?v=26"></script>
   <script src="js/sales.js?v=26"></script>
-  <script src="js/app.js?v=30"></script>
+  <script src="js/app.js?v=31"></script>
 </body>
 
 </html>

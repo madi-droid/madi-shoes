@@ -322,6 +322,26 @@ function setupEventListeners() {
   const btnBuyAction = document.getElementById("btn-buy-action");
   if (btnBuyAction) btnBuyAction.addEventListener("click", () => handleBookingFlow("kaspi"));
 
+  const btnShareProduct = document.getElementById("btn-share-product");
+  if (btnShareProduct) {
+    btnShareProduct.addEventListener("click", async () => {
+      const shareData = {
+        title: currentSelectedProduct?.name || "MADIYAR",
+        text: currentSelectedProduct ? `${currentSelectedProduct.brand} — ${currentSelectedProduct.name}` : "MADIYAR",
+        url: window.location.href
+      };
+      try {
+        if (navigator.share) await navigator.share(shareData);
+        else {
+          await navigator.clipboard.writeText(shareData.url);
+          showToast("Ссылка на товар скопирована");
+        }
+      } catch (error) {
+        if (error?.name !== "AbortError") showToast("Не удалось поделиться ссылкой", "error");
+      }
+    });
+  }
+
   // Подтверждение оплаты Kaspi
   const btnKaspiConfirm = document.getElementById("btn-kaspi-confirm");
   if (btnKaspiConfirm) {
@@ -374,7 +394,7 @@ function setupEventListeners() {
     switchToClientView();
   };
 
-  document.querySelectorAll(".modal-overlay").forEach(overlay => {
+  document.querySelectorAll(".modal-overlay:not(#modal-product-details)").forEach(overlay => {
     overlay.addEventListener("click", (e) => {
       if (e.target === overlay) {
         if (overlay.id === "modal-admin-auth" && !isAdminLoggedIn()) leaveStaffSignIn();
@@ -384,7 +404,7 @@ function setupEventListeners() {
   });
 
   // На телефоне окно можно закрыть естественным свайпом вниз за свободную область.
-  document.querySelectorAll(".modal-overlay").forEach(overlay => {
+  document.querySelectorAll(".modal-overlay:not(#modal-product-details)").forEach(overlay => {
     const sheet = overlay.querySelector(".modal-container, .modal-content");
     if (!sheet) return;
     let startY = null;

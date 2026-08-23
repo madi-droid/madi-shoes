@@ -62,11 +62,13 @@ function updateMobileFilterSummary(sizeFilter, selectedCategories, totalCount) {
   const applyButton = document.getElementById("btn-apply-catalog-filters");
 
   if (sizeTrigger) {
-    sizeTrigger.firstChild.textContent = sizeFilter === "all" ? "Размер " : `Размер ${sizeFilter} `;
+    const label = sizeTrigger.querySelector(".mobile-chip-label");
+    if (label) label.textContent = sizeFilter === "all" ? "Размер" : `Размер ${sizeFilter}`;
   }
   if (categoryTrigger) {
     const categoryText = selectedCategories.includes("all") ? "Категория" : selectedCategories[0];
-    categoryTrigger.firstChild.textContent = `${categoryText.charAt(0).toUpperCase()}${categoryText.slice(1)} `;
+    const label = categoryTrigger.querySelector(".mobile-chip-label");
+    if (label) label.textContent = `${categoryText.charAt(0).toUpperCase()}${categoryText.slice(1)}`;
   }
   if (applyButton) {
     const word = getModelsPluralWord(totalCount);
@@ -621,6 +623,8 @@ function openProductDetailsModal(productId) {
   renderSizePills("mall", item.stock?.mall || {}, "mall-sizes-list", "mall-point-status");
 
   openModal("modal-product-details");
+  const productPage = document.querySelector("#modal-product-details .modal-container");
+  if (productPage) productPage.scrollTop = 0;
 }
 
 function renderSizePills(pointId, stockObj, listContainerId, statusLabelId) {
